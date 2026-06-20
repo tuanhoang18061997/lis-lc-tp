@@ -1,0 +1,127 @@
+﻿@using Management.BL
+@using Newtonsoft.Json
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/sat.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script>
+        // Đặt trước khi load ckeditor.js (nếu để trong layout thì chuyển lên layout)
+        window.CKEDITOR_BASEPATH = '@Url.Content("~/lib/ckeditor/")';
+    </script>
+    <script src="@Url.Content("~/lib/ckeditor/ckeditor.js")?v=full_1"></script>
+</head>
+<style>
+    .nav-link.active {
+        background-color: #c0c0c0 !important;
+        color: #000000 !important;
+        font-weight: bold;
+    }
+
+    .loading-text-container {
+        text-align: center;
+        margin-top: 20px;
+        padding: 0 20px;
+    }
+
+    .loading-text {
+        color: white;
+        font-size: 14px;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    #showWaitting.modal {
+        opacity: 1 !important;
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .navbar-collapse {
+        z-index: 1;
+    }
+</style>
+<body>
+    <header>
+        <div class="menu">
+            <div class="menu-left">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark menu-left-height">
+                    <div class="container-fluid">
+                        <a class="navbar-brand menu-left-color" asp-controller="Main" asp-action="Index">
+                            <i class="bi bi-house-door"></i>
+                            <span>Siêu Âm Tim</span>
+                        </a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                                aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                            <ul class="navbar-nav flex-grow-1 ">
+                                <li class="nav-item">
+                                    <a id="1" class="nav-link text-white bg-dark hover @(ViewContext.RouteData.Values["controller"]?.ToString() == "SA_TIM_GetSample" ? "active" : "")" asp-controller="SA_TIM_GetSample" asp-action="GetSample">
+                                        Đang chờ <span id="countGetSample" class="badge badge-success">@ViewData["countGetSample"]</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a id="2" class="nav-link text-white bg-dark hover @(ViewContext.RouteData.Values["controller"]?.ToString() == "SA_TIM_Process" ? "active" : "")" asp-controller="SA_TIM_Process" asp-action="Process">
+                                        Đang thực hiện <span id="countProcess" class="badge badge-success">@ViewData["countProcess"]</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a id="3" class="nav-link text-white bg-dark hover @(ViewContext.RouteData.Values["controller"]?.ToString() == "SA_TIM_ReturnResult" ? "active" : "")" asp-controller="SA_TIM_ReturnResult" asp-action="ReturnResult">
+                                        Đã xong <span id="countReturnResult" class="badge badge-success">@ViewData["countReturnResult"]</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            <div class="menu-right">
+                <div class="dropdown menu-right-width menu-right-margin-padding">
+                    <button class="btn btn-secondary dropdown-toggle menu-right-width menu-right-bg" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person"></i>
+                        @{
+                            var userName = HttpContextAccessor.HttpContext?.User?.Claims?.FirstOrDefault(p => p.Type == "UserName")?.Value;
+                            @userName;
+                        }
+                    </button>
+                    <ul class="dropdown-menu menu-right-width menu-right-height-64" aria-labelledby="dropdownMenuButton2">
+                        <li>
+                            <a class="dropdown-item menu-right-width menu-right-height-20" asp-controller="Account" asp-action="ChangePassword">
+                                <i class="bi bi-key"></i> Đổi mật khẩu
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item menu-right-width menu-right-height-20" asp-controller="Account" asp-action="Logout">
+                                <i class="bi bi-box-arrow-left"></i> Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main role="main" class="pb-3 renderBody">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/helpers/barcode_scanner_input.js"></script>
+    <script src="~/js/sat.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/swal-helper.js"></script>
+    @* <script src="~/lib/ckeditor/ckeditor.js"></script> *@
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

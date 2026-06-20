@@ -1,0 +1,73 @@
+﻿@using Management.Services
+@inject IBarcodeService BarcodeService
+@{
+    Layout = "_LayoutExport";
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var age = _resultCDHA?.Patient?.IsYear == false ? _resultCDHA?.Patient?.Age?.ToString("dd/MM/yyyy") : _resultCDHA?.Patient?.Age?.ToString("yyyy");
+    var code = _resultCDHA?.Patient?.MaBenhAn?.ToString();
+    var barcodeUrl = BarcodeService.Code128PngDataUrl(code, height: 15, scale: 3);
+}
+@model Hospital
+<div class="hospital-sa">
+    <div class="hospital-logo">
+        <img class="image" src="~/images/logo/@Model.Logo" />
+    </div>
+    <div class="hospital-info">
+        <div class="hospital-info-name">
+            @Model.Name.ToUpper()
+        </div>
+        <div class="hospital-info-address">
+            @Model.Address
+        </div>
+        <div class="hospital-info-phonemail">
+            @Model.Phone | @Model.Email | @Model.Website
+        </div>
+    </div>
+    <div class="title-barcode-sa">
+        <div class="title">
+            KẾT QUẢ SIÊU ÂM
+        </div>
+        <div class="barcode">
+            <img src="@barcodeUrl" style="height:60px;" alt="barcode" />
+            <div style="font-size:12px;">@code</div>
+        </div>
+    </div>
+</div>
+<div class="patient-sa">
+    <div class="title">
+        I. THÔNG TIN HÀNH CHÍNH
+    </div>
+    <div class="name-sex-age">
+        <div class="name">
+            <div class="label1">Họ tên</div>: @_resultCDHA?.Patient?.PatientName.ToUpper()
+        </div>
+        <div class="sex">
+            <div class="label2">Giới tính</div>: @_resultCDHA?.Patient?.Sex
+        </div>
+        <div class="age">
+            <div class="label2">Năm sinh</div>: @age
+        </div>
+    </div>
+    <div class="sid-obj">
+        <div class="sid">
+            <div class="label1">Mã bệnh phẩm</div>: @_resultCDHA?.Patient?.Sid
+        </div>
+        <div class="obj">
+            <div class="label2">Đối tượng</div>: @_resultCDHA?.Patient?.Object?.Name
+        </div>
+    </div>
+    <div class="address">
+        <div class="label1">Địa chỉ</div>: @_resultCDHA?.Patient?.Address
+    </div>
+@*     <div class="doctor-location">
+        <div class="doctor">
+            <div class="label1">Bác sĩ chỉ định</div>: @_resultCDHA?.Patient.Doctor.Name
+        </div>
+        <div class="location">
+            <div class="label2">Nơi chỉ định</div>: @_resultCDHA?.Patient.Location.Name
+        </div>
+    </div>
+    <div class="diagnostic">
+        <div class="label1">Chẩn đoán</div>: @_resultCDHA?.Patient.Diagnostic
+    </div> *@
+</div>

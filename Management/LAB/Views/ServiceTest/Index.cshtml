@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Quản lý dịch vụ và mã xét nghiệm";
+    Layout = "_LayoutSettupDetail";
+    var serviceTest = ViewData["ServiceTest"] as ServiceTest;
+    var lstTestCode = ViewData["lstTestCode"] as List<TestCode>;
+}
+
+<div class="settup-container">
+    <div class="settup-left-servicetest">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH DỊCH VỤ
+            </div>
+            <div class="search">
+                <input type="text" id="servicetest-search" class="form-control height-28" onkeyup="ServiceTest_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="servicetest-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_ServiceTest_List")
+        </div>
+    </div>
+    <div class="settup-right-servicetest">
+        <div class="settup-right-title-search">
+            <div class="title">
+                DANH SÁCH MÃ XÉT NGHIỆM
+            </div>
+        </div>
+        <div id="servicetest-settup-right-list" class="settup-right-list">
+            @await Html.PartialAsync("_ServiceTest_Info")
+        </div>
+        <div id="servicetest-settup-right-button" class="settup-right-button">
+            <button id="servicetest-new" class="btn btn-success btn-blue" data-bs-toggle="modal" data-bs-target="#addTestCode" onclick="ServiceTest_Refresh_AddTestCode()">
+                <i class="bi bi-person-plus"></i> Thêm
+            </button>
+            <button id="servicetest-delete" class="btn btn-success btn-blue" onclick="ServiceTest_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+        </div>
+    </div>
+    <div id="servicetest-settup-addtestcode">
+        <div class="modal" id="addTestCode" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="servicetest-addtestcode-title">
+                        <div class="title">CHỌN MÃ XÉT NGHIỆM</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="servicetest-addtestcode-content">
+                        <input type="text" id="servicetest-search-addtestcode" class="form-control height-28" onkeyup="ServiceTest_Search_AddTestCode(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+                        <div id="servicetest-table-addtestcode" class="table-responsive">
+                            @await Html.PartialAsync("_ServiceTest_AddTestCode")
+                        </div>
+                    </div>
+                    <div class="servicetest-addtestcode-button">
+                        <button id="servicetest-addtestcode" class="btn btn-success" onclick="ServiceTest_Save()">
+                            <i class="bi bi-download"></i> Lưu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

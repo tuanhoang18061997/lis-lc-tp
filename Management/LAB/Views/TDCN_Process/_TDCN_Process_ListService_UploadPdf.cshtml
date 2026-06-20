@@ -1,0 +1,182 @@
+<div class="tdcn-card tdcn-preview-card">
+    <div class="tdcn-card-title tdcn-card-title-between">
+        <div>
+            <i class="bi bi-eye"></i>
+            <span>Preview PDF</span>
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="TDCN_Process_OpenUploadPdfNewTab()">
+            <i class="bi bi-box-arrow-up-right"></i> Mở tab mới
+        </button>
+    </div>
+
+    <div id="tdcn_pdf_preview_empty" class="tdcn-pdf-preview-empty">
+        <i class="bi bi-file-earmark-pdf"></i>
+        <div>Chưa có file PDF để preview</div>
+        <small>Chọn dịch vụ hoặc chọn file PDF ở cột bên trái để xem trước tại đây.</small>
+    </div>
+
+    <embed id="tdcn_pdf_preview_embed"
+           src=""
+           type="application/pdf"
+           style="display:none; width:100%; height:100%; border:0;" />
+</div>
+<script>
+    window.TDCN_UPLOAD_PDF_OBJECT_URL = window.TDCN_UPLOAD_PDF_OBJECT_URL || null;
+    window.TDCN_UPLOAD_PDF_FILE = window.TDCN_UPLOAD_PDF_FILE || null;
+
+    function TDCN_Process_ShowSelectPatientWarning() {
+        if (window.SwalHelper && SwalHelper.Toast && typeof SwalHelper.Toast.warning === 'function') {
+            SwalHelper.Toast.warning('Vui lòng chọn bệnh nhân!');
+            return;
+        }
+        if (window.Swal && typeof Swal.fire === 'function') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thông báo',
+                text: 'Vui lòng chọn bệnh nhân!'
+            });
+            return;
+        }
+        alert('Vui lòng chọn bệnh nhân!');
+    }
+
+    function TDCN_Process_HasSelectedPatient() {
+        var patientDbId = ($('#tdcn_process_id').val() || '').toString().trim();
+        var patientCode = ($('#tdcn_process_patientId').val() || '').toString().trim();
+        return patientDbId !== '' || patientCode !== '';
+    }
+
+    function TDCN_Process_EnsurePatientBeforePdfAction(e) {
+        if (TDCN_Process_HasSelectedPatient()) {
+            return true;
+        }
+
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        TDCN_Process_ShowSelectPatientWarning();
+        return false;
+    }
+
+    function TDCN_Process_SelectUploadPdfService(resultId, row) {
+        $('#tdcn_upload_pdf_resultCDHAId').val(resultId);
+        $('#tdcn_upload_pdf_list_service .tdcn-upload-pdf-chk-service').prop('checked', false);
+        $('#tdcn_upload_pdf_list_service .row-service-upload-pdf').removeClass('active');
+        $(row).addClass('active');
+        $(row).find('.tdcn-upload-pdf-chk-service').prop('checked', true);
+    }
+
+    $(document).off('change', '#tdcn_upload_pdf_chk_all').on('change', '#tdcn_upload_pdf_chk_all', function () {
+        var checked = this.checked === true;
+        $('#tdcn_upload_pdf_list_service .tdcn-upload-pdf-chk-service').prop('checked', checked);
+        if (!checked) {
+            $('#tdcn_upload_pdf_resultCDHAId').val('');
+            $('#tdcn_upload_pdf_list_service .row-service-upload-pdf').removeClass('active');
+        }
+    });
+
+    $(document).off('click', '.tdcn-pdf-choose-btn, #tdcn_process_result_pdf')
+        .on('click', '.tdcn-pdf-choose-btn, #tdcn_process_result_pdf', function (e) {
+            if (!TDCN_Process_EnsurePatientBeforePdfAction(e)) {
+                return false;
+            }
+        });
+
+    $(document).off('click', '#tdcn_pdf_dropzone').on('click', '#tdcn_pdf_dropzone', function (e) {
+        if (!TDCN_Process_EnsurePatientBeforePdfAction(e)) {
+            return false;
+        }
+        if ($(e.target).closest('label, input').length) return;
+        $('#tdcn_process_result_pdf').trigger('click');
+    });
+
+    $(document).off('dragover dragleave drop', '#tdcn_pdf_dropzone')
+        .on('dragover', '#tdcn_pdf_dropzone', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass('dragover');
+        })
+        .on('dragleave', '#tdcn_pdf_dropzone', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('dragover');
+        })
+        .on('drop', '#tdcn_pdf_dropzone', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('dragover');
+            if (!TDCN_Process_EnsurePatientBeforePdfAction(e)) {
+                return false;
+            }
+            var files = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
+            if (!files || !files.length) return;
+            try {
+                var dt = new DataTransfer();
+                dt.items.add(files[0]);
+                document.getElementById('tdcn_process_result_pdf').files = dt.files;
+            } catch (ex) { }
+            TDCN_Process_HandleUploadPdfFile(files[0]);
+        });
+
+    function TDCN_Process_HandleUploadPdfFile(file) {
+        if (!file) return;
+        if (!TDCN_Process_HasSelectedPatient()) {
+            TDCN_Process_ClearUploadPdf();
+            TDCN_Process_ShowSelectPatientWarning();
+            return;
+        }
+        window.TDCN_UPLOAD_PDF_FILE = file;
+        if (file.type !== 'application/pdf') {
+            SwalHelper.Toast.warning('Vui lòng chọn đúng file PDF.');
+            TDCN_Process_ClearUploadPdf();
+            return;
+        }
+
+        if (window.TDCN_UPLOAD_PDF_OBJECT_URL) {
+            URL.revokeObjectURL(window.TDCN_UPLOAD_PDF_OBJECT_URL);
+        }
+
+        window.TDCN_UPLOAD_PDF_OBJECT_URL = URL.createObjectURL(file);
+        $('#tdcn_pdf_preview_embed').attr('src', window.TDCN_UPLOAD_PDF_OBJECT_URL).show();
+        $('#tdcn_pdf_preview_empty').hide();
+        $('#tdcn_pdf_file_name').text(file.name);
+        $('#tdcn_pdf_file_size').text(TDCN_Process_FormatFileSize(file.size));
+        $('#tdcn_pdf_file_info').show();
+    }
+
+    function TDCN_Process_ClearUploadPdf() {
+        if (window.TDCN_UPLOAD_PDF_OBJECT_URL) {
+            URL.revokeObjectURL(window.TDCN_UPLOAD_PDF_OBJECT_URL);
+            window.TDCN_UPLOAD_PDF_OBJECT_URL = null;
+        }
+        window.TDCN_UPLOAD_PDF_FILE = null;
+        $('#tdcn_process_result_pdf').val('');
+        $('#tdcn_pdf_preview_embed').attr('src', '').hide();
+        $('#tdcn_pdf_preview_empty').show();
+        $('#tdcn_pdf_file_info').hide();
+        $('#tdcn_pdf_file_name').text('');
+        $('#tdcn_pdf_file_size').text('');
+    }
+
+    function TDCN_Process_OpenUploadPdfNewTab() {
+        if (!window.TDCN_UPLOAD_PDF_OBJECT_URL) {
+            SwalHelper.Toast.warning('Chưa có file PDF để mở.');
+            return;
+        }
+        window.open(window.TDCN_UPLOAD_PDF_OBJECT_URL, '_blank');
+    }
+
+    function TDCN_Process_FormatFileSize(bytes) {
+        if (!bytes) return '0 KB';
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var size = bytes;
+        var unit = 0;
+        while (size >= 1024 && unit < units.length - 1) {
+            size = size / 1024;
+            unit++;
+        }
+        return size.toFixed(unit === 0 ? 0 : 2) + ' ' + units[unit];
+    }
+</script>

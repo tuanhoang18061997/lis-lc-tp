@@ -1,0 +1,210 @@
+﻿@{
+    var lstPatient = ViewData["lstPatient"] as List<Patient>;
+    var totalPatient = lstPatient.Count();
+}
+<div class="total-patient">Tổng: @totalPatient</div>
+<div class="list-group list-group-flush">
+    @{
+        if (lstPatient != null || lstPatient.Count > 0)
+        {
+            var index = 0;
+            foreach (var patient in lstPatient)
+            {
+                index++;
+                // Serialize patient data to JSON for JavaScript
+                var patientJson = System.Text.Json.JsonSerializer.Serialize(new {
+                    PatientId = patient.PatientId,
+                    PatientName = patient.PatientName,
+                    Age = patient.Age?.ToString("dd/MM/yyyy"),
+                    Sex = patient.Sex,
+                    MaBenhAn = patient.MaBenhAn,
+                    Seq = patient.Seq,
+                    Sid = patient.Sid
+                });
+                
+                if (index % 2 == 0)
+                {
+                    <a href="#" class="list-group-item list-group-item-action" onclick="Process_GetPatientInfo(@patient.Id, '@patient.PatientId')" data-id="@patient.Id">
+                        <div class="list-group-item-pid-age-sex">
+                            <div class="list-group-item-pid-age-sex-pid">@patient.PatientId</div>
+                            <div class="list-group-item-pid-age-sex-age">@patient.Age?.ToString("dd/MM/yyyy")</div>
+                            <div class="list-group-item-pid-age-sex-sex">
+                                @{
+                                    @patient.Sex
+                                }
+                            </div>
+                        </div>
+                        @{
+                            if (patient.FullResultXN)
+                            {
+                                <div class="list-group-item-name-maBenhAn">
+                                    <div class="list-group-item-name-maBenhAn-name" style="color:#dc3545"> @patient.PatientName.ToUpper()</div>
+                                    <div class="list-group-item-name-maBenhAn-maBenhAn"> @patient.MaBenhAn</div>
+                                </div>
+                                <div class="list-group-item-seq-sid">
+                                    <div class="list-group-item-seq-sid-seq">
+                                        <label class="title">Barcode(Seq): </label>
+                                        <span class="seq">@patient.Seq</span>
+                                    </div>
+                                    <div class="list-group-item-seq-sid-index">
+                                        <label class="title">STT: </label>
+                                        <span class="index">@index</span>
+                                    </div>
+                                </div>
+                                @if (patient.BenhAn == "pakage")
+                                {
+                                    <div class="list-group-item-seq-sid">
+                                        <div class="list-group-item-seq-sid-seq">
+                                            <span class="seq" style="color: green; font-size: 11px">@patient.MaDotKham</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else if (patient.NotFullResultXN && patient.ReturnResultTimeXN != null)
+                            {
+                                <div class="list-group-item-name-maBenhAn">
+                                    <div class="list-group-item-name-maBenhAn-name" style="color:#808080"> @patient.PatientName.ToUpper()</div>
+                                    <div class="list-group-item-name-maBenhAn-maBenhAn"> @patient.MaBenhAn</div>
+                                </div>
+                                <div class="list-group-item-seq-sid">
+                                    <div class="list-group-item-seq-sid-seq">
+                                        <label class="title">Barcode(Seq): </label>
+                                        <span class="seq">@patient.Seq</span>
+                                    </div>
+                                    <div class="list-group-item-seq-sid-index">
+                                        <label class="title">STT: </label>
+                                        <span class="index">@index</span>
+                                    </div>
+                                </div>
+                                @if (patient.BenhAn == "pakage")
+                                {
+                                    <div class="list-group-item-seq-sid">
+                                        <div class="list-group-item-seq-sid-seq">
+                                            <span class="seq" style="color: green; font-size: 11px">@patient.MaDotKham</span>
+                                        </div>
+                                    </div>
+                                }
+                            } 
+                            else
+                            {
+                                <div class="list-group-item-name-maBenhAn">
+                                    <div class="list-group-item-name-maBenhAn-name"> @patient.PatientName.ToUpper()</div>
+                                    <div class="list-group-item-name-maBenhAn-maBenhAn"> @patient.MaBenhAn</div>
+                                </div>
+                                <div class="list-group-item-seq-sid">
+                                    <div class="list-group-item-seq-sid-seq">
+                                        <label class="title">Barcode(Seq): </label>
+                                        <span class="seq">@patient.Seq</span>
+                                    </div>
+                                    <div class="list-group-item-seq-sid-index">
+                                        <label class="title">STT: </label>
+                                        <span class="index">@index</span>
+                                    </div>
+                                </div>
+                                @if (patient.BenhAn == "pakage")
+                                {
+                                    <div class="list-group-item-seq-sid">
+                                        <div class="list-group-item-seq-sid-seq">
+                                            <span class="seq" style="color: green; font-size: 11px">@patient.MaDotKham</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                    </a>
+                }
+                else
+                {
+                    <a href="#" class="list-group-item list-group-item-action" onclick="Process_GetPatientInfo(@patient.Id, '@patient.PatientId')" data-id="@patient.Id">
+                        <div class="list-group-item-pid-age-sex">
+                            <div class="list-group-item-pid-age-sex-pid">@patient.PatientId</div>
+                            <div class="list-group-item-pid-age-sex-age">@patient.Age?.ToString("dd/MM/yyyy")</div>
+                            <div class="list-group-item-pid-age-sex-sex">
+                                @{
+                                    @patient.Sex
+                                }
+                            </div>
+                        </div>
+                        @{
+                            if (patient.FullResultXN)
+                            {
+                                <div class="list-group-item-name-maBenhAn">
+                                    <div class="list-group-item-name-maBenhAn-name" style="color:#dc3545"> @patient.PatientName.ToUpper()</div>
+                                    <div class="list-group-item-name-maBenhAn-maBenhAn"> @patient.MaBenhAn</div>
+                                </div>
+                                <div class="list-group-item-seq-sid">
+                                    <div class="list-group-item-seq-sid-seq">
+                                        <label class="title">Barcode(Seq): </label>
+                                        <span class="seq">@patient.Seq</span>
+                                    </div>
+                                    <div class="list-group-item-seq-sid-index">
+                                        <label class="title">STT: </label>
+                                        <span class="index">@index</span>
+                                    </div>
+                                </div>
+                                @if (patient.BenhAn == "pakage")
+                                {
+                                    <div class="list-group-item-seq-sid">
+                                        <div class="list-group-item-seq-sid-seq">
+                                            <span class="seq" style="color: green; font-size: 11px">@patient.MaDotKham</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else if (patient.NotFullResultXN && patient.ReturnResultTimeXN != null)
+                            {
+                                <div class="list-group-item-name-maBenhAn">
+                                    <div class="list-group-item-name-maBenhAn-name" style="color:#808080"> @patient.PatientName.ToUpper()</div>
+                                    <div class="list-group-item-name-maBenhAn-maBenhAn"> @patient.MaBenhAn</div>
+                                </div>
+                                <div class="list-group-item-seq-sid">
+                                    <div class="list-group-item-seq-sid-seq">
+                                        <label class="title">Barcode(Seq): </label>
+                                        <span class="seq">@patient.Seq</span>
+                                    </div>
+                                    <div class="list-group-item-seq-sid-index">
+                                        <label class="title">STT: </label>
+                                        <span class="index">@index</span>
+                                    </div>
+                                </div>
+                                @if (patient.BenhAn == "pakage")
+                                {
+                                    <div class="list-group-item-seq-sid">
+                                        <div class="list-group-item-seq-sid-seq">
+                                            <span class="seq" style="color: green; font-size: 11px">@patient.MaDotKham</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="list-group-item-name-maBenhAn">
+                                    <div class="list-group-item-name-maBenhAn-name"> @patient.PatientName.ToUpper()</div>
+                                    <div class="list-group-item-name-maBenhAn-maBenhAn"> @patient.MaBenhAn</div>
+                                </div>
+                                <div class="list-group-item-seq-sid">
+                                    <div class="list-group-item-seq-sid-seq">
+                                        <label class="title">Barcode(Seq): </label>
+                                        <span class="seq">@patient.Seq</span>
+                                    </div>
+                                    <div class="list-group-item-seq-sid-index">
+                                        <label class="title">STT: </label>
+                                        <span class="index">@index</span>
+                                    </div>
+                                </div>
+                                @if (patient.BenhAn == "pakage")
+                                {
+                                    <div class="list-group-item-seq-sid">
+                                        <div class="list-group-item-seq-sid-seq">
+                                            <span class="seq" style="color: green; font-size: 11px">@patient.MaDotKham</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                    </a>
+                }
+            }
+        }
+    }
+</div>

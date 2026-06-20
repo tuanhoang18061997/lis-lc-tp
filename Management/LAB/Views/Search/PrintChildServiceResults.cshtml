@@ -1,0 +1,33 @@
+﻿@{
+    Layout = "_LayoutExport";
+    var _lstResultXN = ViewData["ListResultXN"] as List<ResultXN>;
+}
+@model Hospital
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết quả xét nghiệm</title>
+    <link rel="stylesheet" href="~/css/search-export-child-xn.css" asp-append-version="true" />
+    <style>
+       
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="btn btn-primary" onclick="window.print()">In kết quả</button>
+        <button class="btn btn-secondary ms-2" onclick="window.close()">Đóng</button>
+    </div>
+
+    <!-- Header Section -->
+    @await Html.PartialAsync("PrintChildServiceHeader", Model)
+
+    <!-- Content Section -->
+    @await Html.PartialAsync("PrintChildServiceContent", Model)
+
+    <!-- Footer Section -->
+    @await Html.PartialAsync("PrintChildServiceFooter", Model)
+</body>
+</html>

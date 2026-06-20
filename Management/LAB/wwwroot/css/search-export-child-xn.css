@@ -1,0 +1,465 @@
+﻿/********************************************************************************************** Export Result */
+
+.hospital-xn { /***************************************************** Hospital */
+    width: 100%;
+    height: 128px; /* 160px * 0.8 */
+    float: left;
+    font-family: 'Times New Roman';
+}
+
+    .hospital-xn .hospital-logo {
+        width: 208px; /* 260px * 0.8 */
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-xn .hospital-logo .image {
+            width: 184px; /* 230px * 0.8 */
+            /*height: 100px;*/
+            object-fit: contain;
+        }
+
+    .hospital-xn .hospital-info {
+        width: calc(100% - 208px); /* adjusted for new logo width */
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-xn .hospital-info .hospital-info-name {
+            width: 100%;
+            height: 24px; /* 30px * 0.8 */
+            float: left;
+            font-size: 17.6px; /* 22px * 0.8 */
+            font-weight: bold;
+        }
+
+        .hospital-xn .hospital-info .hospital-info-address {
+            width: 100%;
+            height: 20px; /* 25px * 0.8 */
+            font-size: 14.4px; /* 18px * 0.8 */
+            float: left;
+        }
+
+        .hospital-xn .hospital-info .hospital-info-phonemail {
+            width: 100%;
+            height: 16px; /* 20px * 0.8 */
+            font-size: 14.4px; /* 18px * 0.8 */
+            float: left;
+        }
+
+        .hospital-xn .hospital-info .hospital-info-title {
+            width: 100%;
+            height: 50.4px; /* 63px * 0.8 */
+            margin-top: 5.6px; /* 7px * 0.8 */
+            float: left;
+            border-top: 1px dotted black;
+        }
+
+            .hospital-xn .hospital-info .hospital-info-title .hospital-info-title-text {
+                width: 320px; /* 400px * 0.8 */
+                height: 100%;
+                padding-top: 16px; /* 20px * 0.8 */
+                float: left;
+                font-size: 17px; /* 17px * 0.8 */
+                font-weight: bold;
+                display: flex;
+            }
+
+            .hospital-xn .hospital-info .hospital-info-title .hospital-info-title-time {
+                width: calc(100% - 320px); /* adjusted for new title-text width */
+                height: 100%;
+                font-size: 14.4px; /* 18px * 0.8 */
+                float: left;
+            }
+
+                .hospital-xn .hospital-info .hospital-info-title .hospital-info-title-time .hospital-info-title-time-getsampletime {
+                    width: 100%;
+                    height: 20px; /* 25px * 0.8 */
+                    float: left;
+                    margin-top: 8px; /* 10px * 0.8 */
+                }
+
+                .hospital-xn .hospital-info .hospital-info-title .hospital-info-title-time .hospital-info-title-time-returnresulttime {
+                    width: 100%;
+                    height: 28px; /* 35px * 0.8 */
+                    float: left;
+                }
+
+.patient-xn { /***************************************************** Patient */
+    float: left;
+    width: 100%;
+    height: 120px; /* 150px * 0.8 */
+    font-size: 17.6px; /* 22px * 0.8 */
+    font-family: 'Times New Roman';
+}
+
+    .patient-xn .label1 {
+        width: 108px; /* 135px * 0.8 */
+        height: 100%;
+        float: left;
+    }
+
+    .patient-xn .label2 {
+        width: 92px; /* 115px * 0.8 */
+        height: 100%;
+        float: left;
+    }
+
+    .patient-xn .name-sex-age {
+        width: 100%;
+        height: 24px; /* 30px * 0.8 */
+        float: left;
+    }
+
+        .patient-xn .name-sex-age .name {
+            width: 330px; /* 500px * 0.8 */
+            height: 100%;
+            float: left;
+        }
+
+        .patient-xn .name-sex-age .sex {
+            width: 156px; /* 220px * 0.8 */
+            height: 100%;
+            float: left;
+        }
+
+        .patient-xn .name-sex-age .age {
+            width: calc(100% - 330px - 156px); /* adjusted for new widths */
+            height: 100%;
+            float: left;
+        }
+
+    .patient-xn .sid-obj {
+        width: 100%;
+        height: 24px; /* 30px * 0.8 */
+        float: left;
+    }
+
+        .patient-xn .sid-obj .sid {
+            width: 400px; /* 500px * 0.8 */
+            height: 100%;
+            float: left;
+        }
+
+        .patient-xn .sid-obj .obj {
+            width: calc(100% - 400px); /* adjusted for new sid width */
+            height: 100%;
+            float: left;
+        }
+
+    .patient-xn .address {
+        width: 100%;
+        min-height: 24px; /* 30px * 0.8 */
+        float: left;
+    }
+
+    .patient-xn .doctor-location {
+        width: 100%;
+        height: 24px; /* 30px * 0.8 */
+        float: left;
+    }
+
+        .patient-xn .doctor-location .doctor {
+            width: 400px; /* 500px * 0.8 */
+            height: 100%;
+            float: left;
+        }
+
+        .patient-xn .doctor-location .location {
+            width: calc(100% - 400px); /* adjusted for new doctor width */
+            height: 100%;
+            float: left;
+        }
+
+    .patient-xn .diagnostic {
+        width: 100%;
+        min-height: 24px; /* 30px * 0.8 */
+        float: left;
+    }
+
+
+.result-xn { /***************************************************** Result */
+    width: 100%;
+    float: left;
+    font-size: 16px; /* 20px * 0.8 */
+    font-family: 'Times New Roman';
+}
+
+    .result-xn .table-result {
+        width: 100%;
+        margin-top: unset;
+        border-collapse: collapse;
+    }
+
+        .result-xn .table-result .thead {
+            display: table-header-group;
+        }
+
+            .result-xn .table-result .thead .tr-title {
+                width: 100%;
+                height: 48px; /* 60px * 0.8 */
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+                .result-xn .table-result .thead .tr-title .th-name {
+                    width: calc(100% - 152px - 184px - 80px); /* adjusted: 190*0.8=152, 230*0.8=184, 100*0.8=80 */
+                    text-align: center;
+                    border: 1px solid black;
+                }
+
+                .result-xn .table-result .thead .tr-title .th-result {
+                    width: 152px; /* 190px * 0.8 */
+                    text-align: center;
+                    border: 1px solid black;
+                }
+
+                .result-xn .table-result .thead .tr-title .th-normalresult {
+                    width: 184px; /* 230px * 0.8 */
+                    text-align: center;
+                    border: 1px solid black;
+                }
+
+                .result-xn .table-result .thead .tr-title .th-unit {
+                    width: 80px; /* 100px * 0.8 */
+                    text-align: center;
+                    border: 1px solid black;
+                }
+
+        .result-xn .table-result .tr-category {
+            width: 100%;
+            min-height: 20px; /* 25px * 0.8 */
+        }
+
+            .result-xn .table-result .tr-category .td-category {
+                font-weight: bold;
+                padding-left: 4px; /* 5px * 0.8 */
+                border: 1px solid black;
+            }
+
+        .result-xn .table-result .tr-content {
+            width: 100%;
+            min-height: 20px; /* 25px * 0.8 */
+            font-size: 17.6px; /* 22px * 0.8 */
+        }
+
+            .result-xn .table-result .tr-content .td-name {
+                width: calc(100% - 120px - 168px - 128px); /* adjusted: 150*0.8=120, 210*0.8=168, 160*0.8=128 */
+                text-align: left;
+                padding-left: 4px; /* 5px * 0.8 */
+                border: 1px solid black;
+            }
+
+            .result-xn .table-result .tr-content .td-result {
+                width: 120px; /* 150px * 0.8 */
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-xn .table-result .tr-content .td-normalresult {
+                width: 168px; /* 210px * 0.8 */
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-xn .table-result .tr-content .td-unit {
+                width: 128px; /* 160px * 0.8 */
+                text-align: center;
+                border: 1px solid black;
+                text-wrap-mode: nowrap;
+                text-wrap: nowrap;
+            }
+
+.result-xn-note {
+    float: left;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* 0.5rem * 0.8 */
+    font-size: 16px; /* 20px * 0.8 */
+}
+
+    .result-xn-note .result-xn-note-label label {
+        font-weight: bold;
+        margin-right: 8px; /* 10px * 0.8 */
+    }
+
+    .result-xn-note .result-xn-note-text {
+        font-style: italic;
+        font-weight: 600;
+    }
+
+/* Toàn bộ khối chữ ký: không cho ngắt trang bên trong, tách khỏi float trước đó */
+.signature-page-xn {
+    clear: both;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding-top: 4.8mm; /* 6mm * 0.8 */
+}
+
+    /* 2 cột: bên trái chỉ là khoảng trống, bên phải chứa toàn bộ thông tin */
+    .signature-page-xn .signature {
+        display: flex;
+        justify-content: flex-end; /* dồn nội dung sang phải */
+        align-items: flex-start;
+        gap: 12.8px; /* 16px * 0.8 */
+    }
+
+        /* Cột trái làm "đệm" */
+        .signature-page-xn .signature .signature-left {
+            flex: 1 1 auto; /* chiếm phần còn lại để đẩy cột phải sang mép phải */
+        }
+
+        /* Cột phải chứa nội dung chữ ký */
+        .signature-page-xn .signature .signature-right {
+            width: 336px; /* 420px * 0.8 */
+            text-align: center;
+            font-size: 17.6px; /* 22px * 0.8 */
+        }
+
+            /* Dòng người kiểm tra */
+            .signature-page-xn .signature .signature-right .signature-right-user-check {
+                line-height: 22.4px; /* 28px * 0.8 */
+                margin-bottom: 4.8px; /* 6px * 0.8 */
+                font-size: 12.8px; /* 16px * 0.8 */
+            }
+
+                .signature-page-xn .signature .signature-right .signature-right-user-check > label {
+                    font-style: italic;
+                }
+
+            /* Dòng thời gian */
+            .signature-page-xn .signature .signature-right .signature-right-time {
+                line-height: 22.4px; /* 28px * 0.8 */
+                margin-bottom: 4.8px; /* 6px * 0.8 */
+                font-style: italic;
+                font-size: 14px;
+            }
+
+            /* Tiêu đề */
+            .signature-page-xn .signature .signature-right .signature-right-title {
+                font-weight: 700;
+                line-height: 16px; /* 20px * 0.8 */
+                margin-bottom: 8px; /* 10px * 0.8 */
+                font-size: 14px;
+            }
+
+            /* Khung ảnh chữ ký – bỏ height cố định để tránh cắt ảnh */
+            .signature-page-xn .signature .signature-right .signature-right-cks {
+                /* KHÔNG dùng height: 55px; */
+                min-height: 48px; /* 60px * 0.8 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 6.4px; /* 8px * 0.8 */
+            }
+
+                /* Ảnh chữ ký – tự co giãn, không méo, không tràn khung */
+                .signature-page-xn .signature .signature-right .signature-right-cks img {
+                    max-width: 80%;
+                    max-height: 80px; /* 100px * 0.8 */
+                    height: auto;
+                    width: auto;
+                    object-fit: contain;
+                    image-rendering: -webkit-optimize-contrast;
+                }
+
+            /* Tên bác sĩ – to, rõ, không bị đè */
+            .signature-page-xn .signature .signature-right .signature-right-user {
+                font-weight: 700;
+                font-size: 14px; /* 24px * 0.8 */
+                line-height: 22.4px; /* 28px * 0.8 */
+            }
+
+/* Khi in PDF, cho phép co giãn tốt hơn để tránh bị cắt */
+@media print {
+    .signature-page-xn {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+        .signature-page-xn .signature .signature-right .signature-right-cks {
+            min-height: 64px; /* 80px * 0.8 */
+        }
+
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Times New Roman';
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+}
+
+/* Đảm bảo font chữ được áp dụng toàn bộ trang */
+html, body {
+    font-family: 'Times New Roman', serif;
+    margin: 0;
+    padding: 0;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Times New Roman', serif;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+}
+
+.no-print {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 8px; /* 10px * 0.8 */
+    border: 1px solid #ccc;
+    border-radius: 4px; /* 5px * 0.8 */
+    font-family: Arial, sans-serif;
+}
+
+    .no-print .btn {
+        font-family: Arial, sans-serif;
+        font-size: 11.2px; /* 14px * 0.8 */
+        padding: 6.4px 12.8px; /* 8px 16px * 0.8 */
+        margin: 0 4px; /* 5px * 0.8 */
+        border: 1px solid #ccc;
+        border-radius: 3.2px; /* 4px * 0.8 */
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+
+        .no-print .btn:hover {
+            background: #e9ecef;
+        }
+
+    .no-print .btn-primary {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+        .no-print .btn-primary:hover {
+            background: #0056b3;
+        }
+
+    .no-print .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border-color: #6c757d;
+    }
+
+        .no-print .btn-secondary:hover {
+            background: #545b62;
+        }

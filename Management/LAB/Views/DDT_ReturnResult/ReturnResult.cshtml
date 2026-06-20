@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Đã xong";
+    Layout = "_LayoutDDT";
+}
+
+<div class="ddt-container">
+    <div class="ddt-left">
+        <div class="ddt-left-search">
+            @await Html.PartialAsync("_DDT_ReturnResult_Search")
+        </div>
+        <div id="returnresult_listPatient" class="ddt-left-list">
+            @await Html.PartialAsync("_DDT_ReturnResult_ListPatient")
+        </div>
+    </div>
+    <div class="ddt-right">
+        <div id="returnresult_patientInfo" class="ddt-right-info">
+            @await Html.PartialAsync("_DDT_ReturnResult_PatientInfo")
+        </div>
+        <div id="returnresult_patientService" class="ddt-right-service">
+            <div id="returnresult_ddt-right-service-group" class="ddt-right-service-group">
+                @await Html.PartialAsync("_DDT_ReturnResult_GroupButton")
+            </div>
+            <div id="returnresult_ddt-right-service-gridview" class="ddt-right-service-gridview">
+                @await Html.PartialAsync("_DDT_ReturnResult_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

@@ -1,0 +1,170 @@
+﻿@using Management.BL
+@{
+    var patientInfo = ViewData["patientInfo"] as Patient;
+    var lstBenhAnModel = ViewData["lstBenhAnModel"] as List<BenhAnModel>;
+
+    var age = (patientInfo != null && patientInfo.Age != null) ? patientInfo?.Age?.ToString("dd/MM/yyyy") : string.Empty;
+    var getSampleTimeXN = (patientInfo != null && patientInfo.GetSampleTimeXN != null) ? patientInfo?.GetSampleTimeXN?.ToString("dd/MM/yyy HH:mm") : string.Empty;
+    var returnResultTimeXN = (patientInfo != null && patientInfo.ReturnResultTimeXN != null) ? patientInfo?.ReturnResultTimeXN?.ToString("dd/MM/yyy HH:mm") : string.Empty;
+}
+<div class="xn-right-info-title">THÔNG TIN BỆNH NHÂN</div>
+<div class="xn-right-info-div-1">
+    <div class="xn-right-info-div-combo-4">
+        <div class="xn-right-info-div-combo-4-label-age-object">
+            <label>Mã bệnh nhân</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_returnresult_id" hidden value="@patientInfo?.Id" />
+            <input type="text" id="xn_returnresult_patientId" value="@patientInfo?.PatientId" class="form-control height-28 pading-left-5 " disabled />
+        </div>
+        <div class="xn-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label>Mã BA</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_returnresult_maBenhAn" value="@patientInfo?.MaBenhAn" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Mã bệnh phẩm</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <div class="xn-right-info-div-combo-2-input-input1">
+                <input type="text" id="xn_returnresult_seq" value="@patientInfo?.Seq" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+            </div>
+            <div class="xn-right-info-div-combo-2-input-input2">
+                <input type="text" id="xn_returnresult_sid" value="@patientInfo?.Sid" class="form-control height-28 pading-left-5 pading-right-5 border-left-none" disabled />
+            </div>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Tên bệnh nhân</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="text" id="xn_returnresult_patientName" value="@patientInfo?.PatientName" class="form-control height-28 pading-left-5 pading-right-5 " disabled />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-4 div-margin-top-5">
+        <div class="xn-right-info-div-combo-4-label-age-object">
+            <label>Ngày sinh</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_returnresult_age" value="@age" class="form-control height-28 pading-left-5 " disabled />
+        </div>
+        <div class="xn-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label>Giới tính</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_returnresult_sex" value="@patientInfo?.Sex" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-4 div-margin-top-5">
+        <div class="xn-right-info-div-combo-4-label-age-object">
+            <label>Đối tượng</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_returnresult_obj" value="@patientInfo?.Object.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+        <div class="xn-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label> Bệnh án</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            @{
+                if (lstBenhAnModel != null)
+                {
+                    var benhan = lstBenhAnModel.Where(p => p.Id == patientInfo?.BenhAn).FirstOrDefault();
+                    if(benhan != null)
+                    {
+                        <input type="text" id="xn_returnresult_type" value="@benhan.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+                    }
+                    else
+                    {
+                        <input type="text" id="xn_returnresult_type" value="" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+                    }
+                }
+                else
+                {
+                    <input type="text" id="xn_returnresult_type" value="" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+                }
+            }
+        </div>
+    </div>
+</div>
+<div class="xn-right-info-div-2 pading-left-10">
+    <div class="xn-right-info-div-combo-2">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Nơi chỉ định</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="text" id="xn_returnresult_location" value="@patientInfo?.Location?.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+@*     <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>BS chỉ định</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="text" id="xn_returnresult_doctor" value="@patientInfo?.Doctor?.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div> *@
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Giờ lấy mẫu</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="text" id="xn_returnresult_getSampleTime" value="@getSampleTimeXN" class="form-control height-28 pading-left-5" disabled />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Giờ trả KQ</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="text" id="xn_returnresult_returnResultTime" value="@returnResultTimeXN" class="form-control height-28 pading-left-5" disabled />
+        </div>
+    </div>
+     <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Người trả KQ</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="hidden" id="xn_returnresult_userLoginId" value="@patientInfo?.UserReturnResultXN" />
+            <input type="text" id="xn_returnresult_userReturnResultXN" value="@patientInfo?.UserXN?.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>CCCD</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input id="xn_returnresult_signerCCCD" class="form-control height-28 pading-left-5 valid" />
+        </div>
+    </div>
+</div>
+<div class="xn-right-info-div-3 pading-left-10">
+    <div class="xn-right-info-div-combo-2">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Địa chỉ</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <textarea id="xn_returnresult_address" class="form-control height-30 pading-left-5 pading-right-5" style="height: 60px" disabled>@patientInfo?.Address</textarea>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Chẩn đoán</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <textarea id="xn_returnresult_diagnostic" class="form-control height-30 pading-left-5 pading-right-5" style="height: 60px" disabled>@patientInfo?.Diagnostic</textarea>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Bệnh viện</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <input type="text" id="xn_returnresult_hospital" value="@patientInfo?.Hospital?.Name" class="form-control height-28 pading-left-5" disabled />
+        </div>
+    </div>
+</div>

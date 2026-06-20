@@ -1,0 +1,182 @@
+﻿@{
+    var user = ViewData["User"] as User;
+    var lstType = ViewData["lstType"] as List<Management.Models.Type>;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã người dùng <span class="required-star">*</span></div>
+    <div class="div-input">
+        <input type="text" id="user-code" class="form-control height-28 valid" value="@user?.Code" onkeyup="User_HideButton(true, false, true, false, true)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên người dùng <span class="required-star">*</span></div>
+    <div class="div-input">
+        <input type="text" id="user-name" class="form-control height-28 valid" value="@user?.Name" onkeyup="User_HideButton(true, false, true, false, true)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Mật khẩu <span class="required-star">*</span></div>
+    <div class="div-input">
+        <div class="password-container">
+            <input type="password" id="user-pass" class="form-control height-28 valid" value="@user?.Password" onkeyup="User_HideButton(true, false, true, false, true)" />
+            <span class="password-toggle"
+                  onclick="User_TogglePassword()">
+                @* <i id="password-eye" class="fas fa-eye"></i> *@
+                <i id="password-eye" class="bi bi-eye-fill"></i>
+            </span>
+        </div>
+        <!-- RULE -->
+        <div class="rule-password">
+
+            <div id="required-pass" class="rule-item rule-fail">
+                Bắt buộc nhập
+            </div>
+
+            <div id="minLength-pass" class="rule-item rule-fail">
+                Tối thiểu 8 ký tự
+            </div>
+
+            <div class="rule-character-password">
+
+                <span id="character-lower" class="rule-item rule-fail">
+                    Ký tự thường
+                </span>
+
+                <span id="character-upper" class="rule-item rule-fail">
+                    Ký tự hoa
+                </span>
+
+                <span id="character-isNumber" class="rule-item rule-fail">
+                    Ký tự số
+                </span>
+
+                <span id="character-special" class="rule-item rule-fail">
+                    Ký tự đặc biệt
+                </span>
+
+            </div>
+
+            <div id="notIncluded-username-pass" class="rule-item rule-fail">
+                Không chứa username
+            </div>
+
+            <div id="khong-chua-chuoi-ky-tu-lien-tuc-pass" class="rule-item rule-fail">
+                Không chứa chuỗi liên tục : abc,123
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã BHYT</div>
+    <div class="div-input">
+        <input type="text" id="user-mabhyt" class="form-control height-28" value="@user?.MaBHYT" onkeyup="User_HideButton(true, false, true, false, true)" />
+    </div>
+</div>
+<div class="div-lable-input">
+    <div class="div-lable">Chữ ký số</div>
+    <div class="div-input">
+        <div class="signature-container">
+            <input type="text" id="user-cks" class="form-control height-28 signature-input" value="@user?.Cks" onkeyup="User_HideButton(true, false, true, false, true); User_UpdateSignaturePreview();" />
+            <span class="signature-image-container" onclick="User_SelectSignatureImage()">
+                @if (!string.IsNullOrEmpty(user?.Cks))
+                {
+                    <img id="user-signature-preview" class="signature-preview"
+                         src="/images/cks/@user.Cks"
+                         alt="Chữ ký số" title="Click để thay đổi chữ ký"
+                         onerror="User_ShowAddSignatureText()" />
+                }
+                else
+                {
+                    <div id="user-signature-placeholder" class="signature-placeholder">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Thêm ảnh chữ ký</span>
+                    </div>
+                    <img id="user-signature-preview" class="signature-preview" style="display: none;"
+                         alt="Chữ ký số" title="Click để thay đổi chữ ký" />
+                }
+                <div class="signature-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Thay đổi</span>
+                </div>
+            </span>
+        </div>
+        <input type="file" id="user-signature-file" class="signature-file-input" accept="image/*" onchange="User_OnSignatureImageSelected(this)" />
+    </div>
+</div>
+<div class="div-lable-input">
+    <div class="div-lable">CCCD</div>
+    <div class="div-input">
+        <input type="text" id="user-cccd" class="form-control height-28" value="@user?.Cccd" onkeyup="User_HideButton(true, false, true, false, true)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Khoa phòng <span class="required-star">*</span></div>
+    <div class="div-input">
+        @{
+            if (lstType != null)
+            {
+                var index = 1000;
+                foreach (var item in lstType)
+                {
+                    index++;
+                    if(user != null)
+                    {
+                        var userType = user.UserTypes.Where(p => p.TypeId == item.Id).FirstOrDefault();
+                        if (userType != null)
+                        {
+                            <div class="div-input-child-20">
+                                <input id="@index" class="form-check-input type" type="checkbox" value="@item.Id" onclick="User_HideButton(true, false, true, false, true)" checked>
+                                <label for="@index">@item.Name</label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="div-input-child-20">
+                                <input id="@index" class="form-check-input type" type="checkbox" value="@item.Id" onclick="User_HideButton(true, false, true, false, true)">
+                                <label for="@index">@item.Name</label>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="div-input-child-20">
+                            <input id="@index" class="form-check-input type" type="checkbox" value="@item.Id" onclick="User_HideButton(true, false, true, false, true)">
+                            <label for="@index">@item.Name</label>
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (user != null)
+            {
+                if (user.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="user-active" onclick="User_HideButton(true, false, true, false, true)" checked>
+                    <label for="user-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="user-active" onclick="User_HideButton(true, false, true, false, true)">
+                    <label for="user-active">Active</label>
+                }
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="user-active" onclick="User_HideButton(true, false, true, false, true)">
+                <label for="user-active">Active</label>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Đã xong";
+    Layout = "_LayoutNSCTC";
+}
+
+<div class="nsctc-container">
+    <div class="nsctc-left">
+        <div class="nsctc-left-search">
+            @await Html.PartialAsync("_NSCTC_ReturnResult_Search")
+        </div>
+        <div id="returnresult_listPatient" class="nsctc-left-list">
+            @await Html.PartialAsync("_NSCTC_ReturnResult_ListPatient")
+        </div>
+    </div>
+    <div class="nsctc-right">
+        <div id="returnresult_patientInfo" class="nsctc-right-info">
+            @await Html.PartialAsync("_NSCTC_ReturnResult_PatientInfo")
+        </div>
+        <div id="returnresult_patientService" class="nsctc-right-service">
+            <div id="returnresult_nsctc-right-service-group" class="nsctc-right-service-group">
+                @await Html.PartialAsync("_NSCTC_ReturnResult_GroupButton")
+            </div>
+            <div id="returnresult_nsctc-right-service-gridview" class="nsctc-right-service-gridview">
+                @await Html.PartialAsync("_NSCTC_ReturnResult_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

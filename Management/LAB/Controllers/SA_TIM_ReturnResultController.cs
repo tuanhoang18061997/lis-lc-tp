@@ -1,0 +1,507 @@
+﻿using Management.BL;
+using Management.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using SelectPdf;
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+
+namespace Management.Controllers
+{
+    public class SA_TIM_ReturnResultController : Controller
+    {
+        public readonly ILogger<SA_ReturnResultController> _logger;
+        public readonly PatientCDHABL _patientCDHABL;
+        public readonly ObjectBL _objectBL;
+        public readonly LocationBL _locationBL;
+        public readonly DoctorBL _doctorBL;
+        public readonly UserBL _userBL;
+        public readonly CategoryBL _categoryBL;
+        public readonly ServiceBL _serviceBL;
+        public readonly ResultCDHABL _resultCDHABL;
+        public readonly SettingBL _settingBL;
+        public readonly GroupBL _groupBL;
+        private readonly ToolBL _toolBL;
+        private readonly HospitalBL _hospitalBL;
+        private readonly IWebHostEnvironment _environment;
+        public readonly DeviceBL _deviceBL;
+        public readonly string _SAT = "SAT";
+
+        public SA_TIM_ReturnResultController(ILogger<SA_ReturnResultController> logger, PatientCDHABL patientBL, ObjectBL objectBL, LocationBL locationBL,
+                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL, 
+                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL, DeviceBL deviceBL)
+        {
+            _logger = logger;
+            _patientCDHABL = patientBL;
+            _objectBL = objectBL;
+            _locationBL = locationBL;
+            _doctorBL = doctorBL;
+            _userBL = userBL;
+            _categoryBL = categoryBL;
+            _serviceBL = serviceBL;
+            _resultCDHABL = resultCDHABL;
+            _settingBL = settingBL;
+            _groupBL = groupBL;
+            _environment = environment;
+            _toolBL = toolBL;
+            _hospitalBL = hospitalBL;
+            _deviceBL = deviceBL;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ReturnResult()
+        {
+            var dateTimeNow = ToolBL.Get_DateNow();
+            var defaultFrom = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 00, 00, 00);
+            var defaultTo = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59);
+
+            // Try to get saved dates from session/cookies first
+            var savedFromStr = HttpContext.Request.Cookies[SessionKeyModel._sessionTimeSearchFrom];
+            var savedToStr = HttpContext.Request.Cookies[SessionKeyModel._sessionTimeSearchTo];
+
+            DateTime from = defaultFrom;
+            DateTime to = defaultTo;
+
+            if (!string.IsNullOrEmpty(savedFromStr) && DateTime.TryParse(savedFromStr, out var savedFrom))
+            {
+                // Ensure time is set to 00:00:00 for the from date
+                from = new DateTime(savedFrom.Year, savedFrom.Month, savedFrom.Day, 00, 00, 00);
+            }
+            if (!string.IsNullOrEmpty(savedToStr) && DateTime.TryParse(savedToStr, out var savedTo))
+            {
+                // Ensure time is set to 23:59:59 for the to date
+                to = new DateTime(savedTo.Year, savedTo.Month, savedTo.Day, 23, 59, 59);
+            }
+
+            var _userLoginId = this.GetUserLogin();
+            if (_userLoginId != null)
+            {
+                ViewData["lstUserFunction"] = await _userBL.GetUserFunction(_userLoginId.Value);
+            }
+
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient(from, to, false, false, true, _SAT);
+            ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
+
+            // Pass the selected dates to the view
+            ViewData["timeSearchFrom"] = from.ToString("yyyy-MM-dd");
+            ViewData["timeSearchTo"] = to.ToString("yyyy-MM-dd");
+
+            await this.Get_Count();
+
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Get_Count()
+        {
+            var dateTimeNow = ToolBL.Get_DateNow();
+            var defaultFrom = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 00, 00, 00);
+            var defaultTo = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59);
+
+            // Try to get saved dates from session/cookies first
+            var savedFromStr = HttpContext.Request.Cookies[SessionKeyModel._sessionTimeSearchFrom];
+            var savedToStr = HttpContext.Request.Cookies[SessionKeyModel._sessionTimeSearchTo];
+
+            DateTime from = defaultFrom;
+            DateTime to = defaultTo;
+
+            if (!string.IsNullOrEmpty(savedFromStr) && DateTime.TryParse(savedFromStr, out var savedFrom))
+            {
+                // Ensure time is set to 00:00:00 for the from date
+                from = new DateTime(savedFrom.Year, savedFrom.Month, savedFrom.Day, 00, 00, 00);
+            }
+            if (!string.IsNullOrEmpty(savedToStr) && DateTime.TryParse(savedToStr, out var savedTo))
+            {
+                // Ensure time is set to 23:59:59 for the to date
+                to = new DateTime(savedTo.Year, savedTo.Month, savedTo.Day, 23, 59, 59);
+            }
+            SaveSearchDatesToSession(from, to);
+
+            var countGetSample = await _patientCDHABL.Get_CountPatient(from, to, true, false, false, _SAT);
+            var countProcess = await _patientCDHABL.Get_CountPatient(from, to, false, true, false, _SAT);
+            var countReturnResult = await _patientCDHABL.Get_CountPatient(from, to, false, false, true, _SAT);
+            ViewData["countGetSample"] = countGetSample;
+            ViewData["countProcess"] = countProcess;
+            ViewData["countReturnResult"] = countReturnResult;
+
+            return Content(countGetSample + ";" + countProcess + ";" + countReturnResult);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Refresh()
+        {
+            var dateTimeNow = ToolBL.Get_DateNow();
+            var defaultFrom = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 00, 00, 00);
+            var defaultTo = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59);
+
+            // Try to get saved dates from session/cookies first
+            var savedFromStr = HttpContext.Request.Cookies[SessionKeyModel._sessionTimeSearchFrom];
+            var savedToStr = HttpContext.Request.Cookies[SessionKeyModel._sessionTimeSearchTo];
+
+            DateTime from = defaultFrom;
+            DateTime to = defaultTo;
+
+            if (!string.IsNullOrEmpty(savedFromStr) && DateTime.TryParse(savedFromStr, out var savedFrom))
+            {
+                // Ensure time is set to 00:00:00 for the from date
+                from = new DateTime(savedFrom.Year, savedFrom.Month, savedFrom.Day, 00, 00, 00);
+            }
+            if (!string.IsNullOrEmpty(savedToStr) && DateTime.TryParse(savedToStr, out var savedTo))
+            {
+                // Ensure time is set to 23:59:59 for the to date
+                to = new DateTime(savedTo.Year, savedTo.Month, savedTo.Day, 23, 59, 59);
+            }
+            SaveSearchDatesToSession(from, to);
+
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, null, _SAT);
+
+            return PartialView("_SA_TIM_ReturnResult_ListPatient");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult SaveSearchDates(DateTime timeSearchFrom, DateTime timeSearchTo)
+        {
+            SaveSearchDatesToSession(timeSearchFrom, timeSearchTo);
+            return Json(new { success = true });
+        }
+
+        // Helper method to save dates to session
+        private void SaveSearchDatesToSession(DateTime timeSearchFrom, DateTime timeSearchTo)
+        {
+            try
+            {
+                CookieOptions cookieOptions = new CookieOptions()
+                {
+                    Expires = new DateTimeOffset(DateTime.Now.AddDays(1)) // Keep for 30 days
+                };
+
+                HttpContext.Response.Cookies.Append(SessionKeyModel._sessionTimeSearchFrom,
+                    timeSearchFrom.ToString("yyyy-MM-dd"), cookieOptions);
+                HttpContext.Response.Cookies.Append(SessionKeyModel._sessionTimeSearchTo,
+                    timeSearchTo.ToString("yyyy-MM-dd"), cookieOptions);
+            }
+            catch { }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Search(string pidorseq, DateTime timeSearchFrom, DateTime timeSearchTo)
+        {
+            // Save selected dates to session/cookies
+            SaveSearchDatesToSession(timeSearchFrom, timeSearchTo);
+
+            var from = new DateTime(timeSearchFrom.Year, timeSearchFrom.Month, timeSearchFrom.Day, 00, 00, 00);
+            var to = new DateTime(timeSearchTo.Year, timeSearchTo.Month, timeSearchTo.Day, 23, 59, 59);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, pidorseq, _SAT);
+
+            return PartialView("_SA_TIM_ReturnResult_ListPatient");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetPatientInfo(long id)
+        {
+            ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
+            ViewData["patientInfo"] = await _patientCDHABL.Get_PatientBySid(id);
+
+            return PartialView("_SA_TIM_ReturnResult_PatientInfo");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetServiceForPatient(long patientId)
+        {
+            ViewData["lstResultCDHAs"] = await _resultCDHABL.GetListResultCDHAByPatientId(patientId, _SAT);
+            return PartialView("_SA_TIM_ReturnResult_ListService");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetImageForService_SieuAmTim(long id)
+        {
+            try
+            {
+                var _resultCDHA = await _resultCDHABL.GetResultCDHA(id);
+                if (_resultCDHA != null)
+                {
+                    var _lstItem = new List<SieuAmTimModel>();
+                    var _sieuamtim = (JsonConvert.DeserializeObject<SieuAmTimModel>(_resultCDHA.SieuAmTim));
+                    if (_resultCDHA.ImageCDHAs != null && _resultCDHA.ImageCDHAs.Count > 0)
+                    {
+                        foreach (var item in _resultCDHA.ImageCDHAs)
+                        {
+                            var _sieuamtimTmp = (SieuAmTimModel)_sieuamtim.Clone();
+                            _sieuamtimTmp.id = item.Id.ToString();
+                            _sieuamtimTmp.name = item.ImagePath;
+                            _sieuamtimTmp.description = item.ResultCDHA.Description;
+                            _sieuamtimTmp.result = item.ResultCDHA.Result;
+                            _sieuamtimTmp.suggest = item.ResultCDHA.Suggest;
+                            _lstItem.Add(_sieuamtimTmp);
+                        }
+                    }
+                    else
+                    {
+                        _sieuamtim.description = _resultCDHA.Description;
+                        _sieuamtim.result = _resultCDHA.Result;
+                        _sieuamtim.suggest = _resultCDHA.Suggest;
+                        _lstItem.Add(_sieuamtim);
+                    }
+                    return Json(_lstItem);
+                }
+                else
+                {
+                    return Json(null);
+                }
+            }
+            catch
+            {
+                return Json(null);
+            }
+        }
+
+        //[HttpPost]
+        //[Authorize]
+        //public async Task<IActionResult> Invalid(long id)
+        //{
+        //    var _userLogin = this.GetUserLogin();
+        //    var dateTimeNow = ToolBL.Get_DateNow();
+        //    var from = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59).AddDays(-1);
+        //    var to = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59);
+        //    var _process = await _patientCDHABL.GetSample_ProcessResult_ReturnResult(id, false, true, false, _userLogin.Value, _SAT);
+        //    return Content(_process.ToString());
+        //}
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Invalid([FromBody] InvalidRequestModel request)
+        {
+            try
+            {
+                if (request == null || request.PatientId <= 0)
+                {
+                    return BadRequest("Thông tin không hợp lệ.");
+                }
+
+                var _userLogin = this.GetUserLogin();
+                if (!_userLogin.HasValue)
+                {
+                    return Unauthorized("Không xác định được người dùng.");
+                }
+
+                // 1. Cập nhật trạng thái bệnh nhân (Invalid)
+                var _process = await _patientCDHABL.GetSample_ProcessResult_ReturnResult(
+                    request.PatientId,
+                    false,  // wait
+                    true,   // process
+                    false,  // valid
+                    _userLogin.Value,
+                    _SAT
+                );
+
+                if (!_process)
+                {
+                    return Content("False");
+                }
+
+                // 2. Xóa các file PDF tương ứng (nếu có danh sách KeyResultForHis)
+                if (request.KeyResultList != null && request.KeyResultList.Any())
+                {
+                    var categoryCode = request.CategoryCode ?? _SAT;
+                    var pdfRemoved = _patientCDHABL.Remove_Result_PDF(request.KeyResultList, categoryCode);
+
+                    _logger.LogInformation($"Removed PDF files: {pdfRemoved} for keys: {string.Join(", ", request.KeyResultList)}");
+                }
+
+                return Content("True");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Invalid operation failed for PatientId: {PatientId}", request?.PatientId);
+                return Content("False");
+            }
+        }
+
+        // Model để nhận request từ client
+        public class InvalidRequestModel
+        {
+            public long PatientId { get; set; }
+            public List<string> KeyResultList { get; set; }
+            public string CategoryCode { get; set; }
+        }
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Print(long resultCDHAId)
+        {
+            var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHAId);
+            var fileBase64 = string.Empty;
+            if (_result != null)
+            {
+                var _folder = Path.Combine(_environment.WebRootPath, "pdf", "sat");
+                var _file = Path.Combine(_folder, _result?.KeyResultForHis + ".pdf");
+                try
+                {
+                    // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
+                    if (_result.UserUpdateId > 0)   // vì userReturnResult là kiểu int/long
+                    {
+                        var returnUser = await _userBL.GetUser(_result.UserUpdateId ?? 0);
+                        if (returnUser != null)
+                        {
+                            ViewData["ReturnUser"] = returnUser; // để Content/Header/Footer dùng khi in
+                        }
+                    }
+                    var _serviceCDHA = _serviceBL.GetById(_result?.Service?.Id);
+                    if (_serviceCDHA != null)
+                    {
+                        ViewData["ServiceCDHA"] = _serviceCDHA.Result;
+                    }
+                    else
+                    {
+                        ViewData["ServiceCDHA"] = null;
+                    }
+                    if (System.IO.File.Exists(_file))
+                    {
+                        fileBase64 = Convert.ToBase64String(System.IO.File.ReadAllBytes(_file));
+                    }
+                    else
+                    {
+                        ViewData["ResultCDHA"] = _result;
+                        ViewData["SieuAmTimModel"] = JsonConvert.DeserializeObject<SieuAmTimModel>(_result.SieuAmTim);
+                        var _hospital = await _hospitalBL.GetHospital();
+                        var content = await this.RenderViewAsync("Content", _hospital);
+                        fileBase64 = await _toolBL.ExportPdf_Result_No_Footer_Header(_folder, _file, content);
+                    }
+                }
+                catch { }
+            }
+            return Content(fileBase64);
+        }
+
+        //[HttpGet]
+        //public async Task<IActionResult> Print01()
+        //{
+        //    var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(331);
+        //    ViewData["ResultCDHA"] = _result;
+        //    ViewData["SieuAmTimModel"] = JsonConvert.DeserializeObject<SieuAmTimModel>(_result.SieuAmTim);
+        //    var _hospital = await _hospitalBL.GetHospital();
+        //    return View(_hospital);
+        //}
+
+
+        public long? GetUserLogin()
+        {
+            long? userId = null;
+            try
+            {
+                userId = long.Parse(HttpContext?.User?.Claims?.FirstOrDefault(p => p.Type == "UserId")?.Value);
+            }
+            catch { }
+            return userId;
+        }
+
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetSignStoreId(long resultCDHAId)
+        {
+            if (resultCDHAId <= 0)
+                return Json(new { signStoreId = (string?)null });
+
+            // Tận dụng BL hiện có để lấy record kết quả rồi đọc SignStoreId
+            var result = await _resultCDHABL.GetResultCDHA(resultCDHAId);
+            var id = result?.SignStoreId;          // tên property đúng với cột DB của bạn
+
+            // Trả JSON để JS dùng trực tiếp
+            return Json(new { signStoreId = id });
+        }
+
+        public Device GetSession_Device()
+        {
+            string _value = HttpContext.Request.Cookies[SessionKeyModel._sessionDeviceSA];
+            Device _device = null;
+            if (!string.IsNullOrEmpty(_value))
+            {
+                _device = JsonConvert.DeserializeObject<Device>(_value);
+            }
+            return _device;
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> RePrint([FromBody] ResultCDHAModel resultCDHA)
+        {
+            if (resultCDHA != null)
+            {
+                var _dateTime = ToolBL.Get_DateNow();
+                var _userLogin = this.GetUserLogin();
+                var _device = this.GetSession_Device();
+                if (await _resultCDHABL.Update(resultCDHA, _userLogin.Value, _dateTime, _device))
+                {
+                    if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _SAT))
+                    {
+                        var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
+                        if (_result != null)
+                        {
+                            try
+                            {
+                                ViewData["ResultCDHA"] = _result;
+                                ViewData["SieuAmTimModel"] = JsonConvert.DeserializeObject<SieuAmTimModel>(_result.SieuAmTim);
+                                var _hospital = await _hospitalBL.GetHospital();
+                                var content = await this.RenderViewAsync("Content", _hospital);
+                                var _folder = Path.Combine(_environment.WebRootPath, "pdf", "sat");
+                                var _file = Path.Combine(_folder, _result?.KeyResultForHis + ".pdf");
+                                var fileBase64 = await _toolBL.ExportPdf_Result_No_Footer_Header(_folder, _file, content);
+                                return Content(fileBase64);
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            return Content(string.Empty);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> SaveSignStoreIdForResultCDHA(long resultCDHAId, long signStoreId)
+        {
+            var _dateTime = ToolBL.Get_DateNow();
+            var _userLogin = this.GetUserLogin();
+
+            if (resultCDHAId <= 0 || signStoreId < 0)
+                return BadRequest("resultCDHAId hoặc signStoreId không hợp lệ.");
+
+            try
+            {
+                // Gọi BL để lưu (giả định chữ ký: UpdateSignStoreId_CKS(long id, string signStoreId))
+                var ok = await _resultCDHABL.UpdateSignStoreId_CKS(resultCDHAId, signStoreId, _userLogin.Value, _dateTime);
+                if (ok == true)
+                {
+                    var _resultCDHA = await _resultCDHABL.GetResultCDHA(resultCDHAId);
+                    var _keyResult = _resultCDHA.KeyResultForHis;
+                    return Json(new { success = true, keyResult = _keyResult });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Lỗi lưu signStoreId." });
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SaveSignStoreIdForResultCDHA failed");
+                return StatusCode(500, "Lỗi lưu signStoreId.");
+            }
+        }
+    }
+}

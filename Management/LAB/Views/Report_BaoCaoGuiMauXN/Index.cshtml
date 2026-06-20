@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Báo cáo gửi mẫu xét nghiệm";
+    Layout = "_LayoutReport";
+    var lstUser = ViewData["lstUser"] as List<Management.Models.User>;
+    var lstHospital = ViewData["lstHospital"] as List<Management.Models.Hospital>;
+}
+
+<div class="report-container">
+    <div id="report-option-search" class="report-option-search">
+        <div class="input1">
+            <input type="date" id="report-time-from" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="input1">
+            <input type="date" id="report-time-to" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+    <div class="input">
+        <select id="report-hospital" class="form-select height-28">
+            <option value="" disabled selected>-- Chọn bệnh viện --</option>
+            @if (lstHospital != null)
+            {
+                foreach (var item in lstHospital)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="report-button">
+        <div class="button">
+            <button id="report-search" class="btn btn-success btn-blue" onclick="Report_Search()">
+                <i class="bi bi-search"></i> Xem trước
+            </button>
+        </div>
+         <div class="button">
+            <button id="report-pdf" class="btn btn-success btn-blue" onclick="Report_PDF()">
+                <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
+            </button>
+        </div>
+        <div class="button">
+            <button id="report-excel" class="btn btn-success btn-blue" onclick="Report_Excel('xlsx')">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Xuất Excel
+            </button>          
+        </div>
+    </div>
+    <div id="report-result" class="report-result">
+        @await Html.PartialAsync("_ReportGuiMauXN")
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

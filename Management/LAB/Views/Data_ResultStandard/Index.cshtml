@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Quản lý dữ liệu";
+    Layout = "_LayoutData";
+    var resultstandard = ViewData["resultstandard"] as Management.Models.ResultStandard;
+}
+
+<div class="data-container">
+    <div class="data-left-data">
+        <div class="data-left-title-search">
+            <div class="title">
+                DANH SÁCH DỮ LIỆU
+            </div>
+        </div>
+        <div id="resultstandard-data-left-list" class="data-left-list">
+            @await Html.PartialAsync("_Data_List")
+        </div>
+    </div>
+    <div class="data-right-data">
+        <div class="data-right-title">
+            THÔNG TIN DỮ LIỆU
+        </div>
+        <div id="resultstandard-data-right-info" class="data-right-info">
+            @await Html.PartialAsync("_Data_Info")
+        </div>
+        <div id="resultstandard-data-right-button" class="data-right-button">
+            <button id="resultstandard-new" class="btn btn-success btn-blue" onclick="ResultStandard_Search()">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+            <button id="resultstandard-save" class="btn btn-success btn-blue" onclick="ResultStandard_UpdateStatus()">
+                <i class="bi bi-pencil"></i>Status
+            </button>
+            <button id="resultstandard-export" class="btn btn-success btn-blue" onclick="ResultStandard_ExportExcel()">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            </button>
+        </div>
+    </div>
+</div>

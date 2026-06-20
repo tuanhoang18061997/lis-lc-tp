@@ -1,0 +1,126 @@
+﻿@model List<Management.BL.ReportProcess>
+@using System.Text.Json
+@using Management.BL
+
+@{
+    var lstReportResult = Model ?? new List<ReportProcess>();
+    var lstGroup = lstReportResult.GroupBy(p => p.DoctorID);
+    var mergedJson = ViewData["MergedProcessJson"] as string;
+}
+
+<div class="table-responsive">
+    <table id="table-export-to-excel" class="table table-bordered table-striped table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-service-process" scope="col">DỊCH VỤ</th>
+                <th class="th-count-process" scope="col">SỐ LƯỢNG</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @foreach (var group in lstGroup)
+            {
+                var lstItem = group.ToList();
+                var sum = lstItem.Sum(p => p.Count);
+
+                <tr class="doctor-row">
+                    <td class="td-doctor-process" colspan="2">
+                        @lstItem[0].DoctorName (Tổng @sum)
+                    </td>
+                </tr>
+
+                @foreach (var item in lstItem)
+                {
+                    var rowId = "service-row-" + item.DoctorID + "-" + item.ServiceID;
+                    var detailId = "detail-row-" + item.DoctorID + "-" + item.ServiceID;
+
+                    <tr class="service-row"
+                        id="@rowId"
+                        onclick="Report_TogglePatientsByService('@item.DoctorID','@item.ServiceID',this)"
+                        style="cursor:pointer;">
+
+                        <td class="td-service-process">
+
+                            <i class="fas fa-chevron-right toggle-icon"
+                               style="margin-right:5px;transition:transform 0.3s;"></i>
+
+                            @item.ServiceName
+
+                        </td>
+
+                        <td class="td-count-process">
+
+                            @item.Count
+
+                        </td>
+
+                    </tr>
+
+                    <tr id="@detailId"
+                        class="patient-detail-row"
+                        style="display:none">
+
+                        <td colspan="2"
+                            style="padding:0;"
+                            id="detail-container-@item.DoctorID-@item.ServiceID">
+                        </td>
+
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!string.IsNullOrEmpty(mergedJson))
+{
+    <script>
+        window.reportProcessCache = @Html.Raw(mergedJson);
+    </script>
+}
+else
+{
+    <script>
+        window.reportProcessCache = null;
+    </script>
+}
+<script>
+
+    function Report_PrepareAllDetailRows()
+    {
+        if(!window.reportProcessCache) return;
+
+        window.reportProcessCache.forEach(function(doctor){
+
+            doctor.Services.forEach(function(service){
+
+                var containerId =
+                    "#detail-container-"
+                    + doctor.DoctorID
+                    + "-"
+                    + service.ServiceID;
+
+                var container = $(containerId);
+
+                if(container.length === 0) return;
+
+                var html =
+                    Report_BuildPatientDetailRowHtml(
+                        service.Patients,
+                        2
+                    );
+
+                container.html(html);
+
+            });
+
+        });
+
+    }
+
+    $(document).ready(function(){
+
+        Report_PrepareAllDetailRows();
+
+    });
+
+</script>

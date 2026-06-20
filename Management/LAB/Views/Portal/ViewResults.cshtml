@@ -1,0 +1,778 @@
+﻿@using Management.Models
+@using System.Web
+@{
+    Layout = "_LayoutPortal";
+    ViewData["Title"] = "Kết quả Cận lâm sàng & Xét nghiệm";
+    var patient = ViewData["Patient"] as Patient;
+    var groupedResults = ViewData["GroupedResults"] as List<IGrouping<DateTime, PatientResultPortalModel>>;
+    var xnResults = ViewData["XNResults"] as List<PatientXNResultPortalModel>;
+    var xnResultsGroupedByCategory = ViewData["XNResultsGroupedByCategory"] as Dictionary<string, List<PatientXNResultPortalModel>>;
+    var xnResultsGroupedByDateAndCategory = ViewData["XNResultsGroupedByDateAndCategory"] as Dictionary<DateTime, Dictionary<string, List<PatientXNResultPortalModel>>>;
+    var hospital = ViewData["Hospital"] as Hospital;
+    var fromDate = ViewData["FromDate"] as string;
+    var toDate = ViewData["ToDate"] as string;
+    var totalResults = (int)ViewData["TotalResults"];
+    var totalXNResults = (int)(ViewData["TotalXNResults"] ?? 0);
+    var pdfResultUrls = ViewData["PdfResultUrls"] as Dictionary<long, string> ?? new Dictionary<long, string>();
+
+}
+
+<div class="portal-container">
+    <!-- Header -->
+    <div class="portal-header">
+        <div class="hospital-info">
+            @if (!string.IsNullOrEmpty(hospital?.Logo))
+            {
+                <img src="~/images/logo/@hospital.Logo" alt="Logo" class="hospital-logo" />
+            }
+            else
+            {
+                <i class="fas fa-hospital-alt fa-2x"></i>
+            }
+            <div>
+                <h2>@(hospital?.Name ?? "Bệnh viện")</h2>
+                <p>Kết quả Cận lâm sàng & Xét nghiệm</p>
+            </div>
+        </div>
+        <div class="print-button">
+            <button onclick="printPortal()" class="btn btn-primary">
+                <i class="fas fa-print"></i> In trang này
+            </button>
+        </div>
+    </div>
+
+    @if (patient != null)
+    {
+        <!-- Patient Info -->
+        <div class="patient-info-card">
+            <h4><i class="fas fa-user"></i> Thông tin bệnh nhân</h4>
+            <div class="patient-details">
+                <div class="detail-item">
+                    <strong>Mã bệnh án:</strong> @patient.MaBenhAn
+                </div>
+                <div class="detail-item">
+                    <strong>Mã bệnh nhân:</strong> @patient.PatientId
+                </div>
+                <div class="detail-item">
+                    <strong>Họ tên:</strong> @patient.PatientName
+                </div>
+                <div class="detail-item">
+                    <strong>Giới tính:</strong> @(patient.Sex == "M" ? "Nam" : patient.Sex == "F" ? "Nữ" : "Chưa rõ")
+                </div>
+                <div class="detail-item">
+                    <strong>Ngày sinh:</strong> @(patient.Age?.ToString("dd/MM/yyyy") ?? "Chưa có")
+                </div>
+                <div class="detail-item">
+                    <strong>Địa chỉ:</strong> @(patient.Address ?? "Chưa có")
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="results-summary">
+            <div class="summary-item">
+                <span class="summary-number">@(totalResults + totalXNResults)</span>
+                <span class="summary-label">Tổng kết quả</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-number">@totalResults</span>
+                <span class="summary-label">Cận lâm sàng</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-number">@totalXNResults</span>
+                <span class="summary-label">Xét nghiệm</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-text">Từ @fromDate đến @toDate</span>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-3" id="resultsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="cls-tab" data-bs-toggle="tab" data-bs-target="#cls" type="button" role="tab">
+                    <i class="fas fa-x-ray"></i> Cận lâm sàng (@totalResults)
+                </button>
+            </li>
+            @*             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="xn-tab" data-bs-toggle="tab" data-bs-target="#xn" type="button" role="tab">
+                    <i class="fas fa-vials"></i> Xét nghiệm (@totalXNResults)
+                </button>
+            </li> *@
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="xn-category-tab" data-bs-toggle="tab" data-bs-target="#xn-category" type="button" role="tab">
+                    <i class="fas fa-layer-group"></i> XN theo danh mục
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="resultsTabContent">
+            <!-- Cận lâm sàng Tab -->
+            <div class="tab-pane fade show active" id="cls" role="tabpanel">
+                @if (groupedResults != null && groupedResults.Any())
+                {
+                    var clsResults = groupedResults
+                    .SelectMany(g => g)
+                    .OrderBy(r => r.Type)
+                    .ThenBy(r => r.ServiceName)
+                    .ThenByDescending(r => r.ReturnResultDate ?? r.CreatedDate)
+                    .ToList();
+
+                    var categoryGroups = clsResults
+                    .GroupBy(r => new
+                    {
+                        TypeCode = string.IsNullOrWhiteSpace(r.TypeCode) ? "OTHER" : r.TypeCode,
+                        TypeName = string.IsNullOrWhiteSpace(r.Type) ? "Khác" : r.Type
+                    })
+                    .OrderBy(g => g.Key.TypeName)
+                    .ToList();
+
+                    @foreach (var categoryGroup in categoryGroups)
+                    {
+                        var serviceGroups = categoryGroup
+                        .GroupBy(r => string.IsNullOrWhiteSpace(r.ServiceName) ? categoryGroup.Key.TypeName : r.ServiceName)
+                        .OrderBy(g => g.Key)
+                        .ToList();
+
+                        <div class="cls-category-section">
+                            <div class="cls-category-header">
+                                <div>
+                                    <div class="cls-category-code badge-@categoryGroup.Key.TypeCode.ToLower()">
+                                        @categoryGroup.Key.TypeCode
+                                    </div>
+                                    <h4>@categoryGroup.Key.TypeName</h4>
+                                </div>
+                                <span class="badge bg-primary">@categoryGroup.Count() kết quả</span>
+                            </div>
+
+                            @foreach (var serviceGroup in serviceGroups)
+                            {
+                                <div class="cls-service-section">
+                                    <div class="cls-service-header">
+                                        <h5>
+                                            <i class="fas fa-notes-medical"></i>
+                                            @serviceGroup.Key
+                                        </h5>
+                                        <span>@serviceGroup.Count() lần thực hiện</span>
+                                    </div>
+
+                                    @foreach (var result in serviceGroup.OrderByDescending(r => r.ReturnResultDate ?? r.CreatedDate))
+                                    {
+                                        var pdfUrl = pdfResultUrls.ContainsKey(result.Id) ? pdfResultUrls[result.Id] : "";
+                                        var hasPdf = !string.IsNullOrWhiteSpace(pdfUrl);
+                                        var hasTextResult =
+                                        !string.IsNullOrWhiteSpace(result.Description) ||
+                                        !string.IsNullOrWhiteSpace(result.Result) ||
+                                        !string.IsNullOrWhiteSpace(result.Suggest) ||
+                                        result.HasImages;
+
+                                        <div class="cls-result-split-card" data-result-id="@result.Id">
+                                            <div class="cls-result-title">
+                                                <div>
+                                                    <div class="cls-result-date">
+                                                        <i class="fas fa-calendar-alt"></i>
+                                                        @((result.ReturnResultDate ?? result.CreatedDate).ToString("dddd, dd/MM/yyyy HH:mm", new System.Globalization.CultureInfo("vi-VN")))
+                                                    </div>
+                                                    <div class="cls-result-code">Mã: @result.KeyResult</div>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(result.DoctorName))
+                                                {
+                                                    <div class="cls-result-doctor">
+                                                        <i class="fas fa-user-md"></i> @result.DoctorName
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <div class="cls-result-layout @(hasPdf ? "has-pdf" : "no-pdf")">
+                                                <div class="cls-pdf-panel">
+                                                    <div class="cls-panel-heading">
+                                                        <span><i class="fas fa-file-pdf"></i> File PDF kết quả</span>
+                                                        @if (hasPdf)
+                                                        {
+                                                            <a href="@pdfUrl" target="_blank" rel="noopener">
+                                                                Mở tab mới
+                                                            </a>
+                                                        }
+                                                    </div>
+
+                                                    @if (hasPdf)
+                                                    {
+                                                        <object data="@(pdfUrl + "#toolbar=1&navpanes=0&scrollbar=1")"
+                                                                type="application/pdf"
+                                                                class="cls-pdf-object">
+                                                            <iframe src="@(pdfUrl + "#toolbar=1&navpanes=0&scrollbar=1")"
+                                                                    class="cls-pdf-object"
+                                                                    title="PDF kết quả @result.ServiceName">
+                                                            </iframe>
+                                                            <div class="pdf-fallback">
+                                                                Trình duyệt không hiển thị được PDF trực tiếp.
+                                                                <a href="@pdfUrl" target="_blank" rel="noopener">Bấm để mở PDF</a>.
+                                                            </div>
+                                                        </object>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="cls-empty-pdf">
+                                                            <i class="fas fa-file-circle-question"></i>
+                                                            <strong>Chưa có file PDF</strong>
+                                                            <span>Không tìm thấy file trong thư mục /pdf/@result.TypeCode.ToLower()/@result.KeyResult</span>
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                                <div class="cls-text-panel">
+                                                    <div class="cls-panel-heading">
+                                                        <span><i class="fas fa-clipboard-list"></i> Nội dung kết quả</span>
+                                                    </div>
+
+                                                    @if (!hasTextResult)
+                                                    {
+                                                        <div class="cls-empty-text">
+                                                            <i class="fas fa-info-circle"></i>
+                                                            <strong>Không có nội dung mô tả dạng text</strong>
+                                                            <span>Kết quả này có thể chỉ được upload bằng PDF.</span>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        @if (!string.IsNullOrEmpty(result.Description))
+                                                        {
+                                                            <div class="result-section">
+                                                                <strong>Mô tả:</strong>
+                                                                <div class="result-text">@Html.Raw(result.Description)</div>
+                                                            </div>
+                                                        }
+
+                                                        @if (!string.IsNullOrEmpty(result.Result))
+                                                        {
+                                                            <div class="result-section">
+                                                                <strong>Kết luận:</strong>
+                                                                <div class="result-text highlight">@Html.Raw(result.Result)</div>
+                                                            </div>
+                                                        }
+
+                                                        @if (!string.IsNullOrEmpty(result.Suggest))
+                                                        {
+                                                            <div class="result-section">
+                                                                <strong>Đề nghị:</strong>
+                                                                <div class="result-text">@Html.Raw(result.Suggest)</div>
+                                                            </div>
+                                                        }
+
+                                                        @if (result.HasImages)
+                                                        {
+                                                            <div class="result-images">
+                                                                <h6><i class="fas fa-images"></i> Hình ảnh đính kèm (@result.ImageCount)</h6>
+                                                                @if (result.Images != null && result.Images.Any())
+                                                                {
+                                                                    <div class="image-thumbnails">
+                                                                        @foreach (var image in result.Images)
+                                                                        {
+                                                                            <div class="image-thumbnail" data-image-url="@image.FullImageUrl">
+                                                                                <img src="@image.ThumbnailUrl"
+                                                                                     alt="Hình ảnh kết quả"
+                                                                                     class="thumbnail-img"
+                                                                                     onclick="viewImageInModal('@Html.Raw(HttpUtility.JavaScriptStringEncode(image.FullImageUrl))');"
+                                                                                     style="cursor: pointer;"
+                                                                                     loading="lazy" />
+                                                                                <div class="thumbnail-overlay" onclick="viewImageInModal('@Html.Raw(HttpUtility.JavaScriptStringEncode(image.FullImageUrl))');">
+                                                                                    <i class="fas fa-search-plus"></i>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button onclick="viewImages(@result.Id)" class="btn btn-sm btn-outline-primary">
+                                                                        <i class="fas fa-images"></i> Tải hình ảnh
+                                                                    </button>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-results">
+                        <i class="fas fa-clipboard-list fa-3x"></i>
+                        <h4>Không có kết quả cận lâm sàng</h4>
+                        <p>Không tìm thấy kết quả cận lâm sàng trong khoảng thời gian này.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Xét nghiệm Tab (Theo ngày) -->
+            @* <div class="tab-pane fade" id="xn" role="tabpanel">
+                @if (xnResultsGroupedByDateAndCategory != null && xnResultsGroupedByDateAndCategory.Any())
+                {
+                    @foreach (var dateGroup in xnResultsGroupedByDateAndCategory.OrderByDescending(x => x.Key))
+                    {
+                        <div class="date-section">
+                            <h4 class="date-header">
+                                <i class="fas fa-calendar-alt"></i>
+                                @dateGroup.Key.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))
+                                <span class="badge bg-success ms-2">@dateGroup.Value.Sum(cat => cat.Value.Count) xét nghiệm</span>
+                            </h4>
+                            
+                            <!-- XN Results Table -->
+                            <div class="xn-results-table">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-bordered">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th width="25%">Tên xét nghiệm</th>
+                                                <th width="15%">Kết quả</th>
+                                                <th width="10%">Đơn vị</th>
+                                                <th width="20%">Giá trị bình thường</th>
+                                                <th width="10%">Trạng thái</th>
+                                                <th width="10%">Thời gian</th>
+                                                <th width="10%">Bác sĩ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var categoryGroup in dateGroup.Value.OrderBy(x => x.Key))
+                                            {
+                                                <!-- Category Header -->
+                                                <tr class="table-warning">
+                                                    <td colspan="7">
+                                                        <strong>
+                                                            <i class="@categoryGroup.Value.First().CategoryIcon"></i> 
+                                                            @categoryGroup.Key
+                                                        </strong>
+                                                        <span class="@categoryGroup.Value.First().CategoryBadgeClass ms-2">
+                                                            @categoryGroup.Value.Count xét nghiệm
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                
+                                                    // Group by Service within Category
+                                                var serviceGroups = categoryGroup.Value.GroupBy(x => x.ServiceName).OrderBy(x => x.Key);
+                                                @foreach (var serviceGroup in serviceGroups)
+                                                {
+                                                    <tr class="table-info">
+                                                        <td colspan="7" style="padding-left: 30px;">
+                                                            <strong><i class="fas fa-flask"></i> @serviceGroup.Key</strong>
+                                                            <span class="badge bg-primary ms-2">@serviceGroup.Count() xét nghiệm</span>
+                                                        </td>
+                                                    </tr>
+                                                    @foreach (var xnResult in serviceGroup.OrderBy(x => x.TestCodeName))
+                                                    {
+                                                        <tr class="xn-result-row">
+                                                            <td style="padding-left: 50px;">
+                                                                <strong>@xnResult.TestCodeName</strong>
+                                                                @if (!string.IsNullOrEmpty(xnResult.TestCodeCode))
+                                                                {
+                                                                    <br><small class="text-muted">(@xnResult.TestCodeCode)</small>
+                                                                }
+                                                            </td>
+                                                            <td class="result-value @xnResult.StatusCssClass">
+                                                                <strong>@xnResult.OnlyResult</strong>
+                                                            </td>
+                                                            <td class="text-muted">
+                                                                @xnResult.Unit
+                                                            </td>
+                                                            <td class="text-muted">
+                                                                @xnResult.NormalRange
+                                                            </td>
+                                                            <td>
+                                                                <span class="@xnResult.StatusBadgeClass">
+                                                                    <i class="@xnResult.StatusIcon"></i>
+                                                                    @xnResult.StatusText
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-muted">
+                                                                @if (xnResult.ValidTime.HasValue)
+                                                                {
+                                                                    @xnResult.ValidTime.Value.ToString("HH:mm")
+                                                                }
+                                                                else
+                                                                {
+                                                                    @xnResult.CreatedDate.ToString("HH:mm")
+                                                                }
+                                                            </td>
+                                                            <td class="text-muted">
+                                                                @xnResult.DoctorName
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-results">
+                        <i class="fas fa-vials fa-3x"></i>
+                        <h4>Không có kết quả xét nghiệm</h4>
+                        <p>Không tìm thấy kết quả xét nghiệm trong khoảng thời gian này.</p>
+                    </div>
+                }
+            </div> *@
+
+            <!-- Xét nghiệm Tab (Theo danh mục) -->
+            <div class="tab-pane fade" id="xn-category" role="tabpanel">
+                @if (xnResultsGroupedByCategory != null && xnResultsGroupedByCategory.Any())
+                {
+                    @foreach (var categoryGroup in xnResultsGroupedByCategory.OrderBy(x => x.Key))
+                    {
+                        <div class="category-section">
+                            <div class="category-header">
+                                <h4>
+                                    <i class="@categoryGroup.Value.First().CategoryIcon"></i>
+                                    @categoryGroup.Key
+                                    <span class="@categoryGroup.Value.First().CategoryBadgeClass ms-2">
+                                        @categoryGroup.Value.Count xét nghiệm
+                                    </span>
+                                </h4>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th width="30%">Tên xét nghiệm</th>
+                                            <th width="15%">Kết quả</th>
+                                            <th width="10%">Đơn vị</th>
+                                            <th width="20%">Giá trị bình thường</th>
+                                            <th width="10%">Trạng thái</th>
+                                            <th width="15%">Ngày thực hiện</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var serviceGroups = categoryGroup.Value.GroupBy(x => x.ServiceName).OrderBy(x => x.Key);
+                                        }
+                                        @foreach (var serviceGroup in serviceGroups)
+                                        {
+                                            <tr class="table-secondary">
+                                                <td colspan="6">
+                                                    <strong><i class="fas fa-flask"></i> @serviceGroup.Key</strong>
+                                                    <span class="badge bg-info ms-2">@serviceGroup.Count() xét nghiệm</span>
+                                                </td>
+                                            </tr>
+                                            @foreach (var xnResult in serviceGroup.OrderByDescending(x => x.CreatedDate).ThenBy(x => x.TestCodeName))
+                                            {
+                                                <tr>
+                                                    <td style="padding-left: 30px;">
+                                                        <strong>@xnResult.TestCodeName</strong>
+                                                        @if (!string.IsNullOrEmpty(xnResult.TestCodeCode))
+                                                        {
+                                                            <br>
+                                    
+                                                            <small class="text-muted">(@xnResult.TestCodeCode)</small>
+                                                        }
+                                                    </td>
+                                                    <td class="result-value @xnResult.StatusCssClass">
+                                                        <strong>@xnResult.OnlyResult</strong>
+                                                    </td>
+                                                    <td class="text-muted">
+                                                        @xnResult.Unit
+                                                    </td>
+                                                    <td class="text-muted">
+                                                        @xnResult.NormalRange
+                                                    </td>
+                                                    <td>
+                                                        <span class="@xnResult.StatusBadgeClass">
+                                                            <i class="@xnResult.StatusIcon"></i>
+                                                            @xnResult.StatusText
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-muted">
+                                                        @xnResult.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                    }
+                }
+                else
+                {
+                    <div class="no-results">
+                        <i class="fas fa-layer-group fa-3x"></i>
+                        <h4>Không có kết quả xét nghiệm</h4>
+                        <p>Không tìm thấy kết quả xét nghiệm trong khoảng thời gian này.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> Không tìm thấy thông tin bệnh nhân
+        </div>
+    }
+</div>
+
+<style>
+    .cls-category-section {
+        margin-bottom: 28px;
+        border: 1px solid #edf0f5;
+        border-radius: 18px;
+        background: #fff;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .cls-category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px;
+        background: linear-gradient(135deg, #f7f8ff 0%, #ffffff 100%);
+        border-bottom: 1px solid #edf0f5;
+    }
+
+        .cls-category-header > div:first-child {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .cls-category-header h4 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+            color: #303647;
+        }
+
+    .cls-category-code {
+        min-width: 58px;
+        text-align: center;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #fff;
+        background: #5f72f2;
+    }
+
+    .cls-service-section {
+        padding: 18px 22px 22px;
+        border-bottom: 1px dashed #e7eaf1;
+    }
+
+        .cls-service-section:last-child {
+            border-bottom: 0;
+        }
+
+    .cls-service-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+        .cls-service-header h5 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #2f3542;
+        }
+
+        .cls-service-header span {
+            color: #6b7280;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+    .cls-result-split-card {
+        border: 1px solid #edf0f5;
+        border-radius: 16px;
+        background: #fff;
+        margin-bottom: 18px;
+        overflow: hidden;
+    }
+
+        .cls-result-split-card:last-child {
+            margin-bottom: 0;
+        }
+
+    .cls-result-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        background: #fafbff;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .cls-result-date {
+        font-size: 15px;
+        font-weight: 800;
+        color: #303647;
+    }
+
+    .cls-result-code,
+    .cls-result-doctor {
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .cls-result-layout {
+        display: grid;
+        grid-template-columns: minmax(360px, 1.05fr) minmax(340px, 0.95fr);
+        gap: 0;
+        min-height: 620px;
+    }
+
+        .cls-result-layout.no-pdf {
+            grid-template-columns: 360px minmax(420px, 1fr);
+            min-height: 360px;
+        }
+
+    .cls-pdf-panel,
+    .cls-text-panel {
+        min-width: 0;
+        background: #fff;
+    }
+
+    .cls-pdf-panel {
+        border-right: 1px solid #edf0f5;
+    }
+
+    .cls-panel-heading {
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 14px;
+        background: #f7f8fb;
+        border-bottom: 1px solid #edf0f5;
+        color: #434a5c;
+        font-weight: 800;
+    }
+
+        .cls-panel-heading a {
+            color: #e11d48;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+    .cls-pdf-object {
+        width: 100%;
+        height: 574px;
+        border: 0;
+        display: block;
+        background: #f3f4f6;
+    }
+
+    .cls-text-panel {
+        padding-bottom: 12px;
+    }
+
+        .cls-text-panel .result-section,
+        .cls-text-panel .result-images {
+            margin: 14px 16px;
+        }
+
+    .cls-empty-pdf,
+    .cls-empty-text,
+    .pdf-fallback {
+        display: flex;
+        min-height: 260px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+        padding: 24px;
+        text-align: center;
+        color: #6b7280;
+        background: #fafafa;
+    }
+
+        .cls-empty-pdf i,
+        .cls-empty-text i {
+            font-size: 34px;
+            color: #9ca3af;
+        }
+
+        .cls-empty-pdf strong,
+        .cls-empty-text strong {
+            color: #374151;
+            font-size: 16px;
+        }
+
+        .cls-empty-pdf span,
+        .cls-empty-text span {
+            max-width: 440px;
+            word-break: break-word;
+        }
+
+    @@media (max-width: 992px) {
+        .cls-result-layout,
+        .cls-result-layout.no-pdf {
+            grid-template-columns: 1fr;
+            min-height: unset;
+        }
+
+        .cls-pdf-panel {
+            border-right: 0;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .cls-pdf-object {
+            height: 520px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .cls-category-header,
+        .cls-service-header,
+        .cls-result-title {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .cls-service-section {
+            padding: 14px;
+        }
+
+        .cls-pdf-object {
+            height: 480px;
+        }
+    }
+</style>
+
+<!-- Modal for viewing images -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Hình ảnh kết quả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalImageContent">
+                <!-- Images will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>

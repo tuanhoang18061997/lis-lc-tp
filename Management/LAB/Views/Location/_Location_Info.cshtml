@@ -1,0 +1,42 @@
+﻿@{
+    var location = ViewData["Location"] as Location;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã khoa phòng</div>
+    <div class="div-input">
+        <input type="text" id="location-code" class="form-control height-28 valid" value="@location?.Code" onkeyup="Location_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên khoa phòng</div>
+    <div class="div-input">
+        <input type="text" id="location-name" class="form-control height-28 valid" value="@location?.Name" onkeyup="Location_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if(location != null)
+            {
+                if(location.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="location-active" onclick="Location_HideButton(true, false, true, false)" checked>
+                    <label for="location-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="location-active" onclick="Location_HideButton(true, false, true, false)">
+                    <label for="location-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="location-active" onclick="Location_HideButton(true, false, true, false)">
+                <label for="location-active">Active</label>
+            }
+        }       
+    </div>
+</div>

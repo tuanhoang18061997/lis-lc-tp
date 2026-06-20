@@ -1,0 +1,20 @@
+﻿<!-- From thêm dịch vụ cho bệnh nhân -->
+<div class="modal" id="showWaitting" data-bs-backdrop="false" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-content-child">
+            <img class="image_loading" src="~/images/logo/loading.gif" />
+            <div class="loading-text-container">
+                <p class="loading-text" id="loadingText">@ViewBag.LoadingMessage</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function updateLoadingText(message) {
+        const loadingText = document.getElementById('loadingText');
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
+    }
+</script>
+<!-- From thêm dịch vụ cho bệnh nhân -->

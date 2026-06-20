@@ -1,0 +1,1867 @@
+﻿html {
+    font-size: 12px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 1rem;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+.table {
+    color: black !important;
+}
+
+
+
+/******************************************************* Select Option*/
+select:required:invalid {
+    color: gray;
+}
+
+option[value=""][disabled] {
+    display: none;
+}
+
+option {
+    color: black;
+}
+
+/******************************************************** Select 2 */
+.select2-results__option {
+    height: 28px;
+    font-size: 0.875rem;
+}
+
+.select2-search__field {
+    font-size: 0.875rem !important;
+}
+
+.select2-container--default .select2-selection--single {
+    border-radius: unset !important;
+    border-color: #808080 !important;
+    padding: 0rem 0.3rem 0.1rem 0rem !important;
+}
+
+    .select2-container--default .select2-selection--single:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7 !important;
+    }
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border: unset;
+}
+
+.select2-selection__arrow {
+    right: 11px !important;
+}
+
+.select2-selection__rendered {
+    color: black !important;
+}
+
+
+/******************************************************** Th? Input trong form*/
+.form-control {
+    /*border-color: #808080;
+    border-radius: unset;
+    color: black;
+    height: 26px;*/
+}
+
+    .form-control:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7;
+    }
+
+.form-select {
+/*    border-color: #808080;
+    border-radius: unset;*/
+    /*padding: 0.1rem 0.3rem 0.1rem 0.4rem;*/
+}
+
+    .form-select:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7;
+    }
+
+
+/********************************************************* Menu ngang*/
+.menu {
+    width: 100%;
+    display: flex;
+}
+
+
+/********************************************************* Menu ngang left*/
+.menu-left {
+    float: left;
+    flex-grow: 100;
+}
+
+.menu-left-height {
+    height: 2.5rem;
+}
+
+.menu-left-color {
+    color: white;
+}
+
+.hover:hover {
+    background-color: white !important;
+    color: black !important;
+}
+
+.badge-success {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+/********************************************************* Menu ngang right*/
+.menu-right {
+    min-height: 2.5rem;
+    min-width: 14.375rem;
+    float: left;
+    background-color: #337ab7;
+    color: white;
+}
+
+.menu-right-bg {
+    background-color: #337ab7;
+    border: none;
+    padding: 0.5rem 0rem 0.5rem 0.5rem;
+}
+
+.menu-right-width {
+    width: 100%;
+    text-align: left;
+}
+
+.menu-right-height-64 {
+    min-height: 4rem;
+}
+
+.menu-right-height-20 {
+    line-height: 1.25rem;
+    padding-left: 0.5rem;
+}
+
+    .menu-right-height-20:hover {
+        background-color: #337ab7;
+        color: white;
+    }
+
+.menu-right-bg:hover {
+    background-color: #1e65a3;
+    box-shadow: none;
+}
+
+.menu-right-bg:focus {
+    background-color: #1e65a3;
+    box-shadow: none;
+}
+
+/********************************************************* Format cho RenderBody */
+.renderBody {
+    font-size: 0.875rem;
+    color: black;
+}
+
+    .renderBody .form-control {
+        font-size: 0.875rem;
+    }
+
+    .renderBody .form-select {
+        font-size: 0.875rem;
+    }
+
+    .renderBody .btn-blue {
+        font-size: 0.875rem;
+        height: 1.75rem;
+        background-color: #337ab7;
+        line-height: 0.875rem;
+        border-color: #337ab7;
+        /*border-radius: unset;*/
+    }
+
+        .renderBody .btn-blue:hover {
+            background-color: #1e65a3;
+        }
+
+        .renderBody .btn-blue:focus {
+            box-shadow: 0rem 0rem 0.063rem 0.063rem #1e65a3;
+        }
+
+    .renderBody .btn-red {
+        font-size: 0.875rem;
+        height: 1.75rem;
+        line-height: 0.875rem;
+        border-radius: unset;
+    }
+
+        .renderBody .btn-red:hover {
+            background-color: #dc3545;
+        }
+
+        .renderBody .btn-red:focus {
+            box-shadow: 0rem 0rem 0.063rem 0.063rem #dc3545;
+        }
+
+/********************************************************* Main */
+.main-bg {
+    background-color: #666;
+}
+
+.main-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-child {
+    min-width: 49.375rem;
+    min-height: 35rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 1.875rem;
+}
+
+.main-card {
+    background-color: #666;
+    width: 11rem;
+    float: left;
+    margin: 1.25rem 2.188rem 0rem 2.188rem;
+    border: none;
+}
+
+.main-card-body {
+    color: white;
+    text-align: center;
+}
+
+.main-card-title {
+    font-size: 1.125rem;
+    font-weight: normal;
+    padding-top: 0.625rem;
+}
+
+/********************************************************** Report */
+.report-container {
+    width: 100%;
+    margin-top: 0.625rem;
+}
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/********************************** Report Search */
+.report-option-search {
+    width: 100%;
+    /*height: 28px;*/
+    float: left;
+}
+
+    .report-option-search .input {
+        width: 20%;
+        height: 100%;
+        float: left;
+        padding-right: 5px;
+    }
+
+    .report-option-search .input1 {
+        width: 10%;
+        height: 100%;
+        float: left;
+        padding-right: 5px;
+    }
+
+        .report-option-search .input:last-child {
+            padding-right: unset;
+        }
+
+.report-button {
+    width: 100%;
+    height: 33px;
+    float: left;
+    margin-top: 5px;
+}
+
+    .report-button .button {
+        width: 110px;
+        height: 28px;
+        float: left;
+        margin-right: 5px;
+    }
+
+        .report-button .button button {
+            width: 100%;
+        }
+
+.report-result {
+    width: 100%;
+    height: calc(100vh - 120px);
+    float: left;
+}
+
+    .report-result .table-responsive {
+        padding: 0px;
+        height: 100%;
+        table-layout: fixed;
+    }
+
+    .report-result .table-responsive td{
+        line-height: 25px;
+    }
+
+    .report-result .table-bordered {
+        border-color: #c5c5c5;
+    }
+
+    .report-result .tr-title {
+        background-color: #dce0e0;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .report-result .tr-content {
+        background-color: #eef0f0;
+    }
+
+    /***************************************************** Report By Service */
+    .report-result .th-stt {
+        width: 5%;
+        text-align: center;
+        padding: unset;
+        line-height: 60px;
+    }
+
+    .report-result .th-service {
+        width: 35%;
+        text-align: center;
+        padding: unset;
+        line-height: 60px;
+    }
+
+    .report-result .th-total {
+        width: 20%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 60px;
+    }
+
+    .report-result .th-totalnt {
+        width: 20%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-totalngt {
+        width: 20%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-bhyt {
+        width: 10%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-tp {
+        width: 10%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-bhytnt {
+        width: 10%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-tpnt {
+        width: 10%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-bhytngt {
+        width: 10%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-tpngt {
+        width: 10%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .td-stt {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-service {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: left;
+        padding-left: 5px;
+    }
+
+    .report-result .td-bhyt {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-tp {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-bhytnt {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-tpnt {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-bhytngt {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-tpngt {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    /***************************************************** Report By Patient */
+    .report-result .th-total-patient {
+        width: 33%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-totalnt-patient {
+        width: 33%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-totalngt-patient {
+        width: 34%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-bhyt-patient {
+        width: 16.5%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-tp-patient {
+        width: 16.5%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-bhytnt-patient {
+        width: 16.5%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-tpnt-patient {
+        width: 16.5%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-bhytngt-patient {
+        width: 17%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-tpngt-patient {
+        width: 17%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .td-bhyt-patient {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-tp-patient {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-bhytnt-patient {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-tpnt-patient {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-bhytngt-patient {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .report-result .td-tpngt-patient {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    /***************************************************** Report By Process */
+    .report-result .th-service-process {
+        width: 80%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .th-count-process {
+        width: 20%;
+        text-align: center;
+        padding: unset;
+        font-weight: bold;
+        line-height: 27px;
+    }
+
+    .report-result .td-doctor-process {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: left;
+        padding-left: 5px;
+        font-weight: bold;
+        background-color: #f0f0f0;
+        position: sticky;
+        top: 25px;
+        z-index: 10;
+    }
+
+    .report-result .td-service-process {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: left;
+        padding-left: 15px;
+    }
+    
+    .report-result .service-row {
+        position: sticky;
+        top: 54px;
+        z-index: 9;
+        background-color: white;
+    }
+    
+    .report-result .service-row:hover {
+        background-color: #f5f5f5;
+    }
+
+    .report-result .td-count-process {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    /********************************************************************************************** Export Result */
+
+/* Wrapper cho table scroll ngang v?i c?t c? d?nh */
+.table-fixed-columns {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    max-width: 100%;
+}
+
+    .table-fixed-columns table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: max-content;
+    }
+
+    /* C? d?nh các c?t d?u tiên (STT, SEQ, Mã B?nh Án, Mã b?nh nhân, Tên b?nh nhân) */
+    .table-fixed-columns thead th:nth-child(1),
+    .table-fixed-columns thead th:nth-child(2),
+    .table-fixed-columns thead th:nth-child(3),
+    .table-fixed-columns thead th:nth-child(4),
+    .table-fixed-columns thead th:nth-child(5),
+    .table-fixed-columns tbody td:nth-child(1),
+    .table-fixed-columns tbody td:nth-child(2),
+    .table-fixed-columns tbody td:nth-child(3),
+    .table-fixed-columns tbody td:nth-child(4),
+    .table-fixed-columns tbody td:nth-child(5) {
+        position: sticky;
+        background-color: white;
+        z-index: 10;
+    }
+
+    /* V? trí c? d?nh cho t?ng c?t - STT */
+    .table-fixed-columns thead th:nth-child(1),
+    .table-fixed-columns tbody td:nth-child(1) {
+        left: 0;
+        min-width: 40px;
+    }
+
+    /* SEQ */
+    .table-fixed-columns thead th:nth-child(2),
+    .table-fixed-columns tbody td:nth-child(2) {
+        left: 40px;
+        min-width: 80px;
+    }
+
+    /* Mã B?nh Án */
+    .table-fixed-columns thead th:nth-child(3),
+    .table-fixed-columns tbody td:nth-child(3) {
+        left: 120px;
+        min-width: 80px;
+    }
+
+    /* Mã b?nh nhân */
+    .table-fixed-columns thead th:nth-child(4),
+    .table-fixed-columns tbody td:nth-child(4) {
+        left: 200px;
+        min-width: 120px;
+    }
+
+    /* Tên b?nh nhân */
+    .table-fixed-columns thead th:nth-child(5),
+    .table-fixed-columns tbody td:nth-child(5) {
+        left: 320px;
+        min-width: 200px;
+    }
+
+    /* Header c?a các c?t c? d?nh */
+    .table-fixed-columns thead th:nth-child(1),
+    .table-fixed-columns thead th:nth-child(2),
+    .table-fixed-columns thead th:nth-child(3),
+    .table-fixed-columns thead th:nth-child(4),
+    .table-fixed-columns thead th:nth-child(5) {
+        z-index: 11;
+        background-color: #dce0e0;
+    }
+
+    /* Border và shadow cho c?t cu?i cùng du?c c? d?nh (Tên b?nh nhân) */
+    .table-fixed-columns thead th:nth-child(5),
+    .table-fixed-columns tbody td:nth-child(5) {
+        border-right: 2px solid #999;
+        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Các c?t d?ch v? - có th? scroll */
+    .table-fixed-columns thead th:nth-child(n+6),
+    .table-fixed-columns tbody td:nth-child(n+6) {
+        min-width: 100px;
+        position: relative;
+        overflow-y: scroll;
+    }
+
+    /* Ð?m b?o hover v?n ho?t d?ng */
+    .table-fixed-columns tbody tr:hover td {
+        background-color: #f5f5f5;
+    }
+
+    .table-fixed-columns tbody tr:hover td:nth-child(1),
+    .table-fixed-columns tbody tr:hover td:nth-child(2),
+    .table-fixed-columns tbody tr:hover td:nth-child(3),
+    .table-fixed-columns tbody tr:hover td:nth-child(4),
+    .table-fixed-columns tbody tr:hover td:nth-child(5) {
+        background-color: #f5f5f5;
+    }
+
+    /* Ð?m b?o border v?n hi?n th? dúng */
+    .table-fixed-columns .table-bordered th,
+    .table-fixed-columns .table-bordered td {
+        border: 1px solid #c5c5c5;
+    }
+
+.hospital { /***************************************************** Hospital */
+    width: 100%;
+    height: 160px;
+    float: left;
+}
+
+    .hospital .hospital-logo {
+        width: 240px;
+        height: 100%;
+        float: left;
+    }
+
+        .hospital .hospital-logo .image {
+            width: 170px;
+            height: 130px;
+        }
+
+    .hospital .hospital-info {
+        width: calc(100% - 240px);
+        height: 100%;
+        float: left;
+    }
+
+        .hospital .hospital-info .hospital-info-name {
+            width: 100%;
+            height: 30px;
+            float: left;
+            font-size: 22px !important;
+            font-weight: bold;
+        }
+
+        .hospital .hospital-info .hospital-info-address {
+            width: 100%;
+            height: 25px;
+            font-size: 18px;
+            float: left;
+        }
+
+        .hospital .hospital-info .hospital-info-phonemail {
+            width: 100%;
+            height: 20px;
+            font-size: 18px;
+            float: left;
+        }
+
+        .hospital .hospital-info .hospital-info-title {
+            width: 100%;
+            height: 90px;
+            float: left;
+        }
+
+            .hospital .hospital-info .hospital-info-title .hospital-info-title-text {
+                width: 100%;
+                height: 45px;
+                padding-top: 20px;
+                float: left;
+                font-size: 33px;
+                font-weight: bold;
+            }
+
+            .hospital .hospital-info .hospital-info-title .hospital-info-title-time {
+                width: 100%;
+                height: 15px;
+                float: left;
+                font-size: 18px;
+                font-style: italic;
+            }
+
+.result-service { /***************************************************** Result Report By Service*/
+    width: 100%;
+    float: left;
+    font-size: 22px;
+}
+
+    .result-service .table-result {
+        width: 100%;
+        margin-top: unset;
+        border-collapse: collapse;
+    }
+
+        .result-service .table-result .thead {
+            display: table-header-group;
+        }
+
+            .result-service .table-result .thead .tr-title {
+                width: 100%;
+                height: 30px;
+                font-weight: bold;
+                font-size: 20px;
+            }
+
+                .result-service .table-result .thead .tr-title .th-stt {
+                    width: 5%;
+                    text-align: center;
+                    padding: unset;
+                    border: 1px solid black;
+                }
+
+                .result-service .table-result .thead .tr-title .th-service {
+                    width: 35%;
+                    text-align: left;
+                    padding-left: 30px;
+                    border: 1px solid black;
+                }
+
+                .result-service .table-result .thead .tr-title .th-total {
+                    width: 20%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-service .table-result .thead .tr-title .th-totalnt {
+                    width: 20%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-service .table-result .thead .tr-title .th-totalngt {
+                    width: 20%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-service .table-result .thead .tr-title .th-bhyt {
+                    width: 10%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-service .table-result .thead .tr-title .th-tp {
+                    width: 10%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-service .table-result .thead .tr-title .th-bhytnt {
+                    width: 10%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-service .table-result .thead .tr-title .th-tpnt {
+                    width: 10%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-service .table-result .thead .tr-title .th-bhytngt {
+                    width: 10%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-service .table-result .thead .tr-title .th-tpngt {
+                    width: 10%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+        .result-service .table-result .tr-content {
+            width: 100%;
+            min-height: 25px;
+        }
+
+            .result-service .table-result .tr-content .td-stt {
+                width: 5%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-service {
+                width: 35%;
+                text-align: left;
+                padding-left: 5px;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-bhyt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-tp {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-bhytnt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-tpnt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-bhytngt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-service .table-result .tr-content .td-tpngt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+.result-patient { /***************************************************** Result Report By Patient */
+    width: 100%;
+    float: left;
+    font-size: 22px;
+}
+
+    .result-patient .table-result {
+        width: 100%;
+        margin-top: unset;
+        border-collapse: collapse;
+    }
+
+        .result-patient .table-result .thead {
+            display: table-header-group;
+        }
+
+            .result-patient .table-result .thead .tr-title {
+                width: 100%;
+                height: 30px;
+                font-weight: bold;
+                font-size: 20px;
+            }
+
+                .result-patient .table-result .thead .tr-title .th-total {
+                    width: 33%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-totalnt {
+                    width: 33%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-totalngt {
+                    width: 34%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-bhyt {
+                    width: 16.5%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-tp {
+                    width: 16.5%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-bhytnt {
+                    width: 16.5%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-tpnt {
+                    width: 16.5%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-bhytngt {
+                    width: 17%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+                .result-patient .table-result .thead .tr-title .th-tpngt {
+                    width: 17%;
+                    text-align: center;
+                    border: 1px solid black;
+                    font-weight: bold;
+                    line-height: 27px;
+                }
+
+        .result-patient .table-result .tr-content {
+            width: 100%;
+            min-height: 25px;
+        }
+
+            .result-patient .table-result .tr-content .td-bhyt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-patient .table-result .tr-content .td-tp {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-patient .table-result .tr-content .td-bhytnt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-patient .table-result .tr-content .td-tpnt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-patient .table-result .tr-content .td-bhytngt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-patient .table-result .tr-content .td-tpngt {
+                width: 10%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+.result-process { /***************************************************** Result Report By Process */
+    width: 100%;
+    float: left;
+    font-size: 22px;
+}
+
+    .result-process .table-result {
+        width: 100%;
+        margin-top: unset;
+        border-collapse: collapse;
+    }
+
+        .result-process .table-result .thead {
+            display: table-header-group;
+        }
+
+            .result-process .table-result .thead .tr-title {
+                width: 100%;
+                height: 30px;
+                font-weight: bold;
+                font-size: 20px;
+            }
+
+                .result-process .table-result .thead .tr-title .th-service {
+                    width: 80%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-process .table-result .thead .tr-title .th-count {
+                    width: 20%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+        .result-process .table-result .tr-content {
+            width: 100%;
+            min-height: 25px;
+        }
+            .result-process .table-result .tr-content .td-doctor {
+                text-align: left;
+                padding-left: 5px;
+                font-weight: bold;
+                border: 1px solid black;
+            }
+
+            .result-process .table-result .tr-content .td-service {
+                width: 80%;
+                text-align: left;
+                padding-left: 15px;
+                border: 1px solid black;
+            }
+
+            .result-process .table-result .tr-content .td-count {
+                width: 20%;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+.signature-page { /***************************************************** Ch? ký */
+    width: 100%;
+    height: 180px;
+    float: left;
+    margin-top: 22px;
+}
+
+    .signature-page .signature {
+        width: 100%;
+        height: 155px;
+        float: left;
+    }
+
+        .signature-page .signature .signature-left {
+            width: calc(100% - 400px);
+            height: 100%;
+            float: left;
+        }
+
+        .signature-page .signature .signature-right {
+            width: 400px;
+            height: 100%;
+            float: left;
+            font-size: 20px;
+        }
+
+            .signature-page .signature .signature-right .signature-right-time {
+                width: 100%;
+                height: 30px;
+                float: left;
+                text-align: center;
+            }
+
+            .signature-page .signature .signature-right .signature-right-title {
+                width: 100%;
+                height: 95px;
+                float: left;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .signature-page .signature .signature-right .signature-right-user {
+                width: 100%;
+                height: 30px;
+                float: left;
+                text-align: center;
+                font-weight: bold;
+            }
+
+    .signature-page .page {
+        width: 100%;
+        height: 25px;
+        float: left;
+        text-align: center;
+        font-size: 16px;
+        margin-top: 15px;
+    }
+
+
+.hospital-covid { /***************************************************** Hospital Report By Covid*/
+    width: 100%;
+    height: 160px;
+    float: left;
+}
+
+    .hospital-covid .hospital-logo {
+        width: 240px;
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-covid .hospital-logo .image {
+            width: 230px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+    .hospital-covid .hospital-info {
+        width: calc(100% - 240px);
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-covid .hospital-info .hospital-info-name {
+            width: 100%;
+            height: 25px;
+            float: left;
+            font-size: 15px !important;
+            font-weight: bold;
+        }
+
+        .hospital-covid .hospital-info .hospital-info-address {
+            width: 100%;
+            height: 20px;
+            font-size: 13px;
+            float: left;
+        }
+
+        .hospital-covid .hospital-info .hospital-info-phonemail {
+            width: 100%;
+            height: 20px;
+            font-size: 13px;
+            float: left;
+        }
+
+        .hospital-covid .hospital-info .hospital-info-title {
+            width: 100%;
+            height: 90px;
+            float: left;
+        }
+
+            .hospital-covid .hospital-info .hospital-info-title .hospital-info-title-text {
+                width: 100%;
+                height: 30px;
+                padding-top: 20px;
+                float: left;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .hospital-covid .hospital-info .hospital-info-title .hospital-info-title-time {
+                width: 100%;
+                height: 15px;
+                float: left;
+                font-size: 13px;
+                font-style: italic;
+            }
+
+.result-covid { /***************************************************** Result Report By Covid */
+    width: 100%;
+    float: left;
+    font-size: 13px;
+}
+
+    .result-covid .table-result {
+        width: 100%;
+        margin-top: unset;
+        border-collapse: collapse;
+    }
+
+        .result-covid .table-result .thead {
+            display: table-header-group;
+        }
+
+            .result-covid .table-result .thead .tr-title {
+                width: 100%;
+                height: 30px;
+                font-weight: bold;
+            }
+
+                .result-covid .table-result .thead .tr-title .th-code {
+                    width: 6%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-covid .table-result .thead .tr-title .th-name {
+                    width: 20%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-covid .table-result .thead .tr-title .th-age {
+                    width: 6%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-covid .table-result .thead .tr-title .th-sex {
+                    width: 4%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-covid .table-result .thead .tr-title .th-address {
+                    width: 44%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-covid .table-result .thead .tr-title .th-result {
+                    width: 9%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+                .result-covid .table-result .thead .tr-title .th-time {
+                    width: 11%;
+                    text-align: center;
+                    padding: unset;
+                    font-weight: bold;
+                    border: 1px solid black;
+                }
+
+        .result-covid .table-result .tr-content {
+            width: 100%;
+            min-height: 25px;
+        }
+
+            .result-covid .table-result .tr-content .td-code {
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-covid .table-result .tr-content .td-name {
+                text-align: left;
+                padding-left: 5px;
+                border: 1px solid black;
+            }
+
+            .result-covid .table-result .tr-content .td-age {
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-covid .table-result .tr-content .td-sex {
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-covid .table-result .tr-content .td-address {
+                text-align: left;
+                padding-left: 5px;
+                border: 1px solid black;
+            }
+
+            .result-covid .table-result .tr-content .td-result {
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .result-covid .table-result .tr-content .td-time {
+                text-align: center;
+                border: 1px solid black;
+            }
+
+.signature-page-covid { /***************************************************** Ch? ký Report By Covid */
+    width: 100%;
+    float: left;
+    margin-top: 20px;
+}
+
+    .signature-page-covid .signature {
+        width: 100%;
+        height: 100px;
+        float: left;
+    }
+
+        .signature-page-covid .signature .signature-left {
+            width: calc(100% - 400px);
+            height: 100%;
+            float: left;
+        }
+
+        .signature-page-covid .signature .signature-right {
+            width: 400px;
+            height: 100%;
+            float: left;
+            font-size: 13px;
+        }
+
+            .signature-page-covid .signature .signature-right .signature-right-time {
+                width: 100%;
+                height: 25px;
+                float: left;
+                text-align: center;
+            }
+
+            .signature-page-covid .signature .signature-right .signature-right-title {
+                width: 100%;
+                height: 70px;
+                float: left;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .signature-page-covid .signature .signature-right .signature-right-user {
+                width: 100%;
+                height: 25px;
+                float: left;
+                text-align: center;
+                font-weight: bold;
+            }
+
+    .signature-page-covid .page {
+        width: 100%;
+        height: 25px;
+        float: left;
+        text-align: center;
+        font-size: 16px;
+        margin-top: 15px;
+    }
+
+/******************************************************* Form Loading */
+.modal-content {
+    border-radius: unset;
+}
+
+.modal-content-child {
+    margin-top: calc(100vh / 2.5);
+    text-align: center;
+    width: 100%;
+    border: unset;
+    background-color: transparent;
+}
+
+    .modal-content-child img {
+        width: 60px;
+        height: 60px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+/* ====== BÁO CÁO B?NH NHÂN TH?C HI?N D?CH V? – FREEZE 5 C?T Ð?U ====== */
+
+/* div ch?a table – cho phép scroll ngang t? c?t d?ch v? */
+.table-fixed-wrapper {
+/*    overflow-x: auto;
+    overflow-y: visible;*/
+}
+
+/* b?n thân table */
+.table-fixed-service-usage {
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 1400px; /* d? các c?t d?ch v? không b? bó h?p */
+}
+
+    .table-fixed-service-usage th,
+    .table-fixed-service-usage td {
+        white-space: nowrap;
+    }
+
+    /* C? d?nh 5 c?t d?u */
+    .table-fixed-service-usage thead th:nth-child(-n+5),
+    .table-fixed-service-usage tbody td:nth-child(-n+5) {
+        position: sticky;
+        left: 0;
+        background: #fff;
+        z-index: 2;
+    }
+
+    /* Chi?u r?ng & v? trí t?ng c?t c? d?nh
+   (b?n có th? tinh ch?nh l?i cho kh?p layout th?c t?) */
+    .table-fixed-service-usage thead th:nth-child(1),
+    .table-fixed-service-usage tbody td:nth-child(1) {
+        width: 60px;
+        left: 0;
+    }
+
+    .table-fixed-service-usage thead th:nth-child(2),
+    .table-fixed-service-usage tbody td:nth-child(2) {
+        width: 80px;
+        left: 60px;
+    }
+
+    .table-fixed-service-usage thead th:nth-child(3),
+    .table-fixed-service-usage tbody td:nth-child(3) {
+        width: 120px;
+        left: 140px; /* 60 + 80 */
+    }
+
+    .table-fixed-service-usage thead th:nth-child(4),
+    .table-fixed-service-usage tbody td:nth-child(4) {
+        width: 120px;
+        left: 260px; /* 60 + 80 + 120 */
+    }
+
+    .table-fixed-service-usage thead th:nth-child(5),
+    .table-fixed-service-usage tbody td:nth-child(5) {
+        width: 260px;
+        left: 380px; /* 60 + 80 + 120 + 120 */
+    }
+
+    /* d? header n?m trên body khi scroll */
+    .table-fixed-service-usage thead th {
+        z-index: 3;
+    }
+/* ??m b?o border hi?n th? ?úng cho các c?t c? ??nh */
+.table-fixed-service-usage thead th:nth-child(-n+5),
+.table-fixed-service-usage tbody td:nth-child(-n+5) {
+    border-right: 1px solid #c5c5c5;
+}
+
+/* Shadow cho c?t cu?i cùng ???c c? ??nh (Tên b?nh nhân) */
+.table-fixed-service-usage thead th:nth-child(5),
+.table-fixed-service-usage tbody td:nth-child(5) {
+    border-right: 2px solid #999 !important;
+}
+
+/* Background cho header c?a các c?t c? ??nh */
+.table-fixed-service-usage thead th:nth-child(-n+5) {
+    background-color: #dce0e0;
+}
+
+/* ??m b?o hover v?n ho?t ??ng */
+.table-fixed-service-usage tbody tr:hover td:nth-child(-n+5) {
+    background-color: #f5f5f5;
+}
+
+/* Các c?t d?ch v? */
+.table-fixed-service-usage thead th:nth-child(n+6),
+.table-fixed-service-usage tbody td:nth-child(n+6) {
+    min-width: 100px;
+    width: 100px;
+    
+}
+
+
+/* C?p nh?t style cho các c?t d?ch v? - hi?n th? tên ??y ?? */
+    .table-fixed-service-usage thead th:nth-child(n+6),
+    .table-fixed-service-usage tbody td:nth-child(n+6) {
+        min-width: 150px;
+        max-width: 200px;
+        width: auto;
+        white-space: normal !important;
+        /*word-wrap: break-word;*/
+        /*overflow-wrap: break-word;*/
+        padding: 8px 4px;
+        vertical-align: middle;
+        line-height: 1.3;
+        width: 10rem;
+    }
+
+/* Style cho header c?a c?t d?ch v? */
+.table-fixed-service-usage thead th:nth-child(n+6) {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    height: auto;
+    min-height: 50px;
+}
+
+/* Shadow cho c?t cu?i cùng ???c c? ??nh */
+.table-fixed-service-usage thead th:nth-child(5),
+.table-fixed-service-usage tbody td:nth-child(5) {
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Style cho dòng t?ng s? b?nh nhân trong header c?t d?ch v? */
+.table-fixed-service-usage thead th:nth-child(n+6) .service-total {
+    font-size: 10px;
+    color: #28a745;
+    margin-top: 3px;
+    font-weight: 600;
+    display: block;
+}
+
+.table-fixed-service-usage thead th:nth-child(n+6) .service-code {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.table-fixed-service-usage thead th:nth-child(n+6) .service-name {
+    font-weight: 600;
+    display: block;
+}
+
+/* Style cho dòng t?ng c?ng ? cu?i b?ng */
+.table-fixed-service-usage tfoot tr.table-footer-total {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-top: 3px solid #dee2e6;
+}
+
+.table-fixed-service-usage tfoot tr.table-footer-total td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    position: sticky;
+    bottom: 0;
+    background-color: #f0f0f0;
+    z-index: 5;
+}
+
+
+
+/* C?t t?ng s? cho các d?ch v? */
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(n+2) {
+    background-color: #e8f5e9 !important;
+    color: #2e7d32;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Hi?u ?ng khi hover vào dòng t?ng */
+.table-fixed-service-usage tfoot tr.table-footer-total:hover td {
+    background-color: #dcedc8 !important;
+}
+
+.table-fixed-service-usage tfoot tr.table-footer-total:hover td:first-child {
+    background-color: #e8e8e8 !important;
+}
+
+
+/* C? ??nh c?t ??u tiên c?a footer (ch?a ch? T?NG C?NG) */
+
+
+/* C?p nh?t style cho footer - làm cho gi?ng tbody */
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(1),
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(2),
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(3),
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(4),
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(5) {
+    position: sticky;
+    background-color: #f0f0f0 !important;
+    z-index: 11;
+}
+
+/* V? trí cho t?ng c?t c? ??nh trong footer */
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(1) {
+    left: 0;
+    width: 60px;
+}
+
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(2) {
+    left: 60px;
+    width: 80px;
+}
+
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(3) {
+    left: 140px;
+    width: 120px;
+}
+
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(4) {
+    left: 260px;
+    width: 120px;
+}
+
+.table-fixed-service-usage tfoot tr.table-footer-total td:nth-child(5) {
+    left: 380px;
+    width: 260px;
+    border-right: 2px solid #999 !important;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* Report theo dịch vụ Xét nghiệm*/
+.sticky-table-wrapper {
+    position: relative;
+    overflow: auto;
+    height: 60vh;
+    overflow-y: scroll;
+    max-height: 31.5rem;
+}
+
+.sticky-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    .sticky-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f4f4f4;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+    }
+
+        /* Cố định 6 cột đầu tiên */
+        .sticky-table thead th:nth-child(1),
+        .sticky-table tbody td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 9;
+            background-color: #fff;
+        }
+
+        .sticky-table thead th:nth-child(2),
+        .sticky-table tbody td:nth-child(2) {
+            position: sticky;
+            left: 40px;
+            z-index: 9;
+            background-color: #fff;
+        }
+
+        .sticky-table thead th:nth-child(3),
+        .sticky-table tbody td:nth-child(3) {
+            position: sticky;
+            left: 190px;
+            z-index: 9;
+            background-color: #fff;
+        }
+
+        .sticky-table thead th:nth-child(4),
+        .sticky-table tbody td:nth-child(4) {
+            position: sticky;
+            left: 270px;
+            z-index: 9;
+            background-color: #fff;
+        }
+
+        .sticky-table thead th:nth-child(5),
+        .sticky-table tbody td:nth-child(5) {
+            position: sticky;
+            left: 370px;
+            z-index: 9;
+            background-color: #fff;
+        }
+
+        .sticky-table thead th:nth-child(6),
+        .sticky-table tbody td:nth-child(6) {
+            position: sticky;
+            left: 470px;
+            z-index: 9;
+            background-color: #fff;
+        }
+
+        /* Header của các cột cố định có z-index cao hơn */
+        .sticky-table thead th:nth-child(1),
+        .sticky-table thead th:nth-child(2),
+        .sticky-table thead th:nth-child(3),
+        .sticky-table thead th:nth-child(4),
+        .sticky-table thead th:nth-child(5),
+        .sticky-table thead th:nth-child(6) {
+            z-index: 11;
+            background-color: #f4f4f4;
+        }
+
+    /* Border cho các cột cố định */
+    .sticky-table th:nth-child(6),
+    .sticky-table td:nth-child(6) {
+        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.3);
+    }
+h3.box-title {
+    font-size: 1.35rem;
+}
+.filter-row {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    height: 8rem;
+}
+
+    .filter-row .form-group {
+        margin-bottom: 0;
+    }
+
+    .filter-row input,
+    .filter-row select {
+        height: 32px;
+        font-size: 13px;
+    }
+
+.hidden-row {
+    display: none;
+}
+
+.hidden-column {
+    display: none !important;
+}
+
+#filterTestCode {
+    height: auto;
+    max-height: 150px;
+}

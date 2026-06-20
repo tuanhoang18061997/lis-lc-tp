@@ -1,0 +1,532 @@
+﻿@using Management.Models
+@model XNServiceByDateReport
+
+<style>
+    .grouped-report-container {
+        padding-right: 4px;
+    }
+
+    .report-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        padding: 10px 0 12px 0;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 15px;
+    }
+
+    .date-report-block {
+        margin-bottom: 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+        .date-report-block .sticky-table-wrapper {
+            height: fit-content !important;
+        }
+    .date-report-block .box-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 14px;
+    }
+
+    .date-block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .date-block-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .date-block-sub {
+        font-size: 13px;
+        color: #6b7280;
+        margin-left: 8px;
+        font-weight: 500;
+    }
+
+    .date-block-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-collapse-date {
+        border: 1px solid #cfd8e3;
+        background: #fff;
+        color: #334155;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .btn-collapse-date:hover {
+        background: #f8fafc;
+    }
+
+    .date-report-block.collapsed .box-body {
+        display: none;
+    }
+
+    .date-report-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .date-report-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: #f8fafc;
+        vertical-align: middle !important;
+        border-bottom: 2px solid #d9e2ec !important;
+        box-shadow: inset 0 -1px 0 #d9e2ec;
+        white-space: nowrap;
+    }
+
+    .date-report-block .sticky-table-wrapper {
+        max-height: 420px;
+        overflow: auto;
+    }
+
+    .date-report-block .sticky-table-wrapper::-webkit-scrollbar {
+        height: 10px;
+        width: 10px;
+    }
+
+    .date-report-block .sticky-table-wrapper::-webkit-scrollbar-thumb {
+        background: #c7ced6;
+        border-radius: 10px;
+    }
+
+    .date-report-block .sticky-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f3f5;
+    }
+
+    .date-report-table tbody tr:hover {
+        background: #fcfcfd;
+    }
+
+    .date-report-table td,
+    .date-report-table th {
+        white-space: nowrap;
+        vertical-align: middle !important;
+    }
+
+    .stt-column {
+        text-align: center;
+    }
+
+    .summary-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #eef5ff;
+        color: #2c5aa0;
+        border: 1px solid #d7e7ff;
+    }
+
+    .toolbar-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+        .toolbar-actions .group-button .btn {
+            min-width: 110px;
+        }
+
+    .report-total-row td {
+        font-weight: 700;
+        background: #fafafa;
+    }
+
+    @@media (max-width: 768px) {
+        .date-block-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .date-block-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .grouped-report-container {
+            height: auto;
+            max-height: none;
+        }
+
+        .date-report-block .sticky-table-wrapper {
+            max-height: none;
+        }
+
+        .date-report-table thead th {
+            position: static;
+        }
+    }
+</style>
+
+@if (Model == null)
+{
+    <div class="alert alert-warning">Model đang null.</div>
+    return;
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            Danh sách khách hàng thực hiện xét nghiệm theo ngày
+            (@Model.FromDate.ToString("dd/MM/yyyy") - @Model.ToDate.ToString("dd/MM/yyyy"))
+        </h3>
+    </div>
+
+    <div class="box-body">
+        <div class="grouped-report-container">
+            <div class="report-toolbar">
+                <div class="filter-row">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Tên khách hàng</label>
+                                <input type="text" id="globalFilterPatientName_Date" class="form-control" placeholder="Tìm theo tên...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Giới tính</label>
+                                <select id="globalFilterGender_Date" class="form-control">
+                                    <option value="">-- Tất cả --</option>
+                                    <option value="nam">Nam</option>
+                                    <option value="nữ">Nữ</option>
+                                    <option value="nu">Nữ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Đối tượng</label>
+                                <input type="text" id="globalFilterObjectName_Date" class="form-control" placeholder="Tìm theo đối tượng...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Địa chỉ</label>
+                                <input type="text" id="globalFilterAddress_Date" class="form-control" placeholder="Tìm theo địa chỉ...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Yêu cầu</label>
+                                <input type="text" id="globalFilterServiceName_Date" class="form-control" placeholder="Tìm theo dịch vụ...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Người đọc</label>
+                                <input type="text" id="globalFilterReaderName_Date" class="form-control" placeholder="Tìm theo người đọc...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar-actions">
+                        <div class="group-button">
+                            <button type="button" class="btn btn-default btn-sm" id="btnExpandAllDateBlocks">
+                                Mở tất cả
+                            </button>
+                            <button type="button" class="btn btn-default btn-sm" id="btnCollapseAllDateBlocks">
+                                Thu gọn tất cả
+                            </button>
+                            <span class="summary-chip" id="visibleRowCountBadge_Date">
+                                Tổng dòng: 0
+                            </span>
+                        </div>
+                        <button class="btn btn-success" id="btnExportExcel">
+                            Xuất Excel
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.DateGroups != null && Model.DateGroups.Any())
+            {
+                foreach (var group in Model.DateGroups)
+                {
+                    var blockId = "date_block_" + group.Date.ToString("yyyyMMdd");
+
+                    <div class="box box-default date-report-block"
+                         id="@blockId"
+                         data-group-date="@group.Date.ToString("yyyy-MM-dd")">
+
+                        <div class="box-header with-border">
+                            <div class="date-block-header">
+                                <h4 class="date-block-title">
+                                    NGÀY THỰC HIỆN: @group.Date.ToString("dd/MM/yyyy")
+                                    <span class="date-block-sub">(@(group.Rows?.Count ?? 0) dòng)</span>
+                                </h4>
+
+                                <div class="date-block-actions">
+                                    <button type="button"
+                                            class="btn-collapse-date"
+                                            data-target="#@blockId">
+                                        Thu gọn
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-body no-padding">
+                            <div class="sticky-table-wrapper">
+                                <table class="table table-bordered table-striped table-hover date-report-table">
+                                    <thead>
+                                        <tr style="text-align:center; vertical-align:middle;">
+                                            <th style="width:90px;">Ngày</th>
+                                            <th style="width:70px;">STT</th>
+                                            <th>HỌ TÊN</th>
+                                            <th style="width:70px;">GIỚI</th>
+                                            <th style="width:70px;">TUỔI</th>
+                                            <th style="width:120px;">ĐỐI TƯỢNG</th>
+                                            <th>ĐỊA CHỈ</th>
+                                            <th>YÊU CẦU</th>
+                                            <th style="width:180px;">NGƯỜI ĐỌC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (group.Rows != null && group.Rows.Any())
+                                        {
+                                            int index = 1;
+                                            foreach (var row in group.Rows)
+                                            {
+                                                <tr class="date-data-row"
+                                                    data-patient-name="@(row.PatientName ?? "")"
+                                                    data-gender="@(row.Gender ?? "")"
+                                                    data-objectname="@(row.ObjectName ?? "")"
+                                                    data-address="@(row.Address ?? "")"
+                                                    data-servicename="@(row.ServiceName ?? "")"
+                                                    data-readername="@(row.ReaderName ?? "")">
+
+                                                    <td>@row.Date.ToString("yyyy-MM-dd")</td>
+                                                    <td class="stt-column">@index</td>
+                                                    <td>@row.PatientName</td>
+                                                    <td>@row.Gender</td>
+                                                    <td style="text-align:center;">@(row.AgeValue.HasValue ? row.AgeValue.Value.ToString() : "")</td>
+                                                    <td>@row.ObjectName</td>
+                                                    <td>@row.Address</td>
+                                                    <td>@row.ServiceName</td>
+                                                    <td>@row.ReaderName</td>
+                                                </tr>
+                                                index++;
+                                            }
+                                        }
+                                        <tr class="report-total-row">
+                                            <td colspan="9">TỔNG: @(group.Rows?.Count ?? 0)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Không có dữ liệu trong khoảng thời gian đã chọn.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        function normalizeText(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        function normalizeVietnamese(value) {
+            return normalizeText(value)
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function updateBlockSTT(block) {
+            var index = 1;
+            block.find('tbody tr.date-data-row:visible').each(function () {
+                $(this).find('.stt-column').text(index);
+                index++;
+            });
+        }
+
+        function updateCollapseButtonText(block) {
+            var button = block.find('.btn-collapse-date').first();
+            if (block.hasClass('collapsed')) {
+                button.text('Mở rộng');
+            } else {
+                button.text('Thu gọn');
+            }
+        }
+
+        function collapseBlock(block) {
+            block.addClass('collapsed');
+            updateCollapseButtonText(block);
+        }
+
+        function expandBlock(block) {
+            block.removeClass('collapsed');
+            updateCollapseButtonText(block);
+        }
+
+        function toggleBlock(block) {
+            if (block.hasClass('collapsed')) {
+                expandBlock(block);
+            } else {
+                collapseBlock(block);
+            }
+        }
+
+        function filterDateReport() {
+            var patientName = normalizeVietnamese($('#globalFilterPatientName_Date').val());
+            var gender = normalizeVietnamese($('#globalFilterGender_Date').val());
+            var objectName = normalizeVietnamese($('#globalFilterObjectName_Date').val());
+            var address = normalizeVietnamese($('#globalFilterAddress_Date').val());
+            var serviceName = normalizeVietnamese($('#globalFilterServiceName_Date').val());
+            var readerName = normalizeVietnamese($('#globalFilterReaderName_Date').val());
+
+            var totalVisibleRows = 0;
+
+            $('.date-report-block').each(function () {
+                var block = $(this);
+                var visibleCount = 0;
+
+                block.find('tbody tr.date-data-row').each(function () {
+                    var row = $(this);
+                    var show = true;
+
+                    var rowPatientName = normalizeVietnamese(row.data('patient-name'));
+                    var rowGender = normalizeVietnamese(row.data('gender'));
+                    var rowObjectName = normalizeVietnamese(row.data('objectname'));
+                    var rowAddress = normalizeVietnamese(row.data('address'));
+                    var rowServiceName = normalizeVietnamese(row.data('servicename'));
+                    var rowReaderName = normalizeVietnamese(row.data('readername'));
+
+                    if (patientName && rowPatientName.indexOf(patientName) === -1) {
+                        show = false;
+                    }
+
+                    if (gender && rowGender.indexOf(gender) === -1) {
+                        show = false;
+                    }
+
+                    if (objectName && rowObjectName.indexOf(objectName) === -1) {
+                        show = false;
+                    }
+
+                    if (address && rowAddress.indexOf(address) === -1) {
+                        show = false;
+                    }
+
+                    if (serviceName && rowServiceName.indexOf(serviceName) === -1) {
+                        show = false;
+                    }
+
+                    if (readerName && rowReaderName.indexOf(readerName) === -1) {
+                        show = false;
+                    }
+
+                    if (show) {
+                        row.show();
+                        visibleCount++;
+                        totalVisibleRows++;
+                    } else {
+                        row.hide();
+                    }
+                });
+
+                var totalRow = block.find('.report-total-row');
+                if (visibleCount === 0) {
+                    block.hide();
+                } else {
+                    block.show();
+                    totalRow.show();
+                    totalRow.find('td').first().text('TỔNG: ' + visibleCount);
+                    updateBlockSTT(block);
+                }
+            });
+
+            $('#visibleRowCountBadge_Date').text('Tổng dòng: ' + totalVisibleRows);
+        }
+
+        function exportExcel() {
+            var from = $('#report-time-from').val();
+            var to = $('#report-time-to').val();
+
+            var url = `/Report_BaoCaoThongKe/ExportPatientServicesByDateXN?fromtime=${from}&totime=${to}`;
+
+            window.open(url, '_blank');
+        }
+
+        $(document).off('click', '.btn-collapse-date').on('click', '.btn-collapse-date', function () {
+            var targetSelector = $(this).data('target');
+            var block = $(targetSelector);
+            if (block.length) {
+                toggleBlock(block);
+            }
+        });
+
+        $('#btnExpandAllDateBlocks').off('click').on('click', function () {
+            $('.date-report-block').each(function () {
+                expandBlock($(this));
+            });
+        });
+
+        $('#btnCollapseAllDateBlocks').off('click').on('click', function () {
+            $('.date-report-block').each(function () {
+                collapseBlock($(this));
+            });
+        });
+         $('#btnExportExcel').off('click').on('click', function () {
+            exportExcel();
+        });
+
+        $('#globalFilterPatientName_Date, #globalFilterObjectName_Date, #globalFilterAddress_Date, #globalFilterServiceName_Date, #globalFilterReaderName_Date')
+            .off('keyup')
+            .on('keyup', function () {
+                filterDateReport();
+            });
+
+        $('#globalFilterGender_Date')
+            .off('change')
+            .on('change', function () {
+                filterDateReport();
+            });
+
+        $('.date-report-block').each(function () {
+            updateCollapseButtonText($(this));
+        });
+
+        filterDateReport();
+    })();
+</script>

@@ -1,0 +1,42 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport_Report";
+    var lstReportResult = ViewData["lstReportResult"] as List<TotalReportPatient>;  
+}
+@model Hospital
+<div class="result-patient">
+    <table class="table-result">
+        <thead class="thead">
+            <tr class="tr-title">
+                <th class="th-total" scope="col" colspan="2">TỔNG SỐ CA</th>
+                <th class="th-totalnt" scope="col" colspan="2">TỔNG SỐ CA NỘI TRÚ</th>
+                <th class="th-totalngt" scope="col" colspan="2">TỔNG SỐ CA NGOẠI TRÚ</th>
+            </tr>
+            <tr class="tr-title">
+                <td class="th-bhyt" scope="col">BHYT</td>
+                <td class="th-tp" scope="col">THU PHÍ</td>
+                <td class="th-bhytnt" scope="col">BHYT</td>
+                <td class="th-tpnt" scope="col">THU PHÍ</td>
+                <td class="th-bhytngt" scope="col">BHYT</td>
+                <td class="th-tpngt" scope="col">THU PHÍ</td>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            @{
+                if (lstReportResult != null && lstReportResult.Count > 0)
+                {
+                    foreach (var item in lstReportResult)
+                    {
+                        <tr class="tr-content">
+                            <td class="td-bhyt">@item.TotalBHYT</td>
+                            <td class="td-tp">@item.TotalTP</td>
+                            <td class="td-bhytnt">@item.TotalBHYT_NoiTru</td>
+                            <td class="td-tpnt">@item.TotalTP_NoiTru</td>
+                            <td class="td-bhytngt">@item.TotalBHYT_NgoaiTru</td>
+                            <td class="td-tpngt">@item.TotalTP_NgoaiTru</td>
+                        </tr>
+                    }
+                }
+            }
+    </table>
+</div>

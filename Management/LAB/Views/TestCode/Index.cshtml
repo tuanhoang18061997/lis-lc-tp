@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý mã xét nghiệm";
+    Layout = "_LayoutSettupDetail";
+    var testCode = ViewData["TestCode"] as TestCode;
+}
+
+<div class="settup-container">
+    <div class="settup-left-testcode">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH MÃ XÉT NGHIỆM
+            </div>
+            <div class="search">
+                <input type="text" id="testcode-search" class="form-control height-28" onkeyup="TestCode_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="testcode-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_TestCode_List")
+        </div>
+    </div>
+    <div class="settup-right-testcode">
+        <div class="settup-right-title">
+            THÔNG TIN MÃ XÉT NGHIỆM
+        </div>
+        <div id="testcode-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_TestCode_Info")
+        </div>
+        <div id="testcode-settup-right-button" class="settup-right-button">
+            <button id="testcode-new" class="btn btn-success btn-blue" onclick="TestCode_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="testcode-save" class="btn btn-success btn-blue" onclick="TestCode_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="testcode-delete" class="btn btn-success btn-blue" onclick="TestCode_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="testcode-cancel" class="btn btn-success btn-blue" onclick="TestCode_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

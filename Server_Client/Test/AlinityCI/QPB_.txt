@@ -1,0 +1,1 @@
+MSH|^~\&|alinity|alinity|labconn|labconn|20200514094919+0700||QBP^Q11^QBP_Q11|202d1fa7-b972-4f66-a665-bfea3afa65fc|P|2.5.1|||NE|AL||UNICODE UTF-8|||LAB-27^IHEQPD|WOS^Work Order Step^IHELAW|16250|1239RCP|I||R^Real Time^HL70394

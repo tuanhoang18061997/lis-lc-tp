@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Thông tin bệnh viện";
+    Layout = "_LayoutSettupDetail";
+    var _hospital = ViewData["Hospital"] as Hospital;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                BỆNH VIỆN
+            </div>
+            <div class="search">
+                <input type="text" id="hospital-search" class="form-control height-28" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="hospital-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Hospital_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            CHI TIẾT
+        </div>
+        <div id="hospital-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Hospital_Info")
+        </div>
+        <div id="hospital-settup-right-button" class="settup-right-button">
+            <button id="hospital-new" class="btn btn-success btn-blue" onclick="Hospital_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="hospital-save" class="btn btn-success btn-blue" onclick="Hospital_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="hospital-cancel" class="btn btn-success btn-blue" onclick="Hospital_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

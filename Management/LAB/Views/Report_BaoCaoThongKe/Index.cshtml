@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Báo cáo thống kê";
+    Layout = "_LayoutReport";
+    var lstUser = ViewData["lstUser"] as List<Management.Models.User>;
+    var lstHospital = ViewData["lstHospital"] as List<Management.Models.Hospital>;
+}
+
+<div class="report-container">
+    <div id="report-option-search" class="report-option-search">
+         @* <div class="input">
+            <select id="report-hospital" class="form-select height-28">
+                <option value="" disabled selected>-- Chọn bệnh viện --</option>
+                @if (lstHospital != null)
+                {
+                    foreach (var item in lstHospital)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            </select>
+        </div>  *@
+        <div class="input1">
+            <input type="date" id="report-time-from" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="input1">
+            <input type="date" id="report-time-to" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="input1">
+            <select id="report-type" class="form-select height-28 valid">
+                <option value="" disabled selected>-- Chọn loại báo cáo --</option>
+                <option value="1" selected>Theo dịch vụ</option>
+                <option value="2">Theo số ca</option>
+                <option value="3">Công thực hiện</option>
+                <option value="4">Theo khách</option>
+                <option value="5">Theo khách 2</option>
+                @*<option value="4">Test Covid</option> *@
+            </select>
+        </div>
+        <div class="input1">
+            <select id="report-location" class="form-select height-28 valid">
+                <option value="" disabled selected>-- Chọn khoa --</option>
+                <option value="XN">Xét nghiệm</option>
+                <option value="SA">Siêu âm</option>
+                <option value="NS">Nội soi</option>
+                <option value="DDT">Đo điện tim</option>
+                <option value="XQ">X-Quang</option>
+            </select>
+        </div>
+ @*         <div class="input">
+            <select id="report-user" class="form-select height-28 valid">
+                <option value="" disabled selected>-- Chọn người báo cáo --</option>
+                @if (lstUser != null)
+                {
+                    foreach (var item in lstUser)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            </select>
+        </div>  *@
+        <div class="input1">
+            <input id="report-service-name" type="text" class="form-control height-28" placeholder="-- Tên dịch vụ --" />
+        </div>
+    </div>
+    <div class="report-button">
+        <div class="button">
+            <button id="report-search" class="btn btn-success btn-blue" onclick="Report_Search_New()">
+                <i class="bi bi-search"></i> Xem trước
+            </button>
+        </div>
+        @* <div class="button">
+            <button id="report-pdf" class="btn btn-success btn-blue" onclick="Report_PDF()">
+                <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
+            </button>
+        </div> *@
+        <div class="button">
+            <button id="report-excel" class="btn btn-success btn-blue" onclick="Report_Excel('xlsx')">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Xuất Excel
+            </button>          
+        </div>
+        @*<a asp-action="Full" asp-controller="Report_BaoCaoThongKe">Test Export</a>*@
+    </div>
+    <div id="report-result" class="report-result">
+        @await Html.PartialAsync("_ReportByService")
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

@@ -1,0 +1,1 @@
+2200710085921R|1|^^^Ser-ChlamyPneuG^OD=|0.026|O.D.|R|2|^^^Ser-ChlamyPneuG^QUAL=|neg||R|3|^^^Ser-ChlamyPneuG^QUAT=|<4|U/mL|P|3||123456O|1|123456||^^^Ser-ChlamyPneuG|R|20200710085926R|1|^^^Ser-ChlamyPneuG^OD=|0.031|O.D.|R|2|^^^SerEA

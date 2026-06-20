@@ -1,0 +1,20 @@
+﻿@{
+    Layout = null;
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var totalImages = _resultCDHA?.ImageCDHAs?.Count ?? 0;
+    var imageClass = totalImages <= 2 ? "few" : "many";
+}
+<div class="export-result-sat">
+    <div class="image @imageClass">
+        <div class="title">HÌNH ẢNH SIÊU ÂM</div>
+        <div class="content">
+            @if (_resultCDHA?.ImageCDHAs != null)
+            {
+                foreach (var item in _resultCDHA.ImageCDHAs)
+                {
+                    <img class="image-item" src="@item.ImagePath" />
+                }
+            }
+        </div>
+    </div>
+</div>

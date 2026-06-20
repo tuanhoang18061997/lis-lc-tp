@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý danh mục";
+    Layout = "_LayoutSettupDetail";
+    var category = ViewData["Category"] as Category;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH DANH MỤC
+            </div>
+            <div class="search">
+                <input type="text" id="category-search" class="form-control height-28" onkeyup="Category_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="category-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Category_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN DANH MỤC
+        </div>
+        <div id="category-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Category_Info")
+        </div>
+        <div id="category-settup-right-button" class="settup-right-button">
+            <button id="category-new" class="btn btn-success btn-blue" onclick="Category_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="category-save" class="btn btn-success btn-blue" onclick="Category_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="category-delete" class="btn btn-success btn-blue" onclick="Category_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="category-cancel" class="btn btn-success btn-blue" onclick="Category_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

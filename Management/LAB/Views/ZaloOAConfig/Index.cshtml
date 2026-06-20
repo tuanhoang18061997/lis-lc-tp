@@ -1,0 +1,211 @@
+﻿@model List<Management.Models.ZaloOAConfig>
+
+@{
+    ViewBag.ZaloOATab = "config";
+    Layout = "_LayoutSettupDetail";
+    var items = Model ?? new List<Management.Models.ZaloOAConfig>();
+}
+
+<link rel="stylesheet" href="~/css/zalo-oa.css" />
+<partial name="~/Views/Shared/_ZaloOATabs.cshtml" />
+
+<div class="zalooa-page">
+    <div class="zalooa-page__header">
+        <div>
+            <h2 class="zalooa-page__title">Quản lý cấu hình Zalo OA</h2>
+            <p class="zalooa-page__subtitle">
+                Thiết lập cấu hình kết nối Zalo OA theo bệnh viện
+            </p>
+        </div>
+    </div>
+
+    <div class="zalooa-layout">
+        <section class="zalooa-card zalooa-list">
+            <div class="zalooa-card__header">
+                <h3>Danh sách cấu hình</h3>
+                <input type="text"
+                       id="txtSearch"
+                       class="zalooa-search"
+                       placeholder="Tìm theo mã, tên..." />
+            </div>
+
+            <div class="zalooa-table-wrap">
+                <table class="zalooa-table" id="zalooaTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">Id</th>
+                            <th style="width: 140px;">Mã</th>
+                            <th>Tên</th>
+                            <th style="width: 110px;">HospitalId</th>
+                            <th style="width: 180px;">ZaloOaId</th>
+                            <th style="width: 90px;">Mặc định</th>
+                            <th style="width: 90px;">Kích hoạt</th>
+                            <th style="width: 150px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="zalooaTableBody">
+                        @if (items.Any())
+                        {
+                            foreach (var item in items)
+                            {
+                                <tr data-search="@($"{item.Code} {item.Name} {item.HospitalId} {item.ZaloOaId}".ToLower())">
+                                    <td>@item.Id</td>
+                                    <td>@item.Code</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.HospitalId</td>
+                                    <td>@item.ZaloOaId</td>
+                                    <td>
+                                        <span class="status-badge @(item.IsDefault ? "is-yes" : "is-no")">
+                                            @(item.IsDefault ? "Có" : "Không")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge @(item.IsActive ? "is-yes" : "is-no")">
+                                            @(item.IsActive ? "Bật" : "Tắt")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button"
+                                                    class="btn btn--sm btn--info"
+                                                    onclick="editConfig(@item.Id)">
+                                                Sửa
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn--sm btn--danger"
+                                                    onclick="deleteConfig(@item.Id)">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 24px;">
+                                    Chưa có dữ liệu cấu hình Zalo OA
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="zalooa-card zalooa-form-panel">
+            <div class="zalooa-card__header">
+                <h3>Thông tin cấu hình</h3>
+            </div>
+
+            <div class="zalooa-form">
+                <input type="hidden" id="Id" />
+
+                <div class="form-group">
+                    <label for="Code">Mã <span style="color:red;">*</span></label>
+                    <input id="Code" class="form-input" maxlength="50" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Name">Tên <span style="color:red;">*</span></label>
+                    <input id="Name" class="form-input" maxlength="255" />
+                </div>
+
+                <div class="form-group">
+                    <label for="HospitalId">HospitalId</label>
+                    <input id="HospitalId" class="form-input" type="number" />
+                </div>
+
+                <div class="form-group">
+                    <label for="ApiUrl">ApiUrl <span style="color:red;">*</span></label>
+                    <input id="ApiUrl" class="form-input" maxlength="500" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Username">Username <span style="color:red;">*</span></label>
+                    <input id="Username" class="form-input" maxlength="100" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Password">Password <span style="color:red;">*</span></label>
+                    <input id="Password" class="form-input" type="password" maxlength="255" />
+                </div>
+
+                <div class="form-group">
+                    <label for="ZaloOaId">Zalo OA Id</label>
+                    <input id="ZaloOaId" class="form-input" maxlength="100" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Notes">Ghi chú</label>
+                    <textarea id="Notes" class="form-input form-textarea" rows="3" maxlength="500"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>AUTHORIZATION_KEY</label>
+
+                    <div class="auth-key-wrap">
+                        <input id="AuthorizationKey" class="form-input" placeholder="Click nút 'Xem' để lấy key" readonly />
+                        <button type="button" class="btn btn--info" onclick="viewAuthorizationKey()">
+                            Xem
+                        </button>
+                    </div>
+
+                    <small class="form-note">
+                        Base64 encode từ Username:Password (chỉ hiển thị, không lưu)
+                    </small>
+                </div>
+
+                <div class="form-check-row">
+                    <label class="form-check">
+                        <input type="checkbox" id="IsDefault" />
+                        <span>Mặc định</span>
+                    </label>
+
+                    <label class="form-check">
+                        <input type="checkbox" id="IsActive" checked />
+                        <span>Kích hoạt</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btnNewBottom" class="btn btn--ghost">Làm mới</button>
+                    <button type="button" id="btnSaveBottom" class="btn btn--primary">Lưu cấu hình</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script src="~/js/zalo-oa.js"></script>
+
+<script>
+    (function () {
+        const txtSearch = document.getElementById("txtSearch");
+        const tbody = document.getElementById("zalooaTableBody");
+
+        if (!txtSearch || !tbody) return;
+
+        txtSearch.addEventListener("input", function () {
+            const keyword = (this.value || "").trim().toLowerCase();
+            const rows = tbody.querySelectorAll("tr[data-search]");
+
+            rows.forEach(function (row) {
+                const searchText = row.getAttribute("data-search") || "";
+                row.style.display = searchText.indexOf(keyword) >= 0 ? "" : "none";
+            });
+        });
+
+        const isDefault = document.getElementById("IsDefault");
+        const hospitalId = document.getElementById("HospitalId");
+
+        if (isDefault && hospitalId) {
+            isDefault.addEventListener("change", function () {
+                if (this.checked) {
+                    hospitalId.value = "";
+                }
+            });
+        }
+    })();
+</script>

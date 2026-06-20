@@ -1,0 +1,40 @@
+﻿@{
+    var lstCategory = ViewData["lstCategory"] as List<Category>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-checkbox" scope="col"></th>
+                <th class="th-number" scope="col">Stt</th>
+                <th class="th-id" scope="col">Id</th>
+                <th class="th-code" scope="col">Mã</th>
+                <th class="th-name" scope="col">Tên</th> 
+                <th class="th-active" scope="col">Active</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstCategory != null && lstCategory.Count > 0)
+                {
+                    var index = 0;
+                    foreach (var item in lstCategory)
+                    {
+                        index++;
+                        <tr class="row-service" onclick="Category_CheckedBoxOnRow('@item.Code')">
+                            <td class="td-checkbox">
+                                <input class="form-check-input" type="checkbox" value="@item.Code" id="flexCheckChecked">
+                            </td>
+                            <td class="td-number">@index</td>
+                            <td class="td-id">@item.Id</td>
+                            <td class="td-code">@item.Code</td>
+                            <td class="td-name">@item.Name</td>
+                            <td class="td-active">@item.Active</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

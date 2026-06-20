@@ -1,0 +1,24 @@
+﻿@{
+    var setting = ViewData["Setting"] as Management.Models.Setting;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã </div>
+    <div class="div-input">
+        <input type="text" id="setting-code" class="form-control height-28 valid" value="@setting?.Code" onkeyup="Setting_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên</div>
+    <div class="div-input">
+        <input type="text" id="setting-name" class="form-control height-28 valid" value="@setting?.Name" onkeyup="Setting_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Giá trị</div>
+    <div class="div-input">
+        <input type="text" id="setting-value" class="form-control height-28" value="@setting?.Value" onkeyup="Setting_HideButton(true, false, true, false)" />
+    </div>
+</div>

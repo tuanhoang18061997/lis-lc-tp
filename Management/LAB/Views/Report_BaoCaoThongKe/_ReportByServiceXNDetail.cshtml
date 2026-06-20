@@ -1,0 +1,353 @@
+﻿@using Management.BL
+@model ServicePatientResultReport
+
+<div class="box box-primary" style="height: 78vh; overflow: hidden;">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            Danh sách kết quả xét nghiệm theo dịch vụ:
+            <strong>@Model.ServiceName</strong>
+            (@Model.FromDate.ToString("dd/MM/yyyy") - @Model.ToDate.ToString("dd/MM/yyyy"))
+        </h3>
+    </div>
+
+    <div class="box-body no-padding">
+        <div class="filter-row">
+            <div class="row">
+                <!-- Cột 1: Các filter tìm kiếm -->
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Tên khách hàng</label>
+                                <input type="text" id="filterPatientName" class="form-control" placeholder="Tìm theo tên...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Giới tính</label>
+                                <select id="filterGender" class="form-control">
+                                    <option value="">-- Tất cả --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Đợt khám</label>
+                                <input type="text" id="filterMaDotKham" class="form-control" placeholder="Tìm theo đợt khám...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Mã bệnh án</label>
+                                <input type="text" id="filterMaBenhAn" class="form-control" placeholder="Tìm theo mã BA...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Seq</label>
+                                <input type="text" id="filterSeq" class="form-control" placeholder="Tìm theo Seq...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Trạng thái kết quả</label>
+                                <select id="filterResultStatus" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option value="complete">Đủ kết quả</option>
+                                    <option value="incomplete">Chưa đủ kết quả</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Từ ngày</label>
+                                <input type="date" id="filterFromDate" class="form-control"
+                                       value="@Model.FromDate.ToString("yyyy-MM-dd")"
+                                       min="@Model.FromDate.ToString("yyyy-MM-dd")"
+                                       max="@Model.ToDate.ToString("yyyy-MM-dd")">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Đến ngày</label>
+                                <input type="date" id="filterToDate" class="form-control"
+                                       value="@Model.ToDate.ToString("yyyy-MM-dd")"
+                                       min="@Model.FromDate.ToString("yyyy-MM-dd")"
+                                       max="@Model.ToDate.ToString("yyyy-MM-dd")">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Cột 2: Filter TestCode -->
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">TestCode (Ctrl để chọn nhiều)</label>
+                        <select id="filterTestCode" class="form-control" multiple>
+                            @if (Model.TestCodes != null && Model.TestCodes.Any())
+                            {
+                                foreach (var tc in Model.TestCodes)
+                                {
+                                    <option value="@tc.Id" selected>@tc.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sticky-table-wrapper">
+            <table class="table table-bordered table-striped table-hover sticky-table" id="resultTable">
+                <thead>
+                    <tr style="text-align: center; vertical-align: middle">
+                        <th style="width:40px; text-align:center;">STT</th>
+                        <th style="min-width:150px;">Tên khách hàng</th>
+                        <th style="min-width:80px;">Giới tính</th>
+                        <th style="min-width:80px;">Ngày sinh</th>
+                        <th style="min-width:100px;">Đợt Khám</th>
+                        <th style="min-width:100px;">Mã bệnh án</th>
+                        <th style="min-width:80px;">Seq</th>
+                        @* Mỗi TestCode là 1 cột *@
+                        @foreach (var tc in Model.TestCodes)
+                        {
+                            <th style="text-align:center; white-space:nowrap; min-width:100px;" class="testcode-column" data-testcode-id="@tc.Id">
+                                @tc.Name
+                                @if (!string.IsNullOrEmpty(tc.Unit))
+                                {
+                                    <span>(@tc.Unit)</span>
+                                }
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Rows != null && Model.Rows.Any())
+                    {
+                        int index = 1;
+                        foreach (var row in Model.Rows)
+                        {
+                            <tr data-patient-name="@row.PatientName"
+                                data-gender="@row.Gender"
+                                data-age="@row.Age"
+                                data-madotkham="@row.MaDotKham"
+                                data-mabenhan="@row.MaBenhAn"
+                                data-seq="@row.Seq"
+                                data-datesearch="@(row.DateSearch?.ToString("yyyy-MM-dd"))">
+                                <td style="text-align:center;" class="stt-column">@index</td>
+                                <td>@row.PatientName</td>
+                                <td>@row.Gender</td>
+                                <td>@row.Age?.ToString("dd/MM/yyyy")</td>
+                                <td>@row.MaDotKham</td>
+                                <td>@row.MaBenhAn</td>
+                                <td>@row.Seq</td>
+
+                                @foreach (var tc in Model.TestCodes)
+                                {
+                                    string value = null;
+                                    if (row.ResultsByTestCode != null && row.ResultsByTestCode.ContainsKey(tc.Id))
+                                    {
+                                        value = row.ResultsByTestCode[tc.Id];
+                                    }
+
+                                    <td style="text-align:center;" class="testcode-column" data-testcode-id="@tc.Id">@value</td>
+                                }
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noDataRow">
+                            <td colspan="@(7 + (Model.TestCodes?.Count ?? 0))" class="text-center">
+                                Không có dữ liệu.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+        $(document).ready(function () {
+        // Hàm cập nhật STT cho bảng XN
+        function updateSTT_XN() {
+            var index = 1;
+            $('#resultTable tbody tr').each(function () {
+                if (!$(this).hasClass('hidden-row') && $(this).find('.stt-column').length > 0) {
+                    $(this).find('.stt-column').text(index);
+                    index++;
+                }
+            });
+        }
+
+        // Hàm kiểm tra row có đủ kết quả không
+        function isRowComplete(row) {
+            var isComplete = true;
+            var visibleTestCodeColumns = $('.testcode-column:not(.hidden-column)');
+
+            // Duyệt qua các cột testcode đang hiển thị
+            visibleTestCodeColumns.each(function() {
+                var testCodeId = $(this).data('testcode-id');
+                var cellValue = row.find('td.testcode-column[data-testcode-id="' + testCodeId + '"]').text().trim();
+
+                // Nếu có bất kỳ ô nào rỗng hoặc null thì chưa đủ kết quả
+                if (!cellValue || cellValue === '' || cellValue === 'null') {
+                    isComplete = false;
+                    return false; // break loop
+                }
+            });
+
+            return isComplete;
+        }
+
+        function filterTable() {
+            console.log("Đã vô đây");
+            var patientName = $('#filterPatientName').val().toLowerCase().trim();
+            var gender = $('#filterGender').val().toLowerCase().trim();
+            var maDotKham = $('#filterMaDotKham').val().toLowerCase().trim();
+            var maBenhAn = $('#filterMaBenhAn').val().toLowerCase().trim();
+            var seq = $('#filterSeq').val().toLowerCase().trim();
+            var fromDate = $('#filterFromDate').val();
+            var toDate = $('#filterToDate').val();
+            var resultStatus = $('#filterResultStatus').val();
+
+            var visibleCount = 0;
+
+            $('#resultTable tbody tr').each(function () {
+                if ($(this).attr('id') === 'noDataRow') return;
+
+                var row = $(this);
+                var show = true;
+
+                // Filter by patient name
+                if (patientName && row.data('patient-name').toLowerCase().indexOf(patientName) === -1) {
+                    show = false;
+                }
+
+                // Filter by gender
+                if (gender && row.data('gender').toLowerCase() !== gender) {
+                    show = false;
+                }
+
+                // Filter by ma dot kham
+                if (maDotKham && row.data('madotkham').toLowerCase().indexOf(maDotKham) === -1) {
+                    show = false;
+                }
+
+                // Filter by ma benh an
+                if (maBenhAn && row.data('mabenhan').toLowerCase().indexOf(maBenhAn) === -1) {
+                    show = false;
+                }
+
+                // Filter by seq
+                if (seq && row.data('seq').toString().toLowerCase().indexOf(seq) === -1) {
+                    show = false;
+                }
+
+                // Filter by date range
+                var dateSearch = row.data('datesearch');
+                if (dateSearch) {
+                    if (fromDate && dateSearch < fromDate) {
+                        show = false;
+                    }
+                    if (toDate && dateSearch > toDate) {
+                        show = false;
+                    }
+                }
+
+                // Filter by result status
+                if (resultStatus) {
+                    var rowComplete = isRowComplete(row);
+                    if (resultStatus === 'complete' && !rowComplete) {
+                        show = false;
+                    } else if (resultStatus === 'incomplete' && rowComplete) {
+                        show = false;
+                    }
+                }
+
+                if (show) {
+                    row.removeClass('hidden-row');
+                    visibleCount++;
+                } else {
+                    row.addClass('hidden-row');
+                }
+            });
+
+            // Update no data message colspan
+            updateNoDataColspan();
+
+            // Show/hide no data message
+            if (visibleCount === 0) {
+                if ($('#noDataRow').length === 0) {
+                    var colspan = getVisibleColumnsCount();
+                    $('#resultTable tbody').append('<tr id="noDataRow"><td colspan="' + colspan + '" class="text-center">Không có dữ liệu phù hợp với bộ lọc.</td></tr>');
+                } else {
+                    $('#noDataRow').show();
+                }
+            } else {
+                $('#noDataRow').hide();
+            }
+
+            // Cập nhật lại STT sau khi filter
+            updateSTT_XN();
+        }
+
+        function filterTestCodeColumns() {
+            var selectedTestCodes = $('#filterTestCode').val() || [];
+
+            // Nếu không có gì được chọn, hiển thị tất cả
+            if (selectedTestCodes.length === 0) {
+                $('.testcode-column').removeClass('hidden-column');
+            } else {
+                // Ẩn tất cả các cột testcode
+                $('.testcode-column').addClass('hidden-column');
+
+                // Hiển thị các cột được chọn
+                selectedTestCodes.forEach(function (testCodeId) {
+                    $('.testcode-column[data-testcode-id="' + testCodeId + '"]').removeClass('hidden-column');
+                });
+            }
+
+            // Update no data message colspan
+            updateNoDataColspan();
+
+            // Re-apply filter after column visibility changes
+            filterTable();
+        }
+
+        function getVisibleColumnsCount() {
+            var count = 7; // 7 cột cố định (đã thêm 1 cột STT)
+            count += $('.testcode-column').not('.hidden-column').length;
+            return count;
+        }
+
+        function updateNoDataColspan() {
+            var colspan = getVisibleColumnsCount();
+            $('#noDataRow td').attr('colspan', colspan);
+        }
+
+        // Bind filter events cho bảng XN
+        $('#filterPatientName, #filterMaDotKham, #filterMaBenhAn, #filterSeq').on('keyup', function () {
+            filterTable();
+        });
+
+        $('#filterGender, #filterFromDate, #filterToDate, #filterResultStatus').on('change', function () {
+            filterTable();
+        });
+
+        $('#filterTestCode').on('change', function () {
+            filterTestCodeColumns();
+        });
+
+        // Bind filter events cho bảng CDHA (nếu cần thêm filter cho CDHA sau này)
+        // $('#filterPatientNameCDHA, ...').on('keyup', function () {
+        //     filterTableCDHA();
+        //     updateSTT_CDHA();
+        // });
+    });
+</script>

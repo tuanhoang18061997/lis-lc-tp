@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Đang thực hiện";
+    Layout = "_LayoutXQ";   
+}
+
+<div class="xq-container">
+    <div class="xq-left">
+        <div class="xq-left-search">
+            @await Html.PartialAsync("_XQ_ReturnResult_Search")
+        </div>
+        <div id="returnresult_listPatient" class="xq-left-list">
+            @await Html.PartialAsync("_XQ_ReturnResult_ListPatient")
+        </div>
+    </div>
+    <div class="xq-right">
+        <div id="returnresult_patientInfo" class="xq-right-info">
+            @await Html.PartialAsync("_XQ_ReturnResult_PatientInfo")
+        </div>
+        <div id="returnresult_patientService" class="xq-right-service">
+            <div id="returnresult_xq-right-service-group" class="xq-right-service-group">
+                @await Html.PartialAsync("_XQ_ReturnResult_GroupButton")
+            </div>
+            <div id="returnresult_xq-right-service-gridview" class="xq-right-service-gridview">
+                @await Html.PartialAsync("_XQ_ReturnResult_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

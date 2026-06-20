@@ -1,0 +1,35 @@
+﻿@using Management.BL
+@{
+    var lstReportResult = ViewData["lstReportResult"] as List<ReportCovid>;
+}
+<div class="table-responsive">
+    <table id="table-export-to-excel" class="table table-bordered table-striped table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-code-covid" scope="col">Mã</th>
+                <th class="th-name-covid" scope="col">Họ Tên</th>
+                <th class="th-age-covid" scope="col">Tuổi</th>
+                <th class="th-sex-covid" scope="col">GT</th>
+                <th class="th-address-covid" scope="col">Địa Chỉ</th>
+                <th class="th-result-covid" scope="col">Kết Quả</th>
+                <th class="th-time-covid" scope="col">Giờ Trả KQ</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                foreach (var item in lstReportResult)
+                {
+                    <tr>
+                        <td class="td-code-covid">@item.PatientID</td>
+                        <td class="td-name-covid">@item.PatientName</td>
+                        <td class="td-age-covid">@item.Age?.ToString("dd/MM/yyyy")</td>
+                        <td class="td-sex-covid">@item.Sex</td>
+                        <td class="td-address-covid">@item.Address</td>
+                        <td class="td-result-covid">@item.Result</td>
+                        <td class="td-time-covid">@item.ReturnResultTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,2712 @@
+﻿html {
+    font-size: 18px;
+    position: relative;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.reset-fieldset-legend {
+    all: initial;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 13px;
+    padding: 7px 9px;
+    width: fit-content;
+}
+
+.legend {
+    font-weight: bold;
+    color: #15428b;
+}
+
+.table {
+    color: black !important;
+}
+
+
+
+/****************************************************** CKEditor */
+.cke_chrome {
+    border: 1px solid #808080 !important;
+}
+
+
+/******************************************************* Select Option*/
+select:required:invalid {
+    color: gray;
+}
+
+option[value=""][disabled] {
+    display: none;
+}
+
+option {
+    color: black;
+}
+
+/******************************************************** Select 2 */
+.select2-results__option {
+    height: 28px;
+    font-size: 0.875rem;
+}
+
+.select2-search__field {
+    font-size: 0.875rem !important;
+}
+
+.select2-container--default .select2-selection--single {
+    border-radius: unset !important;
+    border-color: #808080 !important;
+    padding: 0rem 0.3rem 0.1rem 0rem !important;
+}
+
+    .select2-container--default .select2-selection--single:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7 !important;
+    }
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border: unset;
+}
+
+.select2-selection__arrow {
+    right: 11px !important;
+}
+
+.select2-selection__rendered {
+    color: black !important;
+}
+/******************************************************** Thẻ DIV canh giữa => Bỏ phần tử nào vào trong cũng tự động canh giữa*/
+.div-center {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.div-margin-top-5 {
+    margin-top: 0.313rem;
+}
+
+
+/******************************************************** Thẻ Input trong form*/
+.form-control {
+    border-color: #808080;
+    border-radius: unset;
+    color: black;
+}
+
+    .form-control:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7;
+    }
+
+.form-select {
+    border-color: #808080;
+    border-radius: unset;
+    padding: 0.1rem 0.3rem 0.1rem 0.4rem;
+}
+
+    .form-select:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7;
+    }
+
+
+/******************************************************** Margin */
+.margin-right-10 {
+    margin-right: 0.625rem;
+}
+
+.margin-right-5 {
+    margin-right: 0.312rem;
+}
+
+.margin-bottom-10 {
+    margin-bottom: 0.9rem;
+}
+
+.margin-left-100 {
+    margin-left: 100px;
+}
+
+.margin-top-2 {
+    margin-top: 5px;
+}
+
+.margin-right-2 {
+    margin-right: 4px;
+}
+
+.margin-top-80 {
+    margin-top: 90px;
+}
+/********************************************************Pading */
+.pading-left-5 {
+    padding-left: 0.312rem;
+}
+
+.pading-right-5 {
+    padding-right: 0.312rem;
+}
+
+.pading-left-10 {
+    padding-left: 0.624rem;
+}
+
+.pading-right-2 {
+    padding-right: 0.125rem;
+}
+
+.pading-unset {
+    padding: unset;
+}
+
+/******************************************************** Text color*/
+.text-red {
+    color: red;
+}
+
+/******************************************************** Width - Height*/
+.width-20 {
+    width: 7.53rem;
+}
+
+.width-97 {
+    width: 6.01rem;
+}
+
+.width-95 {
+    width: 5.95rem;
+}
+
+.width-100 {
+    width: 100%;
+}
+
+.height-100 {
+    height: 100% !important;
+}
+
+.height-28 {
+    height: 1.75rem;
+}
+
+.height-60 {
+    height: 3.8rem;
+}
+
+.height-160 {
+    height: 10rem;
+}
+
+.height-30 {
+    height: 4.85rem;
+}
+
+
+/******************************************************** Border */
+.border-red {
+    border-color: red;
+}
+
+.border-left-none {
+    border-left: unset !important;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+
+/******************************************************** Account */
+.account {
+    font-size: 0.938rem;
+    margin-bottom: 0.234rem;
+    background-image: url("/images/Background.jpg");
+    /*background-color: #ffffff;*/
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+
+/******************************************************** From Login*/
+.login-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-child {
+    background-color: #ffffff;
+    min-width: 25rem;
+    min-height: 16.875rem;
+    padding: 1.25rem 1.25rem 0.313rem 1.25rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0rem 0rem 0.938rem 0.5rem #808080;
+}
+
+
+/********************************************************* Menu ngang*/
+.menu {
+    width: 100%;
+    display: flex;
+    font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+    font-size: 14px;
+}
+
+
+/********************************************************* Menu ngang left*/
+.menu-left {
+    float: left;
+    flex-grow: 100;
+}
+
+.menu-left-height {
+    height: 2.5rem;
+}
+
+.menu-left-color {
+    color: white;
+}
+
+.hover:hover {
+    background-color: white !important;
+    color: black !important;
+}
+
+.badge-success {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+/********************************************************* Menu ngang right*/
+.menu-right {
+    min-height: 2.5rem;
+    min-width: 14.375rem;
+    float: left;
+    background-color: #337ab7;
+    color: white;
+}
+
+.menu-right-bg {
+    background-color: #337ab7;
+    border: none;
+    padding: 0.5rem 0rem 0.5rem 0.5rem;
+}
+
+.menu-right-width {
+    width: 100%;
+    text-align: left;
+}
+
+.menu-right-height-64 {
+    min-height: 4rem;
+}
+
+.menu-right-height-20 {
+    line-height: 1.25rem;
+    padding-left: 0.5rem;
+}
+
+    .menu-right-height-20:hover {
+        background-color: #337ab7;
+        color: white;
+    }
+
+.menu-right-bg:hover {
+    background-color: #1e65a3;
+    box-shadow: none;
+}
+
+.menu-right-bg:focus {
+    background-color: #1e65a3;
+    box-shadow: none;
+}
+
+/********************************************************* Format cho RenderBody */
+.renderBody {
+    font-size: 0.875rem;
+    color: black;
+    font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+}
+
+    .renderBody .form-control {
+        font-size: 0.875rem;
+    }
+
+    .renderBody .form-select {
+        font-size: 0.875rem;
+    }
+
+    .renderBody .btn-blue {
+        font-size: 0.875rem;
+        height: 1.75rem;
+        background-color: #337ab7;
+        line-height: 0.875rem;
+        border-color: #337ab7;
+        border-radius: unset;
+    }
+
+        .renderBody .btn-blue:hover {
+            background-color: #1e65a3;
+        }
+
+        .renderBody .btn-blue:focus {
+            box-shadow: 0rem 0rem 0.063rem 0.063rem #1e65a3;
+        }
+
+    .renderBody .btn-red {
+        font-size: 0.875rem;
+        height: 1.75rem;
+        line-height: 0.875rem;
+        border-radius: unset;
+    }
+
+        .renderBody .btn-red:hover {
+            background-color: #dc3545;
+        }
+
+        .renderBody .btn-red:focus {
+            box-shadow: 0rem 0rem 0.063rem 0.063rem #dc3545;
+        }
+
+/********************************************************* Main */
+.main-bg {
+    background-color: #666;
+}
+
+.main-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-child {
+    min-width: 49.375rem;
+    min-height: 35rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 1.875rem;
+}
+
+.main-card {
+    background-color: #666;
+    width: 11rem;
+    float: left;
+    margin: 1.25rem 2.188rem 0rem 2.188rem;
+    border: none;
+}
+
+.main-card-body {
+    color: white;
+    text-align: center;
+}
+
+.main-card-title {
+    font-size: 1.125rem;
+    font-weight: normal;
+    padding-top: 0.625rem;
+}
+
+/********************************************************** Xét Nghiệm */
+
+.sat-container {
+    width: 100%;
+    margin-top: 0.625rem;
+}
+
+
+
+
+/********************************** XN Left */
+.sat-left {
+    width: 15.625rem;
+    height: 100%;
+    float: left;
+    padding-right: 0.313rem;
+}
+
+.sat-left-search {
+    width: 100%;
+    height: 10rem;
+    float: left;
+}
+
+.sat-left-list {
+    width: 100%;
+    height: calc(100vh - 13.563rem); /* = Chiều cao màn hình (100vh) - Chiều cao sa-left-search (130px) - Chiều cao menu-left-height (50px)*/
+    float: left;
+}
+    .sat-left-list .total-patient {
+        margin: .5rem .3rem;
+        font-size: 15px;
+        font-weight: 700;
+        border-bottom: 1px dashed lightgray;
+    }
+
+    .sat-left-list .list-group-item-secondary {
+        background-color: #eef0f0;
+    }
+
+.list-group {
+    font-size: 0.875rem;
+    margin-top: 0.313rem;
+    max-height: 100%;
+    margin-bottom: 0.625rem;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+.list-group-item {
+    padding: 0rem 0.313rem 0.313rem 0.313rem;
+    color: black;
+}
+
+.list-group-item-action {
+    border-bottom: 1px solid rgb(197, 197, 197);
+}
+
+    .list-group-item-action:hover {
+        background-color: #ced4da;
+        transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        color: black;
+    }
+
+    .list-group-item-action.active {
+        color: black;
+        background-color: rgb(163 208 251);
+        border-left: 4px solid #007bff;
+        transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    }
+
+    .list-group-item-action:focus {
+        background-color: #ced4da;
+        color: black;
+    }
+
+.list-group-item-pid-age-sex {
+    width: 100%;
+    float: left;
+}
+
+.list-group-item-pid-age-sex-pid {
+    width: 40%;
+    float: left;
+}
+
+.list-group-item-pid-age-sex-age {
+    width: 40%;
+    float: left;
+    text-align: center;
+}
+
+.list-group-item-pid-age-sex-sex {
+    width: 20%;
+    float: left;
+    text-align: right;
+}
+
+.list-group-item-name-maBenhAn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.list-group-item-name-maBenhAn-name {
+    width: 100%;
+    color: #15428b;
+    font-weight: bold;
+}
+
+.list-group-item-name-maBenhAn-maBenhAn {
+    width: 50%;
+    color: red;
+    font-weight: bold;
+    display: flex;
+    justify-content: flex-end;
+}
+.list-group-item-seq-sid {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-style: italic;
+    align-items: center;
+}
+
+.list-group-item-seq-sid-seq .seq {
+    color: mediumblue;
+    font-weight: 700;
+}
+
+.list-group-item-seq-sid-index {
+    width: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    font-size: 12px;
+    gap: .1rem;
+}
+
+/********************************** XN Right */
+.sat-right {
+    width: calc(100% - 15.625rem);
+    height: 100%;
+    float: left;
+    padding-left: 0.313rem;
+}
+
+/********************************** Thông tin bệnh nhân*/
+.sat-right-info {
+    width: 100%;
+    height: auto;
+    float: left;
+    margin-bottom: .3rem;
+}
+
+.sat-right-info-title {
+    width: 100%;
+    height: 1.75rem;
+    float: left;
+    line-height: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 0.313rem;
+    background-color: #dce0e0;
+    color: black;
+    padding-left: 0.313rem;
+}
+
+.sat-right-info-div-1 {
+    width: 25rem;
+    /*height: 100%;*/
+    float: left;
+}
+
+.sat-right-info-div-2 {
+    width: 25rem;
+    /*height: 100%;*/
+    float: left;
+}
+
+.sat-right-info-div-3 {
+    width: calc(100% - 25rem - 25rem);
+    /*height: 100%;*/
+    float: left;
+}
+
+.sat-right-info-div-combo-2 {
+    width: 100%;
+    float: left;
+}
+
+.sat-right-info-div-combo-2-label {
+    width: 25%;
+    max-width: 7rem;
+    float: left;
+    line-height: 1.75rem;
+}
+
+.sat-right-info-div-combo-2-input {
+    width: calc(100% - 25%);
+    max-width: 19rem;
+    float: left;
+}
+
+.sat-right-info-div-combo-2-input-input1 {
+    width: 33%;
+    float: left;
+}
+
+.sat-right-info-div-combo-2-input-input2 {
+    width: 67%;
+    float: left;
+}
+
+
+.sat-right-info-div-combo-4 {
+    width: 100%;
+    float: left;
+}
+
+.sat-right-info-div-combo-4-label-age-object {
+    width: 25%;
+    float: left;
+    line-height: 1.75rem;
+}
+
+.sat-right-info-div-combo-4-label-sex-benhan {
+    width: 17%;
+    float: left;
+    line-height: 1.75rem;
+}
+
+.sat-right-info-div-combo-4-input {
+    width: 29%;
+    float: left;
+}
+
+
+/************************************** Chỉ định xét nghiệm */
+
+.sat-right-service {
+    width: 100%;
+    height: calc(100% - 12.5rem);
+    float: left;
+}
+
+.sat-right-service-group {
+    width: 100%;
+    /*height: 1.75rem;*/
+    float: left;
+    margin-bottom: 0.313rem;
+}
+
+.sat-right-service-group-button {
+    width: 400px;
+    height: 100%;
+    float: left;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 0.2rem;
+}
+
+.sat-right-service-group-button .sat_returnresult_invalid_removedigitalsign {
+    font-size: 12px;
+    padding: 0 0.4rem;
+    width: 5.5rem;
+}
+
+.sat-right-service-group-button .sat_returnresult_print_signed {
+    font-size: 12px;
+    padding: 0 0.4rem;
+    width: 5.5rem;
+}
+
+.sat-right-service-group-button .btn {
+    width: 97px;
+    padding: 0 0.1rem;
+    line-height: .875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+}
+
+.sat-right-service-group-button .sat_process_signpdf {
+    font-size: 13px;
+    padding: 0 0.4rem !important;
+    line-height: 1.475rem !important;
+}
+
+.sat-right-service-group-button-title-sample {
+    width: calc(100% - 400px);
+    height: 100%;
+    float: left;
+}
+
+
+    .sat-right-service-group-button-title-sample .title-process {
+        width: 97px;
+        height: 100%;
+        float: left;
+        line-height: 1.75rem;
+        font-weight: bold;
+        background-color: #dce0e0;
+        color: black;
+        margin-left: 5px;
+        padding-left: 5px;
+    }
+
+    .sat-right-service-group-button-title-sample .title-returnresult {
+        width: calc(100% - 5px);
+        height: 100%;
+        float: left;
+        line-height: 1.75rem;
+        font-weight: bold;
+        background-color: #dce0e0;
+        color: black;
+        margin-left: 5px;
+        padding-left: 5px;
+    }
+
+    .sat-right-service-group-button-title-sample .sample {
+        width: calc(100% - 102px);
+        height: 100%;
+        float: left;
+        padding-left: 5px;
+    }
+
+.sat-right-service-group-category {
+    width: 250px;
+    height: 100%;
+    float: left;
+    background-color: #dce0e0;
+}
+
+.sat-right-service-group-category-label {
+    width: 107px;
+    height: 100%;
+    float: left;
+    padding-left: 10px;
+    font-weight: bold;
+    line-height: 1.75rem;
+}
+
+.sat-right-service-group-category-select {
+    width: 143px;
+    height: 100%;
+    float: left;
+    line-height: 1.75rem;
+    padding-right: 1px;
+}
+
+.sat-right-service-group-service {
+    width: calc(100% - 400px - 250px);
+    height: 100%;
+    float: left;
+    background-color: #dce0e0;
+}
+
+.sat-right-service-group-service-label {
+    width: 89px;
+    height: 100%;
+    float: left;
+    padding-left: 10px;
+    font-weight: bold;
+    line-height: 1.75rem;
+}
+
+.sat-right-service-group-service-select {
+    width: calc(100% - 89px);
+    height: 100%;
+    float: left;
+    line-height: 1.75rem;
+}
+
+.sat-right-service-gridview {
+    width: 100%;
+    height: calc(100% - 12.5rem - 1.75rem);
+    float: left;
+}
+
+    /********************************************************************* Get sample */
+    .sat-right-service-gridview .table-responsive {
+        padding: 0px;
+        height: calc(100vh - 3.5rem - 12.5rem - 1.75rem);
+    }
+
+        .sat-right-service-gridview .table-responsive td {
+            line-height: 25px;
+        }
+
+    .sat-right-service-gridview .table-bordered {
+        border-color: #c5c5c5;
+    }
+
+    .sat-right-service-gridview .tr-title {
+        background-color: #dce0e0;
+    }
+
+    .sat-right-service-gridview .tr-content {
+        background-color: #eef0f0;
+    }
+
+
+    .sat-right-service-gridview .th-number {
+        width: 60px;
+        text-align: center;
+    }
+
+    .sat-right-service-gridview .th-name {
+        min-width: 490px;
+        text-align: center;
+    }
+
+    .sat-right-service-gridview .th-delete {
+        width: 60px;
+        text-align: center;
+    }
+
+    .sat-right-service-gridview .td-number {
+        padding: unset;
+        margin: unset;
+        height: 25px;
+        text-align: center;
+    }
+
+    .sat-right-service-gridview .td-name {
+        padding: unset;
+        margin: unset;
+        /*height: 25px;*/
+        text-align: left;
+        padding-left: 5px;
+    }
+
+    .sat-right-service-gridview .td-delete {
+        padding: unset;
+        margin: unset;
+        text-align: center;
+    }
+
+
+        .sat-right-service-gridview .td-delete .btn-red-in-gridview {
+            font-size: 0.875rem;
+            height: 25px;
+            width: 100%;
+            line-height: 12.5px;
+            border-radius: unset;
+            padding: unset;
+            border: none;
+        }
+
+            .sat-right-service-gridview .td-delete .btn-red-in-gridview:hover {
+                background-color: #dc3545;
+                border: none;
+            }
+
+            .sat-right-service-gridview .td-delete .btn-red-in-gridview:focus {
+                box-shadow: 0rem 0rem 0.063rem 0.063rem #dc3545;
+                border: none;
+            }
+
+    /********************************************************************* Process */
+    /* Left */
+    .sat-right-service-gridview .table-responsive .left {
+        width: 400px;
+        height: 100%;
+        float: left;
+    }
+
+        .sat-right-service-gridview .table-responsive .left .list-service {
+            width: 100%;
+            height: auto;
+            float: left;
+            margin-bottom: 5px;
+        }
+
+            .sat-right-service-gridview .table-responsive .left .list-service .table-responsive {
+                padding: 0px;
+                width: 100%;
+                height: 100%;
+                float: left;
+            }
+
+                .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered {
+                    border-color: #c5c5c5;
+                }
+
+                    .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-check {
+                        padding: unset;
+                        margin: unset;
+                        width: 30px;
+                        height: 25px;
+                        line-height: 25px;
+                        text-align: center;
+                    }
+
+                    .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-name {
+                        padding: unset;
+                        margin: unset;
+                        /*height: 25px;*/
+                        line-height: 25px;
+                        padding-left: 5px;
+                        padding-right: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: flex-start;
+                    }
+                    .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-name .service-info {
+                        display: flex;
+                        justify-content: space-between;
+                        align-content: center;
+                        gap: 0.2rem;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-name .service-info .serviceName {
+                            width: 75%;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-name .service-info .serviceId {
+                            font-size: 12px;
+                            font-style: italic;
+                            text-decoration: underline;
+                            width: 25%;
+                        }
+
+                    .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-name .digital-sign-icon {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 12px;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .td-name .digital-sign-icon i {
+                            font-size: 14px;
+                        }
+                .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .tbody-service .row-service.active {
+                    background-color: #dceeff; /* màu nền nhạt để nổi bật */
+                    border-left: 4px solid #007bff;
+                    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+                }
+
+                .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .tbody-service .row-service:hover {
+                    background-color: #f1f7ff;
+                }
+
+                .sat-right-service-gridview .table-responsive .left .list-service .table-responsive .table-bordered .tbody-service .row-service.multi-selected {
+                    background-color: #e7ffe7; /* xanh nhạt cho dòng được tick checkbox */
+                    border-left: 4px solid #28a745;
+                }
+
+        .sat-right-service-gridview .table-responsive .left .camera {
+            width: 100%;
+            height: 250px;
+            float: left;
+            background-color: gray;
+        }
+
+            .sat-right-service-gridview .table-responsive .left .camera .video {
+                width: 400px;
+                height: 250px;
+                float: left;
+            }
+
+        .sat-right-service-gridview .table-responsive .left .group-button-image {
+            width: 100%;
+            height: fit-content;
+            float: left;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+            .sat-right-service-gridview .table-responsive .left .group-button-image .group-button {
+                width: 100%;
+                height: fit-content;
+                float: left;
+            }
+
+                .sat-right-service-gridview .table-responsive .left .group-button-image .group-button .with-1 {
+                    width: max-content;
+                    text-align: left;
+                    font-size: 0.875rem;
+                    text-wrap-mode: nowrap;
+                }
+
+                .sat-right-service-gridview .table-responsive .left .group-button-image .group-button .with-2 {
+                    width: fit-content;
+                    text-align: center !important;
+                    font-size: 13px !important;
+                }
+
+                .sat-right-service-gridview .table-responsive .left .group-button-image .group-button .margin-4 {
+                    margin-right: 4%;
+                }
+
+                /*.sat-right-service-gridview .table-responsive .left .group-button-image .group-button .btn {
+                            height: 28px;
+                            float: left;
+                            padding: unset;
+                            line-height: 0.875rem;
+                            border-radius: unset;
+                            padding-left: 3px;
+                        }*/
+
+                    .sat-right-service-gridview .table-responsive .left .group-button-image .group-button .btn:focus {
+                        box-shadow: 0rem 0rem 0.063rem 0.063rem;
+                    }
+
+
+            .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA {
+                width: calc(100% - 97px);
+                height: 100%;
+                padding-top: 5px;
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 20px;
+            }
+            .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDH .img-cell.print-selected::after {
+                content: "In";
+                position: absolute;
+                top: 6px;
+                right: 8px;
+                font-size: 12px;
+                line-height: 1;
+                padding: 2px 6px;
+                color: #fff;
+                background: #198754; /* xanh lá */
+                border-radius: 12px;
+            }
+
+            /* Checkbox dưới ảnh */
+            .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDH .img-cell .sat-print-ctrl {
+                margin-top: 6px;
+                font-size: 14px;
+                user-select: none;
+            }
+
+            /* Ẩn UI điều khiển khi in PDF */
+            @media print {
+                .sat-print-ctrl,
+                .img-cell.print-selected::after {
+                    display: none;
+                }
+            }
+
+            .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA .image-item {
+                display: inline-block;
+                width: 71.8px;
+                height: 61px;
+                background-color: gray;
+                margin-left: 3.9px;
+                float: left;
+                object-fit: cover;
+                border-radius: 4px;
+                cursor: pointer;
+                border: 1px solid;
+            }
+
+                    .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA .image-item:hover {
+                        opacity: 0.6;
+                    }
+
+                    .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA .image-item:focus {
+                        opacity: 0.6;
+                    }
+                    .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA .image-item.active {
+                        outline: 3px solid #0d6efd; /* viền xanh cho ẢNH ĐANG CHỌN */
+                        box-shadow: 0 0 0 3px rgba(13,110,253,.18);
+                        border-radius: 4px;
+                    }
+.sat-right-service-gridview .table-responsive .left .group-button-image .custom-upload {
+    padding: 8px 16px;
+    background-color: #337ab7;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+    .sat-right-service-gridview .table-responsive .left .group-button-image.custom-upload:hover {
+        background-color: #45a049;
+    }
+
+.sat-right-service-gridview .table-responsive .left .group-button-image input[type="file"] {
+    display: none;
+}
+
+
+
+        .sat-right-service-gridview .table-responsive .left .image-returnresult {
+            width: 100%;
+            height: 317px;
+            float: left;
+            overflow: auto;
+            white-space: nowrap;
+            border: 1px solid #808080;
+        }
+
+            .sat-right-service-gridview .table-responsive .left .image-returnresult .image-item {
+                width: 182.5px;
+                height: 150px;
+                float: left;
+                margin: 5px 5px 0px 5px;
+            }
+
+                .sat-right-service-gridview .table-responsive .left .image-returnresult .image-item:nth-child(odd) {
+                    margin-right: unset;
+                }
+
+                .sat-right-service-gridview .table-responsive .left .image-returnresult .image-item:last-child {
+                    margin-bottom: unset;
+                }
+
+                .sat-right-service-gridview .table-responsive .left .image-returnresult .image-item:nth-last-child(2) {
+                    margin-bottom: unset;
+                }
+
+
+                .sat-right-service-gridview .table-responsive .left .image-returnresult .image-item .image {
+                    width: 100%;
+                    height: 100%;
+                    float: left;
+                    margin: unset;
+                    padding: unset;
+                }
+                    .sat-right-service-gridview .table-responsive .left .image-returnresult .image-item .image.active {
+                        filter: brightness(0.6);
+                    }
+
+    /* Right */
+    .sat-right-service-gridview .table-responsive .right {
+        width: 100%;
+        height: 100%;
+        float: left;
+    }
+
+        .sat-right-service-gridview .table-responsive .right .desscription {
+            width: 100%;
+            height: 306px;
+            float: left;
+            padding-left: 5px;
+            margin-bottom: 5px;
+        }
+
+            .sat-right-service-gridview .table-responsive .right .desscription .content {
+                width: 100%;
+                height: 310px;
+            }
+
+                .sat-right-service-gridview .table-responsive .right .desscription .content .textarea-desscription {
+                    width: 100%;
+                    height: 100%;
+                    float: left;
+                    margin: unset;
+                    padding: unset;
+                }
+
+        .sat-right-service-gridview .table-responsive .right .result-suggest {
+            width: 100%;
+            height: 61.5px;
+            float: left;
+        }
+
+            .sat-right-service-gridview .table-responsive .right .result-suggest .result {
+                width: 450px;
+                height: 100%;
+                float: left;
+                padding-left: 5px;
+            }
+
+                .sat-right-service-gridview .table-responsive .right .result-suggest .result .textarea-result {
+                    width: 100%;
+                    height: 100%;
+                    float: left;
+                }
+
+
+            .sat-right-service-gridview .table-responsive .right .result-suggest .suggest {
+                width: calc(100% - 450px);
+                height: 100%;
+                float: left;
+                padding-left: 5px;
+            }
+
+                .sat-right-service-gridview .table-responsive .right .result-suggest .suggest .textarea-suggest {
+                    width: 100%;
+                    height: 100%;
+                    float: left;
+                }
+
+
+    /*Siêu âm tim */
+    .sat-right-service-gridview .table-responsive div {
+        margin: unset;
+        padding: unset;
+    }
+
+    .sat-right-service-gridview .table-responsive input {
+        font-weight: bold;
+    }
+
+.sat-right-service-gridview .table-responsive .sieu-am-tim {
+    float: left;
+    width: calc(100% - 425px);
+    margin-top: 20px;
+    height: 60vh;
+    overflow-y: scroll;
+}
+
+        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong {
+            float: left;
+            /*width: 100%;*/
+            border-top: 1px solid #15428b;
+            margin-bottom: 20px;
+        }
+
+            .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong {
+                float: left;
+                width: 100%;
+                margin-top: 5px;
+            }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .child {
+                    float: left;
+                    width: 25%;
+                    padding-right: 7px;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .child-01 {
+                    float: left;
+                    width: 25%;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .label {
+                    float: left;
+                    width: 42%;
+                    line-height: 28px;
+                    background-color: #dce0e0;
+                    padding-left: 5px;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .input {
+                    float: left;
+                    width: 38%;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .unit {
+                    float: left;
+                    width: 20%;
+                    height: 28px;
+                    text-align: center;
+                    line-height: 23px;
+                    background-color: #dce0e0;
+                    border-top: 1px solid #808080;
+                    border-right: 1px solid #808080;
+                    border-bottom: 1px solid #808080;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .input-01 {
+                    float: left;
+                    width: 58%;
+                }
+
+        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset {
+            float: left;
+            /*width: 100%;*/
+            border-top: 1px solid #15428b;
+            margin-bottom: 20px;
+        }
+            .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.desscription {
+                float: left;
+                width: -webkit-fill-available !important;
+                border-top: 1px solid #15428b;
+                margin-bottom: 20px;
+            }
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.desscription .title {
+                    font-size: 14px;
+                    line-height: 1.75rem;
+                    font-weight: bold;
+                    background-color: #dce0e0;
+                    color: black;
+                    padding-left: 5px;
+                    margin-bottom: 5px;
+                    text-transform: uppercase;
+                }
+
+
+            .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest {
+                float: left;
+                width: -webkit-fill-available !important;
+                border-top: 1px solid #15428b;
+                margin-bottom: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest .title {
+                    font-size: 14px;
+                    line-height: 1.75rem;
+                    font-weight: bold;
+                    background-color: #dce0e0;
+                    color: black;
+                    padding-left: 5px;
+                    margin-bottom: 5px;
+                    text-transform: uppercase;
+                }
+
+            .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row {
+                float: left;
+                width: 100%;
+                margin-top: 5px;
+            }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .child {
+                    float: left;
+                    width: 50%;
+                    padding-right: 7px;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .child-01 {
+                    float: left;
+                    width: 50%;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .label {
+                    float: left;
+                    width: 30%;
+                    line-height: 28px;
+                    background-color: #dce0e0;
+                    padding-left: 5px;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .input {
+                    float: left;
+                    width: 60%;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .unit {
+                    float: left;
+                    width: 10%;
+                    height: 28px;
+                    text-align: center;
+                    line-height: 23px;
+                    background-color: #dce0e0;
+                    border-top: 1px solid #808080;
+                    border-right: 1px solid #808080;
+                    border-bottom: 1px solid #808080;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .input-01 {
+                    float: left;
+                    width: 70%;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .child-02 {
+                    float: left;
+                    width: 100%;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .label-02 {
+                    float: left;
+                    width: 14.9%;
+                    line-height: 28px;
+                    background-color: #dce0e0;
+                    padding-left: 5px;
+                }
+
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .input-02 {
+                    float: left;
+                    width: 85.1%;
+                }
+
+
+
+/******************************************************* Form thêm dịch vụ cho bệnh nhân */
+.modal-content {
+    border-radius: unset;
+}
+
+.sat-right-add-service-for-patient-title {
+    width: 100%;
+    height: 2.3rem;
+    float: left;
+    line-height: 2.3rem;
+    font-weight: bold;
+    color: black;
+    padding-left: 0.313rem;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+    .sat-right-add-service-for-patient-title .title {
+        float: left;
+    }
+
+    .sat-right-add-service-for-patient-title .btn-close {
+        float: right;
+        margin-right: 7px;
+        margin-top: 9px;
+        font-size: 12px;
+    }
+
+.sat-right-add-service-for-patient-service {
+    width: 100%;
+    padding: 0px 10px 0px 10px;
+    float: left;
+}
+
+    .sat-right-add-service-for-patient-service .title {
+        width: 15%;
+        float: left;
+    }
+
+    .sat-right-add-service-for-patient-service .content {
+        width: 85%;
+        float: left;
+    }
+
+        .sat-right-add-service-for-patient-service .content .select2-container {
+            width: 100% !important;
+        }
+
+.sat-right-add-service-for-patient-button {
+    width: 100%;
+    height: 2.3rem;
+    float: left;
+    line-height: 2.3rem;
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+    .sat-right-add-service-for-patient-button .btn {
+        width: 97px;
+        padding: unset;
+    }
+
+
+/******************************************************* Form chọn Device */
+
+.sat-right-select-device-title {
+    width: 100%;
+    height: 2.3rem;
+    float: left;
+    line-height: 2.3rem;
+    font-weight: bold;
+    color: black;
+    padding-left: 0.313rem;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+    .sat-right-select-device-title .title {
+        float: left;
+    }
+
+    .sat-right-select-device-title .btn-close {
+        float: right;
+        margin-right: 7px;
+        margin-top: 9px;
+        font-size: 12px;
+    }
+
+.sat-right-select-device {
+    width: 100%;
+    padding: 0px 10px 0px 10px;
+    float: left;
+}
+
+    .sat-right-select-device .title {
+        width: 15%;
+        float: left;
+    }
+
+    .sat-right-select-device .content {
+        width: 85%;
+        float: left;
+    }
+
+        .sat-right-select-device .content .select2-container {
+            width: 100% !important;
+        }
+
+.sat-right-select-device-button {
+    width: 100%;
+    height: 2.3rem;
+    float: left;
+    line-height: 2.3rem;
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+    .sat-right-select-device-button .btn {
+        width: 97px;
+        padding: unset;
+    }
+
+/******************************************************* Form Loading */
+.modal-content-child {
+    margin-top: calc(100vh / 2.5);
+    text-align: center;
+    width: 100%;
+    border: unset;
+    background-color: transparent;
+}
+
+    .modal-content-child img {
+        width: 60px;
+        height: 60px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+/********************************************************************************************** Export Result */
+
+.hospital-sat { /***************************************************** Hospital */
+    width: 100%;
+    height: 70px;
+    float: left;
+    font-family: 'Times New Roman';
+}
+
+    .hospital-sat .hospital-logo {
+        width: 260px;
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-sat .hospital-logo .image {
+            width: 230px;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .hospital-sat .hospital-info {
+        width: calc(100% - 260px);
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-sat .hospital-info .hospital-info-name {
+            width: 100%;
+            height: 30px;
+            float: left;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .hospital-sat .hospital-info .hospital-info-address {
+            width: 100%;
+            height: 25px;
+            font-size: 18px;
+            float: left;
+        }
+
+        .hospital-sat .hospital-info .hospital-info-phonemail {
+            width: 100%;
+            height: 20px;
+            font-size: 18px;
+            float: left;
+        }
+
+    .hospital-sat .title-barcode-sat {
+        width: 100%;
+        display: flex;
+        align-items: center; /* căn giữa theo chiều dọc */
+        justify-content: center; /* mặc định căn giữa cho .title */
+        position: relative; /* để barcode tuyệt đối trong box */
+        margin-bottom: 6mm;
+        top: 3mm;
+    }
+
+        .hospital-sat .title-barcode-sat .title {
+            font-size: 25px;
+            font-weight: bold;
+            color: red;
+        }
+
+        .hospital-sat .title-barcode-sat .barcode {
+            position: absolute;
+            right: 10%; /* dính sang phải */
+            top: 50%; /* giữa dòng */
+            transform: translateY(-50%);
+            text-align: center;
+        }
+
+            .hospital-sat .title-barcode-sat .barcode img {
+                height: 50px;
+                display: block;
+                margin: 0 auto;
+            }
+
+            .hospital-sat .title-barcode-sat .barcode div {
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+/***************************************************** Patient */
+.patient-sat {
+    width: 100%;
+    margin-top: 15mm; /* tuỳ chỉnh khoảng cách trên */
+    margin-bottom: 1mm; /* thêm chút khoảng cách dưới */
+    font-size: 19px;
+    font-family: 'Times New Roman';
+    /* sửa quan trọng */
+    height: auto; /* bỏ chiều cao cố định */
+    overflow: hidden; /* bao hết float con */
+    float: left;
+    padding: 0; /* đảm bảo không có padding dư */
+}
+    /* Clear float bên trong patient-sa */
+    .patient-sat::after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+
+    .patient-sat .title {
+        width: 100%;
+        height: 25px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        float: left;
+        text-decoration: underline;
+        color: red;
+    }
+
+    .patient-sat .label1 {
+        width: 135px;
+        height: 100%;
+        float: left;
+    }
+
+    .patient-sat .label2 {
+        width: 115px;
+        height: 100%;
+        float: left;
+    }
+
+    .patient-sat .name-sex-age {
+        width: 100%;
+        height: 30px;
+        float: left;
+    }
+
+        .patient-sat .name-sex-age .name {
+            width: 500px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-sat .name-sex-age .sex {
+            width: 220px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-sat .name-sex-age .age {
+            width: calc(100% - 500px - 220px);
+            height: 100%;
+            float: left;
+        }
+
+    .patient-sat .sid-obj {
+        width: 100%;
+        height: 30px;
+        float: left;
+    }
+
+        .patient-sat .sid-obj .sid {
+            width: 500px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-sat .sid-obj .obj {
+            width: calc(100% - 500px);
+            height: 100%;
+            float: left;
+        }
+
+    .patient-sat .address {
+        width: 100%;
+        min-height: 10px;
+        float: left;
+    }
+
+    .patient-sat .doctor-location {
+        width: 100%;
+        height: 30px;
+        float: left;
+    }
+
+        .patient-sat .doctor-location .doctor {
+            width: 500px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-sat .doctor-location .location {
+            width: calc(100% - 500px);
+            height: 100%;
+            float: left;
+        }
+
+    .patient-sat .diagnostic {
+        width: 100%;
+        min-height: 30px;
+        float: left;
+    }
+
+/*Dịch vụ Siêu Âm*/
+.service-sat {
+    clear: both;
+    margin-bottom: 3mm;
+    font-size: 19px;
+    font-family: 'Times New Roman';
+}
+
+    .service-sat .title {
+        text-decoration: underline;
+        font-weight: bold;
+        color: red;
+    }
+
+    .service-sat .service-name {
+        font-weight: 400;
+        color: black;
+    }
+
+.export-result-sat { /***************************************************** Result */
+    width: 100%;
+    float: left;
+    font-size: 19px;
+    font-family: 'Times New Roman';
+}
+
+    /* Hình ảnh */
+    .export-result-sat .image {
+        width: 100%;
+        float: left;
+    }
+
+        .export-result-sat .image .title {
+            width: 100%;
+            height: 25px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            float: left;
+            color: red;
+            text-decoration: underline;
+        }
+
+.export-result-sat .image .content {
+    width: 100%;
+    float: left;
+    margin-left: 80px;
+    margin-right: 80px
+}
+
+    .export-result-sat .image .content.two-images .image-item {
+        width: 450px;
+        height: 330px;
+        float: left;
+        margin-right: 10px;
+        object-fit: contain;
+    }
+
+    /* >2 ảnh: luôn 2 cột; tự chia 2–3 hàng theo class */
+    .export-result-sat .image .content.grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px; /* khoảng cách giữa các ảnh (ngang + dọc) */
+    }
+
+        .export-result-sat .image .content.grid-2 .image-item {
+            width: 400px;
+            height: 150px;
+            aspect-ratio: 4/3;
+            object-fit: contain;
+            float: none; /* bỏ float cũ */
+            margin: 0;
+        }
+    /* ====== Chống bị chia trang và đảm bảo vừa A4 khi in ====== */
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+
+    .export-result-sat .image,
+    .export-result-sat .image .content,
+    .export-result-sat .image .content .image-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+@media print {
+    /* Vùng tối đa dành cho KHỐI ẢNH khi >2 ảnh (chỉnh theo phần mô tả) */
+    .export-result-sat .image .content.grid-2 {
+        --img-area: 110mm;
+        max-height: var(--img-area);
+    }
+
+        /* 2 hàng (tối đa 4 ảnh) */
+        .export-result-sat .image .content.grid-2.rows-2 {
+            grid-auto-rows: calc((var(--img-area) - 15px) / 2);
+            align-content: start;
+        }
+        /* 3 hàng (tối đa 6 ảnh) */
+        .export-result-sat .image .content.grid-2.rows-3 {
+            grid-auto-rows: calc((var(--img-area) - 2*15px) / 3);
+            align-content: start;
+        }
+
+        .export-result-sat .image .content.grid-2 .image-item {
+            height: 100%; /* đầy ô lưới, không phình to */
+        }
+}
+    /* Mô tả */
+    .export-result-sat .sieu-am-tim {
+        float: left;
+        width: 100%;
+        margin-top: 20px;
+        font-size: 22px;
+        font-family: 'Times New Roman';
+    }
+
+        .export-result-sat .sieu-am-tim .fieldset-thetrong {
+            float: left;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+            .export-result-sat .sieu-am-tim .fieldset-thetrong .row-thetrong {
+                float: left;
+                width: 100%;
+                height: 28px;
+            }
+
+                .export-result-sat .sieu-am-tim .fieldset-thetrong .row-thetrong .child {
+                    float: left;
+                    width: 25%;
+                    height: 100%;
+                }
+
+                .export-result-sat .sieu-am-tim .fieldset-thetrong .row-thetrong .label {
+                    float: left;
+                    width: 50%;
+                    height: 100%;
+                    line-height: 28px;
+                }
+
+                .export-result-sat .sieu-am-tim .fieldset-thetrong .row-thetrong .input {
+                    float: left;
+                    width: 50%;
+                    height: 100%;
+                    line-height: 28px;
+                }
+
+                    .export-result-sat .sieu-am-tim .fieldset-thetrong .row-thetrong .input .result {
+                        float: left;
+                        height: 100%;
+                        line-height: 28px;
+                        color: #0d6efd;
+                    }
+
+
+        .export-result-sat .sieu-am-tim .fieldset-all {
+            float: left;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+            .export-result-sat .sieu-am-tim .fieldset-all .row-title {
+                float: left;
+                width: 100%;
+                height: 28px;
+                margin-top: 5px;
+                font-weight: bold;
+            }
+
+            .export-result-sat .sieu-am-tim .fieldset-all .row-width-100 {
+                float: left;
+                width: 100%;
+                margin-left: 20px;
+            }
+
+                .export-result-sat .sieu-am-tim .fieldset-all .row-width-100 .child {
+                    float: left;
+                    width: 100%;
+                    height: 28px;
+                }
+
+                    .export-result-sat .sieu-am-tim .fieldset-all .row-width-100 .child .label {
+                        float: left;
+                        width: 22%;
+                        height: 100%;
+                        line-height: 28px;
+                    }
+
+                    .export-result-sat .sieu-am-tim .fieldset-all .row-width-100 .child .input {
+                        float: left;
+                        width: 78%;
+                        height: 100%;
+                        line-height: 28px;
+                    }
+
+                        .export-result-sat .sieu-am-tim .fieldset-all .row-width-100 .child .input .result {
+                            float: left;
+                            height: 100%;
+                            line-height: 28px;
+                            color: #0d6efd;
+                        }
+
+
+            .export-result-sat .sieu-am-tim .fieldset-all .row-left {
+                float: left;
+                width: calc(50% - 20px);
+                margin-left: 20px;
+            }
+
+                .export-result-sat .sieu-am-tim .fieldset-all .row-left .child {
+                    float: left;
+                    width: 100%;
+                    height: 28px;
+                }
+
+                    .export-result-sat .sieu-am-tim .fieldset-all .row-left .child .label {
+                        float: left;
+                        width: 46%;
+                        height: 100%;
+                        line-height: 28px;
+                    }
+
+                    .export-result-sat .sieu-am-tim .fieldset-all .row-left .child .input {
+                        float: left;
+                        width: 54%;
+                        height: 100%;
+                        line-height: 28px;
+                    }
+
+                        .export-result-sat .sieu-am-tim .fieldset-all .row-left .child .input .result {
+                            float: left;
+                            height: 100%;
+                            line-height: 28px;
+                            color: #0d6efd;
+                        }
+
+    /*Description - Result - Suggest*/
+    .export-result-sat .des-res-sug {
+        width: 100%;
+        float: left;
+        font-family: 'Times New Roman';
+        margin-top: 10px;
+    }
+
+        .export-result-sat .des-res-sug .title {
+            width: 100%;
+            height: 25px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            float: left;
+            color: red;
+            text-decoration: underline;
+        }
+
+        .export-result-sat .des-res-sug .des {
+            width: 100%;
+            float: left;
+            margin-bottom: 10px;
+        }
+
+            .export-result-sat .des-res-sug .des .des-title {
+                width: 100%;
+                float: left;
+                font-weight: bold;
+            }
+
+            .export-result-sat .des-res-sug .des .des-content {
+                width: calc(100% - 20px);
+                float: left;
+                margin-left: 20px;
+            }
+
+        .export-result-sat .des-res-sug .res {
+            width: 100%;
+            float: left;
+            margin-bottom: 10px;
+        }
+
+            .export-result-sat .des-res-sug .res .res-title {
+                width: 100%;
+                float: left;
+                font-weight: bold;
+                color: red;
+                text-decoration: underline;
+            }
+
+            .export-result-sat .des-res-sug .res .res-content {
+                width: calc(100% - 20px);
+                float: left;
+                margin-left: 20px;
+                white-space: pre-line;
+                color: blue;
+            }
+
+
+        .export-result-sat .des-res-sug .sug {
+            width: 100%;
+            float: left;
+            margin-bottom: 10px;
+        }
+
+            .export-result-sat .des-res-sug .sug .sug-title {
+                width: 100%;
+                float: left;
+                font-weight: bold;
+                color: red;
+                text-decoration: underline;
+            }
+
+            .export-result-sat .des-res-sug .sug .sug-content {
+                width: calc(100% - 20px);
+                float: left;
+                margin-left: 20px;
+                white-space: pre-line;
+            }
+
+
+
+/* Toàn bộ khối chữ ký: không cho ngắt trang bên trong, tách khỏi float trước đó */
+.signature-page-sat {
+    clear: both;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding-top: 6mm; /* tạo khoảng cách an toàn với phần trên */
+}
+
+    /* 2 cột: bên trái chỉ là khoảng trống, bên phải chứa toàn bộ thông tin */
+    .signature-page-sat .signature {
+        display: flex;
+        justify-content: flex-end; /* dồn nội dung sang phải */
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+        /* Cột trái làm “đệm” */
+        .signature-page-sat .signature .signature-left {
+            flex: 1 1 auto; /* chiếm phần còn lại để đẩy cột phải sang mép phải */
+        }
+
+        /* Cột phải chứa nội dung chữ ký */
+        .signature-page-sat .signature .signature-right {
+            width: 420px; /* tùy trang A4 dọc, bạn có thể 380–460px */
+            text-align: center;
+            font-size: 19px;
+        }
+
+            /* Dòng thời gian */
+            .signature-page-sat .signature .signature-right .signature-right-time {
+                line-height: 24px;
+                margin-bottom: 5px;
+            }
+
+            /* Tiêu đề */
+            .signature-page-sat .signature .signature-right .signature-right-title {
+                font-weight: 700;
+                line-height: 10px;
+                margin-bottom: 5px;
+            }
+
+            /* Khung ảnh chữ ký – bỏ height cố định để tránh cắt ảnh */
+            .signature-page-sat .signature .signature-right .signature-right-cks {
+                /* KHÔNG dùng height: 55px; */
+                min-height: 50px; /* giữ không gian tối thiểu */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                /* Ảnh chữ ký – tự co giãn, không méo, không tràn khung */
+                .signature-page-sat .signature .signature-right .signature-right-cks img {
+                    max-width: 80%;
+                    max-height: 100px; /* tăng/giảm nếu ảnh nhỏ/quá to */
+                    height: auto;
+                    width: auto;
+                    object-fit: contain;
+                    image-rendering: -webkit-optimize-contrast;
+                }
+
+            /* Tên bác sĩ – to, rõ, không bị đè */
+            .signature-page-sat .signature .signature-right .signature-right-user {
+                font-weight: 700;
+                font-size: 21px;
+                line-height: 24px;
+                margin-top: .1rem;
+            }
+
+/* ====== RESPONSIVE CHO MOBILE (max-width: 768px) ====== */
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+
+    /* Container chính */
+    .sat-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 2.5rem); /* trừ chiều cao menu */
+        margin-top: 0;
+        position: relative;
+    }
+
+    /* Ẩn danh sách bệnh nhân mặc định trên mobile */
+    /* Nút toggle danh sách bệnh nhân - dạng floating button */
+    .mobile-toggle-patient-list {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3rem;
+        height: 3rem;
+        background-color: #337ab7;
+        color: white;
+        border: none;
+        border-radius: 0 0.5rem 0.5rem 0;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1001;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+
+        .mobile-toggle-patient-list:hover {
+            background-color: #1e65a3;
+            width: 3.5rem;
+        }
+
+        .mobile-toggle-patient-list i {
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toggle-patient-list.active i {
+            transform: rotate(90deg);
+        }
+
+    /* Overlay khi mở danh sách */
+    .mobile-patient-list-overlay {
+        display: none;
+        position: fixed;
+        top: 2.5rem;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        transition: opacity 0.3s ease;
+    }
+
+        .mobile-patient-list-overlay.show {
+            display: block;
+        }
+
+    /* Danh sách bệnh nhân - slide từ trái */
+    .sat-left {
+        width: 85%;
+        max-width: 400px;
+        height: calc(100vh - 2.5rem);
+        padding: 0;
+        position: fixed;
+        top: 2.5rem;
+        left: -100%;
+        z-index: 1000;
+        background-color: white;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        transition: left 0.3s ease;
+        overflow-y: auto;
+    }
+
+        /* Khi toggle mở danh sách */
+        .sat-left.show {
+            left: 0;
+        }
+
+    /* Header của danh sách bệnh nhân */
+    .sat-left-header {
+        width: 100%;
+        height: 2.5rem;
+        background-color: #337ab7;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .sat-left-header-title {
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .sat-left-header-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Search box trong danh sách */
+    .sat-left-search {
+        width: 100%;
+        height: auto;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+    }
+
+    /* Danh sách bệnh nhân */
+    .sat-left-list {
+        width: 100%;
+        height: auto;
+        max-height: calc(100vh - 2.5rem - 2.5rem - 10rem);
+        overflow-y: auto;
+        padding: 0 0.25rem;
+    }
+
+        .sat-left-list .total-patient {
+            margin: 0.5rem 0.3rem;
+            font-size: 15px;
+            font-weight: 700;
+            border-bottom: 1px dashed lightgray;
+            padding-bottom: 0.5rem;
+        }
+
+    /* Phần bên phải - thông tin bệnh nhân */
+    .sat-right {
+        width: 100%;
+        height: auto;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Thông tin bệnh nhân - layout cột */
+    .sat-right-info {
+        width: 100%;
+        height: auto;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-info-title {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Các div thông tin - chuyển thành cột */
+    .sat-right-info-div-1,
+    .sat-right-info-div-2,
+    .sat-right-info-div-3 {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.5rem;
+        padding: 0;
+    }
+
+    /* Combo input - mỗi input 1 dòng full width */
+    .sat-right-info-div-combo-2 {
+        width: 100%;
+        float: none;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-info-div-combo-2-label {
+        width: 100%;
+        max-width: 100%;
+        float: none;
+        line-height: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+
+    .sat-right-info-div-combo-2-input {
+        width: 100%;
+        max-width: 100%;
+        float: none;
+        padding: 0;
+    }
+
+    .sat-right-info-div-combo-2-input-input1,
+    .sat-right-info-div-combo-2-input-input2 {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Combo 4 - layout cột */
+    .sat-right-info-div-combo-4 {
+        width: 100%;
+        float: none;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-info-div-combo-4-label-age-object,
+    .sat-right-info-div-combo-4-label-sex-benhan {
+        width: 100%;
+        float: none;
+        line-height: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+
+    .sat-right-info-div-combo-4-input {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Phần dịch vụ */
+    .sat-right-service {
+        width: 100%;
+        height: auto;
+        padding: 0.5rem;
+        overflow-y: auto;
+    }
+
+    .sat-right-service-group {
+        width: 100%;
+        height: auto;
+        flex-direction: column;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-service-group-button {
+        width: 100%;
+        height: auto;
+        float: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+        .sat-right-service-group-button .btn {
+            width: 100%;
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            height: auto;
+        }
+
+    .sat-right-service-group-button-title-sample {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-service-group-category {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-service-group-category-label {
+        width: 100%;
+        float: none;
+        padding-left: 0.5rem;
+    }
+
+    .sat-right-service-group-category-select {
+        width: 100%;
+        float: none;
+        padding: 0 0.5rem;
+    }
+
+    .sat-right-service-group-service {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .sat-right-service-group-service-label {
+        width: 100%;
+        float: none;
+        padding-left: 0.5rem;
+    }
+
+    .sat-right-service-group-service-select {
+        width: 100%;
+        float: none;
+        padding: 0 0.5rem;
+    }
+
+    /* GridView */
+    .sat-right-service-gridview {
+        width: 100%;
+        height: auto;
+        max-height: none;
+        overflow-y: auto;
+    }
+
+        .sat-right-service-gridview .table-responsive {
+            height: auto;
+            max-height: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+            /* Process - layout cột trên mobile */
+            .sat-right-service-gridview .table-responsive .left {
+                width: 100%;
+                float: none;
+                padding: 0.5rem;
+                order: 1; /* Hiển thị đầu tiên */
+            }
+
+                /* Danh sách dịch vụ */
+                .sat-right-service-gridview .table-responsive .left .list-service {
+                    width: 100%;
+                    margin-bottom: 1rem;
+                }
+
+                /* Camera */
+                .sat-right-service-gridview .table-responsive .left .camera {
+                    width: 100%;
+                    height: auto;
+                    aspect-ratio: 16/9;
+                    margin-bottom: 1rem;
+                }
+
+                    .sat-right-service-gridview .table-responsive .left .camera .video {
+                        width: 100%;
+                        height: 100%;
+                    }
+
+                /* Group button */
+                .sat-right-service-gridview .table-responsive .left .group-button-image {
+                    width: 100%;
+                    gap: 1rem;
+                }
+
+                    .sat-right-service-gridview .table-responsive .left .group-button-image .group-button {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr 1fr;
+                        gap: 0.5rem;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .left .group-button-image .group-button .btn {
+                            width: 100%;
+                            font-size: 0.7rem;
+                            padding: 0.3rem;
+                        }
+
+                    /* Images grid - 2 cột trên mobile */
+                    .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA {
+                        grid-template-columns: 1fr 1fr;
+                        gap: 0.5rem;
+                        width: 100%;
+                        padding-top: 0.5rem;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .left .group-button-image .imageCDHA .image-item {
+                            width: 100%;
+                            height: auto;
+                            aspect-ratio: 4/3;
+                            margin: 0;
+                        }
+
+            /* ========== PHẦN CHI TIẾT SIÊU ÂM TIM - MOBILE ========== */
+            .sat-right-service-gridview .table-responsive .sieu-am-tim {
+                width: 100%;
+                float: none;
+                padding: 0.5rem;
+                margin-top: 0;
+                height: auto;
+                max-height: none;
+                overflow-y: visible;
+                order: 2; /* Hiển thị sau phần left */
+            }
+
+                /* Fieldset - THỂ TRỌNG */
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong {
+                    width: 100%;
+                    margin-bottom: 1rem;
+                }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.5rem;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .child,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .child-01 {
+                            width: 100%;
+                            float: none;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .label {
+                            width: 40%;
+                            min-width: 120px;
+                            float: none;
+                            line-height: 1.75rem;
+                            font-size: 0.875rem;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .input,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .input-01 {
+                            width: 45%;
+                            flex: 1;
+                            float: none;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset-thetrong .row-thetrong .unit {
+                            width: 15%;
+                            min-width: 50px;
+                            float: none;
+                            font-size: 0.875rem;
+                        }
+
+                /* Fieldset - Các phần khác (TM, DOPPLER, 2D...) */
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset {
+                    width: 100%;
+                    margin-bottom: 1rem;
+                }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.5rem;
+                        margin-top: 0.5rem;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .child,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .child-01,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .child-02 {
+                            width: 100%;
+                            float: none;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            padding-right: 0;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .label,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .label-02 {
+                            width: 50%;
+                            min-width: 140px;
+                            float: none;
+                            line-height: 1.75rem;
+                            font-size: 0.875rem;
+                            background-color: #dce0e0;
+                            padding-left: 0.5rem;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .input,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .input-01,
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .input-02 {
+                            flex: 1;
+                            float: none;
+                        }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset .row .unit {
+                            width: 15%;
+                            min-width: 60px;
+                            float: none;
+                            font-size: 0.875rem;
+                        }
+
+                /* Legend - Tiêu đề của các fieldset */
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .reset-fieldset-legend.legend {
+                    font-size: 0.875rem;
+                    padding: 0.5rem;
+                }
+
+                /* Fieldset Description */
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.desscription {
+                    width: 100%;
+                    margin-bottom: 1rem;
+                }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.desscription .title {
+                        font-size: 0.875rem;
+                        padding: 0.5rem;
+                        margin-bottom: 0.5rem;
+                    }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.desscription .content {
+                        width: 100%;
+                    }
+
+                        .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.desscription .content .textarea-desscription {
+                            width: 100%;
+                            min-height: 150px;
+                        }
+
+                /* Fieldset Result-Suggest */
+                .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest {
+                    width: 100%;
+                    margin-bottom: 1rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest .result,
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest .suggest {
+                        width: 100%;
+                        float: none;
+                    }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest .title {
+                        font-size: 0.875rem;
+                        padding: 0.5rem;
+                        margin-bottom: 0.5rem;
+                    }
+
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest .textarea-result,
+                    .sat-right-service-gridview .table-responsive .sieu-am-tim .fieldset.result-suggest .textarea-suggest {
+                        width: 100%;
+                        min-height: 100px;
+                    }
+
+    /* Form control trên mobile */
+    .form-control,
+    .form-select {
+        font-size: 16px; /* tránh zoom trên iOS */
+    }
+
+    /* Select2 trên mobile */
+    .select2-container {
+        font-size: 16px;
+    }
+
+    /* List group items */
+    .list-group-item {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+
+    /* Modal trên mobile */
+    .modal-content {
+        margin: 0.5rem;
+    }
+
+    .sat-right-add-service-for-patient-service .title {
+        width: 100%;
+        float: none;
+        margin-bottom: 0.25rem;
+    }
+
+    .sat-right-add-service-for-patient-service .content {
+        width: 100%;
+        float: none;
+    }
+}
+
+/* Ẩn toggle button trên desktop */
+@media (min-width: 769px) {
+    .mobile-toggle-patient-list,
+    .mobile-patient-list-overlay,
+    .sat-left-header {
+        display: none;
+    }
+}

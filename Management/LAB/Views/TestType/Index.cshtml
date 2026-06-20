@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý loại mẫu";
+    Layout = "_LayoutSettupDetail";
+    var testType = ViewData["TestType"] as TestType;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH LOẠI MẪU
+            </div>
+            <div class="search">
+                <input type="text" id="testtype-search" class="form-control height-28" onkeyup="TestType_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="testtype-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_TestType_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN LOẠI MẪU
+        </div>
+        <div id="testtype-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_TestType_Info")
+        </div>
+        <div id="testtype-settup-right-button" class="settup-right-button">
+            <button id="testtype-new" class="btn btn-success btn-blue" onclick="TestType_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="testtype-save" class="btn btn-success btn-blue" onclick="TestType_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="testtype-delete" class="btn btn-success btn-blue" onclick="TestType_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="testtype-cancel" class="btn btn-success btn-blue" onclick="TestType_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

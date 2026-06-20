@@ -1,0 +1,74 @@
+﻿@{
+    Layout = "_LayoutExport";
+    var _lstResultXN = ViewData["ListResultXN"] as List<ResultXN>;
+    var _groupResultByCategory = _lstResultXN.GroupBy(p => p.Service.CategoryId);
+}
+@model Hospital
+<div class="result-xn">
+    <table class="table-result">
+        <thead class="thead">
+            <tr class="tr-title">
+                <th class="th-name" scope="col">TÊN XÉT NGHIỆM</th>
+                <th class="th-result" scope="col">KẾT QUẢ</th>
+                <th class="th-normalresult" scope="col">CHỈ SỐ BÌNH THƯỜNG</th>
+                <th class="th-unit" scope="col">ĐƠN VỊ</th>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            @if (_groupResultByCategory != null)
+            {
+                foreach (var _group in _groupResultByCategory)
+                {
+                    var _results = _group.ToList();
+                    if (_results != null)
+                    {
+                        <tr class="tr-category">
+                            <td class="td-category" colspan="4">@_results[0].Service?.Category?.Name.ToUpper()</td>
+                        </tr>
+                        foreach (var _result in _results)
+                        {
+                            <tr class="tr-content">
+                                @if (_result.TestCode.IsTestChild)
+                                {
+                                    if (_result?.Status == 1 || _result?.Status == 2)
+                                    {
+                                        <td class="td-name bold">&nbsp;&nbsp;&nbsp; @_result?.TestCode?.Name</td>
+                                    }
+                                    else
+                                    {
+                                        <td class="td-name">&nbsp;&nbsp;&nbsp; @_result?.TestCode?.Name</td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td class="td-name">@_result?.TestCode?.Name</td>
+                                }
+                                @if (_result?.Status == 1 || _result?.Status == 2)
+                                {
+                                    <td class="td-result bold">@_result?.Result</td>
+                                }
+                                else
+                                {
+                                    <td class="td-result">@_result?.Result</td>
+                                }
+                                @if (_result?.Patient?.Sex == "Nam" && !String.IsNullOrEmpty(_result?.TestCode?.NormalRangeM))
+                                {
+                                    <td class="td-normalresult">@_result?.TestCode?.NormalRangeM</td>
+                                }
+                                else if (_result?.Patient?.Sex == "Nữ" && !String.IsNullOrEmpty(_result?.TestCode?.NormalRangeF))
+                                {
+                                    <td class="td-normalresult">@_result?.TestCode?.NormalRangeF</td>
+                                }
+                                else
+                                {
+                                    <td class="td-normalresult">@_result?.TestCode?.NormalResult</td>
+                                }
+                                <td class="td-unit"><unit text="@_result?.TestCode.Unit"></unit></td>
+                            </tr>
+                        }
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

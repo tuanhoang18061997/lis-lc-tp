@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Đẩy kết quả HIS";
+    Layout = "_LayoutData";
+}
+
+<div class="data-container">
+    <div class="data-left-pushresulthis">
+        <div class="data-left-title-search">
+            <div class="title">
+                DANH SÁCH BỆNH NHÂN
+            </div>
+        </div>
+        <div id="pushresulthis-data-left-list" class="data-left-list">
+            @await Html.PartialAsync("_List")
+        </div>
+    </div>
+    <div class="data-right-pushresulthis">
+        <div class="data-right-title">
+            TÌM KIẾM
+        </div>
+        <div id="pushresulthis-data-right-info" class="data-right-info">
+            @await Html.PartialAsync("_Info")
+        </div>
+        <div id="pushresulthis-data-right-button" class="data-right-button">
+            <button id="pushresulthis-search" class="btn btn-success btn-blue" onclick="PushResultHIS_Search()">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+            <button id="pushresulthis-status" class="btn btn-success btn-blue" onclick="PushResultHIS_UpdatePush()">
+                <i class="bi bi-pencil"></i> Status
+            </button>
+            <button id="pushresulthis-push" class="btn btn-success btn-blue" onclick="PushResultHIS_Push()">
+                <i class="bi bi-arrow-up-square"></i> Đẩy KQ
+            </button>
+        </div>
+    </div>
+</div>

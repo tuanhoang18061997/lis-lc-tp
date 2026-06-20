@@ -1,0 +1,252 @@
+﻿@{
+    var lstresultCDHAs = ViewData["lstResultCDHAs"] as List<ResultCDHA>
+        ?? ViewData["lstresultCDHAs"] as List<ResultCDHA>;
+
+    bool IsPdfValidated(ResultCDHA item)
+    {
+        if (item == null || string.IsNullOrWhiteSpace(item.KeyResultForHis)) return false;
+        var fileName = $"{item.KeyResultForHis}.pdf";
+        var pdfPath = System.IO.Path.Combine("wwwroot", "pdf", "tdcn", fileName);
+        return System.IO.File.Exists(pdfPath);
+    }
+}
+
+<div class="table-responsive tdcn-returnresult-pdf-layout">
+    <div class="left tdcn-returnresult-left-panel">
+        <div class="list-service tdcn-returnresult-service-panel">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr class="tr-title">
+                            <th class="th-check" style="width: 30px; text-align: center;">
+                                <input class="form-check-input" type="checkbox" id="tdcn_returnresult_chk_all" title="Chọn tất cả">
+                            </th>
+                            <th class="th-service" style="text-align: center;">Dịch vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tbody-service">
+                        @{
+                            if (lstresultCDHAs != null && lstresultCDHAs.Count > 0)
+                            {
+                                foreach (var item in lstresultCDHAs)
+                                {
+                                    var isPdfValidated = IsPdfValidated(item);
+                                    var isDigitallySigned = item.SignStoreId != 0 && item.SignStatus == 1;
+                                    <tr class="row-service tdcn-returnresult-service-row"
+                                        data-result-id="@item.Id"
+                                        data-key-result="@item.KeyResultForHis"
+                                        onclick="ReturnResult_CheckedBoxOnRow(@item.Id, event)">
+                                        <td class="td-check">
+                                            <input class="form-check-input tdcn-returnresult-chk-service"
+                                                   type="checkbox"
+                                                   value="@item.Id"
+                                                   data-key-result="@item.KeyResultForHis"
+                                                   data-has-pdf="@(isPdfValidated ? "true" : "false")"
+                                                   data-has-digital-sign="@(isDigitallySigned ? "true" : "false")"
+                                                   id="flexCheckChecked_@item.Id">
+                                        </td>
+                                        <td class="td-name">
+                                            <div class="service-info">
+                                                <span class="serviceName">@item.Service.Name</span>
+                                                <span class="serviceId">Mã dv: @item.Id</span>
+                                            </div>
+
+                                            <div class="tdcn-returnresult-badges">
+                                                @if (isPdfValidated)
+                                                {
+                                                    <span class="pdf-validated-icon" title="Đã Valid PDF">
+                                                        <i class="bi bi-file-earmark-pdf-fill text-success"></i>
+                                                        <small class="text-success">Đã Valid (PDF)</small>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="pdf-missing-icon" title="Chưa tìm thấy PDF kết quả">
+                                                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                                                        <small class="text-warning">Chưa có PDF</small>
+                                                    </span>
+                                                }
+
+                                                @if (isDigitallySigned)
+                                                {
+                                                    <span class="digital-sign-icon" title="Đã ký chữ ký điện tử">
+                                                        <i class="bi bi-shield-check text-success"></i>
+                                                        <small class="text-success">Đã ký số</small>
+                                                    </span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted p-3">
+                                        Không có dịch vụ đã trả kết quả.
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="right tdcn-returnresult-pdf-panel">
+        <input type="hidden" id="tdcn_returnresult_selected_result_id" value="" />
+        <input type="hidden" id="tdcn_returnresult_signStoreId" value="" />
+
+        <div class="tdcn-pdf-preview-header d-flex align-items-center justify-content-between">
+            <div>
+                <div class="tdcn-pdf-title">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    PDF kết quả đã Valid
+                </div>
+                <div id="tdcn_returnresult_pdf_meta" class="tdcn-pdf-meta text-muted">
+                    Chọn một dịch vụ bên trái để xem lại file PDF kết quả.
+                </div>
+            </div>
+            <div class="tdcn-pdf-actions">
+                <button type="button"
+                        id="tdcn_returnresult_pdf_reload"
+                        class="btn btn-sm btn-outline-secondary"
+                        onclick="ReturnResult_ReloadSelectedPdf()"
+                        disabled>
+                    <i class="bi bi-arrow-clockwise"></i> Reload
+                </button>
+                <a id="tdcn_returnresult_pdf_open"
+                   class="btn btn-sm btn-primary disabled"
+                   href="javascript:void(0)"
+                   target="_blank"
+                   rel="noopener">
+                    <i class="bi bi-box-arrow-up-right"></i> Mở tab mới
+                </a>
+            </div>
+        </div>
+
+        <div id="tdcn_returnresult_pdf_preview_wrap" class="tdcn-pdf-preview-wrap">
+            <div id="tdcn_returnresult_pdf_empty" class="tdcn-pdf-empty-state">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <div class="tdcn-pdf-empty-title">Chưa chọn dịch vụ</div>
+                <div class="tdcn-pdf-empty-desc">File PDF đã Valid sẽ hiển thị ở đây. Vâng, PDF cũng cần được mời lên sân khấu trước khi biểu diễn.</div>
+            </div>
+            <embed id="tdcn_returnresult_pdf_preview"
+                   src=""
+                   type="application/pdf"
+                   style="display:none; width:100%; height:100%; border:0;" />
+        </div>
+    </div>
+</div>
+
+<style>
+    .tdcn-returnresult-pdf-layout {
+        display: grid;
+        grid-template-columns: 380px minmax(0, 1fr);
+        gap: 8px;
+        width: 100%;
+        min-height: 520px;
+    }
+
+    .tdcn-returnresult-left-panel,
+    .tdcn-returnresult-pdf-panel {
+        min-width: 0;
+    }
+
+    .tdcn-returnresult-service-panel {
+        border: 1px solid #cfd8dc;
+        background: #fff;
+        max-height: 520px;
+        overflow: auto;
+    }
+
+    .tdcn-returnresult-service-row {
+        cursor: pointer;
+    }
+
+        .tdcn-returnresult-service-row.active {
+            background: #eaf4ff;
+        }
+
+    .tdcn-returnresult-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+        .tdcn-returnresult-badges span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+    .tdcn-returnresult-pdf-panel {
+        border: 1px solid #cfd8dc;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 620px;
+    }
+
+    .tdcn-pdf-preview-header {
+        padding: 8px 10px;
+        border-bottom: 1px solid #d8dee3;
+        background: #f5f7f8;
+    }
+
+    .tdcn-pdf-title {
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #263238;
+    }
+
+    .tdcn-pdf-meta {
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .tdcn-pdf-actions {
+        display: flex;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .tdcn-pdf-preview-wrap {
+        position: relative;
+        flex: 1;
+        min-height: 560px;
+        background: #eceff1;
+    }
+
+    .tdcn-pdf-empty-state {
+        height: 100%;
+        min-height: 560px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: #607d8b;
+        text-align: center;
+        padding: 24px;
+    }
+
+        .tdcn-pdf-empty-state i {
+            font-size: 54px;
+            opacity: .65;
+            margin-bottom: 10px;
+        }
+
+    .tdcn-pdf-empty-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #455a64;
+    }
+
+    .tdcn-pdf-empty-desc {
+        max-width: 420px;
+        margin-top: 6px;
+        font-size: 13px;
+    }
+</style>

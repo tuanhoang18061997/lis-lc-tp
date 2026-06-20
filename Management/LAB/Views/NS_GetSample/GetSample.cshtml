@@ -1,0 +1,30 @@
+﻿@using Management.BL
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Đang chờ";
+    Layout = "_LayoutNS"; 
+}
+
+<div class="ns-container">
+    <div class="ns-left">
+        <div class="ns-left-search">
+            @await Html.PartialAsync("_NS_GetSample_Search")
+        </div>
+        <div id="listPatient" class="ns-left-list">
+            @await Html.PartialAsync("_NS_GetSample_ListPatient")
+        </div>
+    </div>
+    <div class="ns-right">
+        <div id="patientInfo" class="ns-right-info">
+            @await Html.PartialAsync("_NS_GetSample_PatientInfo")
+        </div>
+        <div id="patientService" class="ns-right-service">
+            <div id="ns-right-service-group" class="ns-right-service-group">
+                @await Html.PartialAsync("_NS_GetSample_GroupButton")
+            </div>
+            <div id="ns-right-service-gridview" class="ns-right-service-gridview">
+                @await Html.PartialAsync("_NS_GetSample_ListService")
+            </div>
+        </div>
+    </div>
+</div>

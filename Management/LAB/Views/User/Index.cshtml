@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "_LayoutSettupDetail";
+    var lstFunction = ViewData["lstFunction"] as List<Function>;
+    var user = ViewData["User"] as User;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH NGƯỜI DÙNG
+            </div>
+            <div class="search">
+                <input type="text" id="user-search" class="form-control height-28" onkeyup="User_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="user-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_User_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN NGƯỜI DÙNG
+        </div>
+        <div id="user-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_User_Info")
+        </div>
+        <div id="user-settup-right-button" class="settup-right-button">
+            <button id="user-new" class="btn btn-success btn-blue user" onclick="User_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="user-save" class="btn btn-success btn-blue user" onclick="User_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="user-delete" class="btn btn-success btn-blue user" onclick="User_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="user-cancel" class="btn btn-success btn-blue user" onclick="User_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+            <button id="user-function" class="btn btn-success btn-blue user" onclick="User_UserFunction()" data-bs-toggle="modal" data-bs-target="#addFunction">
+                <i class="bi bi-gear"></i> Quyền
+            </button>
+        </div>
+    </div>
+
+    <div id="user-settup-function">
+        @await Html.PartialAsync("_User_Function")
+    </div>
+</div>

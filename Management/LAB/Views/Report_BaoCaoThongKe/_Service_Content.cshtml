@@ -1,0 +1,69 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport_Report";
+    var lstReportResult = ViewData["lstReportResult"] as List<TotalReportService>;
+    double sumBHYT = 0, sumTP = 0, sumBHYTNT = 0, sumTPNT = 0, sumBHYTNGT = 0, sumTPNGT = 0;
+    if (lstReportResult != null)
+    {
+        foreach (var item in lstReportResult)
+        {
+            sumBHYT += item.TotalBHYT;
+            sumBHYTNT += item.TotalBHYT_NoiTru;
+            sumBHYTNGT += item.TotalBHYT_NgoaiTru;
+            sumTP += item.TotalTP;
+            sumTPNT += item.TotalTP_NoiTru;
+            sumTPNGT += item.TotalTP_NgoaiTru;
+        }
+    }
+}
+@model Hospital
+<div class="result-service">
+    <table class="table-result">
+        <thead class="thead">
+            <tr class="tr-title">
+                <th class="th-stt" scope="col" rowspan="2"></th>
+                <th class="th-service" scope="col" rowspan="2">DANH MỤC XÉT NGHIỆM</th>
+                <th class="th-total" scope="col" colspan="2">TỔNG</th>
+                <th class="th-totalnt" scope="col" colspan="2">TỔNG NỘI TRÚ</th>
+                <th class="th-totalngt" scope="col" colspan="2">TỔNG NGOẠI TRÚ</th>
+            </tr>
+            <tr class="tr-title">
+                <td class="th-bhyt" scope="col">BHYT</td>
+                <td class="th-tp" scope="col">THU PHÍ</td>
+                <td class="th-bhytnt" scope="col">BHYT</td>
+                <td class="th-tpnt" scope="col">THU PHÍ</td>
+                <td class="th-bhytngt" scope="col">BHYT</td>
+                <td class="th-tpngt" scope="col">THU PHÍ</td>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            @{
+                if (lstReportResult != null && lstReportResult.Count > 0)
+                {
+                    foreach (var item in lstReportResult)
+                    {
+                        <tr class="tr-content">
+                            <td class="td-stt">@item.STT</td>
+                            <td class="td-service">@item.ServiceName</td>
+                            <td class="td-bhyt">@item.TotalBHYT</td>
+                            <td class="td-tp">@item.TotalTP</td>
+                            <td class="td-bhytnt">@item.TotalBHYT_NoiTru</td>
+                            <td class="td-tpnt">@item.TotalTP_NoiTru</td>
+                            <td class="td-bhytngt">@item.TotalBHYT_NgoaiTru</td>
+                            <td class="td-tpngt">@item.TotalTP_NgoaiTru</td>
+                        </tr>
+                    }
+                    <tr class="tr-content">
+                        <td class="td-stt"></td>
+                        <td class="td-service" style="font-weight: bold; text-align: center">Tổng</td>
+                        <td class="td-bhyt" style="font-weight: bold">@sumBHYT</td>
+                        <td class="td-tp" style="font-weight: bold">@sumTP</td>
+                        <td class="td-bhytnt" style="font-weight: bold">@sumBHYTNT</td>
+                        <td class="td-tpnt" style="font-weight: bold">@sumTPNT</td>
+                        <td class="td-bhytngt" style="font-weight: bold">@sumBHYTNGT</td>
+                        <td class="td-tpngt" style="font-weight: bold">@sumTPNGT</td>
+                    </tr>
+                }
+            }
+    </table>
+</div>

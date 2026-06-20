@@ -1,0 +1,681 @@
+﻿@{
+    var lstresultCDHAs = ViewData["lstresultCDHAs"] as List<ResultCDHA>;
+}
+
+<div class="table-responsive">
+    <div class="left">
+        <div class="list-service">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered" id="sat_list_service">
+                    <thead>
+                        <tr class="tr-title">
+                            <th class="th-check" style="width: 30px; text-align: center;">
+                                <input class="form-check-input" type="checkbox" id="sat_chk_all" />
+                            </th>
+                            <th class="th-service" style="text-align: center;">Dịch vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tbody-service">
+                        @{
+                            if (lstresultCDHAs != null && lstresultCDHAs.Count > 0)
+                            {
+                                var index = 0;
+                                foreach (var item in lstresultCDHAs)
+                                {
+                                    index++;
+                                    // Kiểm tra xem file PDF đã tồn tại chưa
+                                    var isPdfValidated = false;
+                                    if (!string.IsNullOrEmpty(item.KeyResultForHis))
+                                    {
+                                        var categoryCode = item.KeyResultForHis.Split('-').FirstOrDefault()?.ToLower() ?? "sat";
+                                        var pdfPath = System.IO.Path.Combine("wwwroot", "pdf", categoryCode, $"{item.KeyResultForHis}.pdf");
+                                        isPdfValidated = System.IO.File.Exists(pdfPath);
+                                    }
+                                    <tr id="start-camera" class="row-service" data-resultid="@item.Id">
+                                        <td class="td-check">
+                                            <input class="form-check-input sat-chk-service" type="checkbox" value="@item.Id" data-serviceid="@item.ServiceId" id="flexCheckChecked">
+                                        </td>
+                                        <td class="td-name" onclick="Process_CheckedBoxOnRow(@item.Id)">
+                                            <div class="service-info">
+                                                <span class="serviceName">@item.Service.Name</span>
+                                                <span class="serviceId">Mã dv: @item.Id</span>
+                                            </div>
+                                            @if (item.SignStoreId != 0 && item.SignStatus == 1)
+                                            {
+                                                <span class="digital-sign-icon" title="Đã ký chữ ký điện tử">
+                                                    <i class="bi bi-shield-check text-success"></i>
+                                                    <small class="text-success">Đã ký số</small>
+                                                </span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Description) || !string.IsNullOrEmpty(item.Result))
+                                            {
+                                                <span class="result-status-icon" title="Đã có kết quả (mô tả | kết luận)">
+                                                    <i class="bi bi-check-circle-fill text-info"></i>
+                                                    <small class="text-info">Đã có kết quả (mô tả | kết luận)</small>
+                                                    <small class="text-info-image-count">&nbsp;&nbsp;&nbsp;&nbsp; @item?.ImageCDHAs.Count() hình ảnh</small>
+                                                </span>
+                                            }
+                                            @* Icon đã Valid (PDF) - MỚI THÊM *@
+                                            @if (isPdfValidated)
+                                            {
+                                                <span class="pdf-validated-icon" title="Đã Valid (PDF đã tồn tại)">
+                                                    <i class="bi bi-file-earmark-pdf-fill text-success"></i>
+                                                    <small class="text-success">Đã Valid (PDF)</small>
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="camera">
+            <video id="video" class="video" autoplay></video>
+        </div>
+        <div class="group-button-image">
+            <div class="group-button">
+                <button id="sat_process_startcamera" class="btn btn-success margin-top-2 with-2" onclick="StartCamera()">
+                    <i class="bi bi-play-btn"></i><br /> Mở camera
+                </button>
+                <button id="sat_process_snapshot" class="btn btn-primary margin-top-2 with-2" onclick="SnapShot()" style="display:none" title="Chụp hình">
+                    <i class="bi bi-camera"></i><br /> Chụp ảnh
+                </button>
+                <button id="sat_process_xem" class="btn btn-success margin-top-2 with-2" onclick="XemHinh()" title="Xem hình">
+                    <i class="bi bi-eye"></i><br /> Xem ảnh
+                </button>
+                <button id="sat_process_deletephoto" class="btn btn-danger margin-top-2 with-2" onclick="DeletePhoto()" title="Xoá hình">
+                    <i class="bi bi-trash"></i><br /> Xóa ảnh
+                </button>
+                <label for="fileInput" class="btn btn-danger margin-top-2 with-2 custom-upload"><i class="bi bi-upload" style="display: block;"></i>Tải ảnh</label>
+                <input type="file" id="fileInput" name="file" onchange="UploadHinh(this)" title="Tải hình" accept="image/png, image/jpeg">
+                @*                <button id="sa_process_startvideo" class="btn btn-success margin-top-2 with-2" onclick="StartVideo()" style="display:none">
+                    <i class="bi bi-camera-video"></i><br /> Ghi video
+                </button>
+                <button id="sa_process_stopvideo" class="btn btn-success margin-top-2 with-2" onclick="StopVideo()" style="display:none">
+                    <i class="bi bi-camera-video-fill"></i><br /> Dừng video
+                </button>
+                 <button id="sa_process_downloadvideo" class="btn btn-success margin-top-2 with-2 margin-4" onclick="DownloadVideo()" value="" style="display:none" title="Lưu video">
+                    <i class="bi bi-download"></i><br /> Lưu Video
+                </button>
+                <button id="sa_process_deletevideo" class="btn btn-danger margin-top-2 with-2" onclick="DeleteVideo()" style="display:none" title="Xoá video">
+                    <i class="bi bi-camera-video-off"></i><br /> Xóa Video
+                </button>  *@                 
+                <a id="sat_process_downloadvideo_a" download="test.webm" style="display:none"></a>
+            </div>
+            <div hidden> <canvas id="canvas" class="canvas"></canvas></div>
+            <div id="imageCDHA" class="imageCDHA"></div>
+            <!-- Modal Bootstrap -->
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" style="transform: translate(29%, 0);max-width: 70rem;">
+                    <div class="modal-content" style="width: 100%;">
+                        <div class="modal-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" style="padding: 1.5rem 1.5rem;"></button>
+                        </div>
+                        <div class="modal-body text-center" style="overflow: hidden;">
+                            <img id="modalImage" src="" style="display: block; margin: 1rem; width: 95%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*Siêu âm tim*@
+    <div class="sieu-am-tim">
+
+        @* THỂ TRỌNG *@
+        <fieldset class="reset-fieldset-legend fieldset-thetrong">
+            <legend class="reset-fieldset-legend legend">THỂ TRỌNG &nbsp;&nbsp;</legend>
+            <div class="row-thetrong">
+                <div class="child">
+                    <div class="label">Chiều cao</div>
+                    <div class="input">
+                        <input type="text" id="sat_chieucao" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">cm</div>
+                </div>
+                <div class="child">
+                    <div class="label">Cân nặng</div>
+                    <div class="input">
+                        <input type="text" id="sat_cannang" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">kg</div>
+                </div>
+                <div class="child">
+                    <div class="label">BSA</div>
+                    <div class="input">
+                        <input type="text" id="sat_bsa" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">m2</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">BMI</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_bmi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        @* TM *@
+        <fieldset class="reset-fieldset-legend fieldset">
+            <legend class="reset-fieldset-legend legend">TM &nbsp;&nbsp;</legend>
+            @*1*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">ĐM chủ (AO)</div>
+                    <div class="input">
+                        <input type="text" id="sat_dmchu" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+            </div>
+
+            @*2*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Nhĩ trái (LA)</div>
+                    <div class="input">
+                        <input type="text" id="sat_nhitrai" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Thất phải</div>
+                    <div class="input">
+                        <input type="text" id="sat_thatphai" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+            </div>
+
+            @*3*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">IVSd</div>
+                    <div class="input">
+                        <input type="text" id="sat_ivsd" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">IVSs</div>
+                    <div class="input">
+                        <input type="text" id="sat_ivss" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+            </div>
+
+            @*4*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">LVIDd</div>
+                    <div class="input">
+                        <input type="text" id="sat_lvidd" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">LVIDs</div>
+                    <div class="input">
+                        <input type="text" id="sat_lvids" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+            </div>
+
+            @*5*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">LVPWd</div>
+                    <div class="input">
+                        <input type="text" id="sat_lvpwd" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">LVPWs</div>
+                    <div class="input">
+                        <input type="text" id="sat_lvpws" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+            </div>
+
+            @*6*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">RVDd</div>
+                    <div class="input">
+                        <input type="text" id="sat_rvdd" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mm</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">LVEDV</div>
+                    <div class="input">
+                        <input type="text" id="sat_lvedv" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">ml</div>
+                </div>
+            </div>
+
+            @*7*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">FS</div>
+                    <div class="input">
+                        <input type="text" id="sat_fs" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">%</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">EF</div>
+                    <div class="input">
+                        <input type="text" id="sat_ef" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">%</div>
+                </div>
+            </div>
+        </fieldset>
+
+        @* DOPPLER - DÒNG QUA VAN HAI LÁ *@
+        <fieldset class="reset-fieldset-legend fieldset">
+            <legend class="reset-fieldset-legend legend">DOPPLER - DÒNG QUA VAN HAI LÁ &nbsp;&nbsp;</legend>
+
+            @*1*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_vantoctoida_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">m/s</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">E/A</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_ea_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*2*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Chênh áp tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_chenhaptoida_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Gd mean</div>
+                    <div class="input">
+                        <input type="text" id="sat_gdmean_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+            </div>
+
+            @*3*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Độ hở van</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_dohovan_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Loại hở</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_loaiho_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*4*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Hẹp van 2 lá</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_hepvanhaila_haila" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        @* DOPPLER - DÒNG QUA VAN BA LÁ *@
+        <fieldset class="reset-fieldset-legend fieldset">
+            <legend class="reset-fieldset-legend legend">DOPPLER - DÒNG QUA VAN BA LÁ &nbsp;&nbsp;</legend>
+
+            @*1*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_vantoctoida_bala" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">m/s</div>
+                </div>
+            </div>
+
+            @*2*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Chênh áp tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_chenhaptoida_bala" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Chênh áp TB</div>
+                    <div class="input">
+                        <input type="text" id="sat_chenhaptb_bala" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+            </div>
+
+            @*3*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Hở van</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_hovan_bala" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">PAPs</div>
+                    <div class="input">
+                        <input type="text" id="sat_paps_bala" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+            </div>
+        </fieldset>
+
+        @* DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH PHỔI *@
+        <fieldset class="reset-fieldset-legend fieldset">
+            <legend class="reset-fieldset-legend legend">DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH PHỔI &nbsp;&nbsp;</legend>
+
+            @*1*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_vantoctoida_dongmachphoi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">m/s</div>
+                </div>
+            </div>
+
+            @*2*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Chênh áp tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_chenhaptoida_dongmachphoi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Gd mean</div>
+                    <div class="input">
+                        <input type="text" id="sat_gdmean_dongmachphoi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+            </div>
+
+            @*3*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">PAPm</div>
+                    <div class="input">
+                        <input type="text" id="sat_papm_dongmachphoi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">PAPd</div>
+                    <div class="input">
+                        <input type="text" id="sat_papd_dongmachphoi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+            </div>
+        </fieldset>
+
+        @* DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH CHỦ *@
+        <fieldset class="reset-fieldset-legend fieldset">
+            <legend class="reset-fieldset-legend legend">DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH CHỦ &nbsp;&nbsp;</legend>
+
+            @*1*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_vantoctoida_dongmachchu" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">m/s</div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Chênh áp tối đa</div>
+                    <div class="input">
+                        <input type="text" id="sat_chenhaptoida_dongmachchu" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                    <div class="unit">mmHg</div>
+                </div>
+            </div>
+
+            @*2*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Hở van ĐM chủ</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_hovandmchu_dongmachchu" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Hẹp van ĐM chủ</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_hepvandmchu_dongmachchu" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        @*KHÔNG CÓ TIÊU ĐỀ *@
+        <fieldset class="reset-fieldset-legend fieldset">
+
+            @*1*@
+            <div class="row">
+                <div class="child-02">
+                    <div class="label-02">Dòng qua vách liên nhĩ</div>
+                    <div class="input-02">
+                        <input type="text" id="sat_dongquavachliennhi" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*2*@
+            <div class="row">
+                <div class="child-02">
+                    <div class="label-02">Dòng qua vách liên thất</div>
+                    <div class="input-02">
+                        <input type="text" id="sat_dongquavachlienthat" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*3*@
+            <div class="row">
+                <div class="child-02">
+                    <div class="label-02">Dòng bất thường khác</div>
+                    <div class="input-02">
+                        <input type="text" id="sat_dongbatthuongkhac" value="" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        @* 2D *@
+        <fieldset class="reset-fieldset-legend fieldset">
+            <legend class="reset-fieldset-legend legend">2D &nbsp;&nbsp;</legend>
+
+            @*1*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Tư thế tim (Situs)</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_tuthetim_2d" value="SOLITUS LEVOCARDIA" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">ĐM phổi</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_dmphoi_2d" value="Bình thường" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+
+            @*2*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Màng ngoài tim</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_mangngoaitim_2d" value="Không dịch" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">ĐM vành</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_dmvanh_2d" value="Không dãn" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*3*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Nhĩ trái</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_nhitrai_2d" value="Không giãn" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Xoang vành</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_xoangvanh_2d" value="Không giãn" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*4*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Nhĩ phải</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_nhiphai_2d" value="Không giãn" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Van hai lá</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_vanhaila_2d" value="Mềm mại" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*5*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Tịnh mạch</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_tinhmach_2d" value="Bình thường" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Van ba lá</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_vanbala_2d" value="Mềm mại" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*6*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">ĐM chủ</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_dmchu_2d" value="Bình thường" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+                <div class="child-01">
+                    <div class="label">Van ĐMC</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_vandmc_2d" value="Mềm mại" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+
+            @*7*@
+            <div class="row">
+                <div class="child">
+                    <div class="label">Van ĐMP</div>
+                    <div class="input-01">
+                        <input type="text" id="sat_vandmp_2d" value="Mềm mại" class="form-control height-28 pading-left-5 pading-right-5 " />
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="reset-fieldset-legend fieldset desscription">
+            <div class="title">Mô tả kết quả</div>
+            <div class="content">
+                <textarea id="sat_process_description" class="form-control textarea-desscription pading-left-5 pading-right-5" placeholder="Mô tả ..."></textarea>
+                <script>
+                    CKEDITOR.replace('sat_process_description', {
+                        customConfig: '@Url.Content("~/lib/ckeditor/config.js")',
+                        toolbar: 'Full',
+                        extraPlugins: 'image,table,specialchar' // ép nạp plugin nếu cần
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="reset-fieldset-legend fieldset result-suggest">
+            <div class="result">
+                <div class="title">Kết luận</div>
+                <textarea id="sat_process_result" class="form-control textarea-result pading-left-5 pading-right-5" placeholder="Kết luận ..."></textarea>
+            </div>
+            <div class="suggest">
+                <div class="title">Đề nghị</div>
+                <textarea id="sat_process_suggest" class="form-control textarea-suggest pading-left-5 pading-right-5" placeholder="Đề nghị ..."></textarea>
+            </div>
+        </div>
+    </div>
+@*     <div class="right">
+        <div class="desscription">
+            <div class="content">
+                <textarea id="sat_process_description" class="form-control textarea-desscription pading-left-5 pading-right-5" placeholder="Mô tả ..."></textarea>
+                <script>
+                    CKEDITOR.replace("sat_process_description");
+                </script>
+            </div>
+        </div>
+        <div class="result-suggest">
+            <div class="result">
+                <textarea id="sat_process_result" class="form-control textarea-result pading-left-5 pading-right-5" placeholder="Kết luận ..."></textarea>
+            </div>
+            <div class="suggest">
+                <textarea id="sat_process_suggest" class="form-control textarea-suggest pading-left-5 pading-right-5" placeholder="Đề nghị ..."></textarea>
+            </div>
+        </div>
+    </div> *@
+</div>

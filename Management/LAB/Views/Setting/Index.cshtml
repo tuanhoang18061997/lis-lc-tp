@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+    Layout = "_LayoutSettupDetail";
+    var setting = ViewData["Setting"] as Management.Models.Setting;
+}
+<partial name="~/Views/Shared/_ZaloOATabs.cshtml" />
+<div class="settup-container">
+    <div class="settup-left-setting">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH CẤU HÌNH
+            </div>
+            <div class="search">
+                <input type="text" id="setting-search" class="form-control height-28" onkeyup="Setting_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="setting-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Setting_List")
+        </div>
+    </div>
+    <div class="settup-right-setting">
+        <div class="settup-right-title">
+            THÔNG TIN CẤU HÌNH
+        </div>
+        <div id="setting-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Setting_Info")
+        </div>
+        <div id="setting-settup-right-button" class="settup-right-button">
+            <button id="setting-new" class="btn btn-success btn-blue" onclick="Setting_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="setting-save" class="btn btn-success btn-blue" onclick="Setting_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="setting-delete" class="btn btn-success btn-blue" onclick="Setting_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="setting-cancel" class="btn btn-success btn-blue" onclick="Setting_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+        <div id="setting-settup-right-button" class="settup-right-button">
+            <button id="setting-refresh-autotask" class="btn btn-success btn-blue" style="width: 198px; padding: unset" onclick="Setting_Start_AutoTask()">
+                <i class="bi bi-arrow-clockwise"></i> Start Auto Task
+            </button>
+            <button id="setting-refresh-autotask" class="btn btn-success btn-blue" style="width: 198px; padding: unset" onclick="Setting_Stop_AutoTask()">
+                <i class="bi bi-arrow-clockwise"></i> Stop Auto Task
+            </button>
+        </div>
+    </div>
+</div>

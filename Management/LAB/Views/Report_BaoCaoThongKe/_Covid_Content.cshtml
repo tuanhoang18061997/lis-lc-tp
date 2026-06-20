@@ -1,0 +1,36 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport_Report";
+    var lstReportResult = ViewData["lstReportResult"] as List<ReportCovid>;  
+}
+@model Hospital
+<div class="result-covid">
+    <table class="table-result">
+        <thead class="thead">
+            <tr class="tr-title">
+                <th class="th-code" scope="col">Mã</th>
+                <th class="th-name" scope="col">Họ Tên</th>
+                <th class="th-age" scope="col">Tuổi</th>
+                <th class="th-sex" scope="col">GT</th>
+                <th class="th-address" scope="col">Địa Chỉ</th>
+                <th class="th-result" scope="col">Kết Quả</th>
+                <th class="th-time" scope="col">Giờ Trả KQ</th>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            @{
+                foreach(var item in lstReportResult)
+                {
+                    <tr class="tr-content">
+                        <td class="td-code">@item.PatientID</td>
+                        <td class="td-name">@item.PatientName</td>
+                        <td class="td-age">@item.Age?.ToString("dd/MM/yyyy")</td>
+                        <td class="td-sex">@item.Sex</td>
+                        <td class="td-address">@item.Address</td>
+                        <td class="td-result">@item.Result</td>
+                        <td class="td-time">@item.ReturnResultTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    </tr>
+                }
+            }
+    </table>
+</div>

@@ -1,0 +1,158 @@
+﻿@{
+    var sample = ViewData["Sample"] as Sample;
+    var lstCategory = ViewData["lstCategory"] as List<Category>;
+    var lstService = ViewData["lstService"] as List<Service>;
+    var gender = sample?.Gender ?? "MF";
+
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã mẫu kết quả</div>
+    <div class="div-input">
+        <input type="text" id="sample-code" class="form-control height-28 valid" value="@sample?.Code" onkeyup="Sample_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên mẫu kết quả</div>
+    <div class="div-input">
+        <input type="text" id="sample-name" class="form-control height-28 valid" value="@sample?.Name" onkeyup="Sample_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Mô tả</div>
+    <div id="div-sample-description" class="div-input">
+        <textarea id="sample-description" class="form-control pading-left-5 pading-right-5 textarea-desscription" onkeyup="Sample_HideButton(true, false, true, false)">@sample?.Description</textarea>
+        <script>
+            // var ck = CKEDITOR.replace("sample-description", { height: '240px' });
+            var ck = CKEDITOR.replace('sample-description', {
+                customConfig: '@Url.Content("~/lib/ckeditor/config.js")',
+                toolbar: 'Full',
+                extraPlugins: 'image,table,specialchar' // ép nạp plugin nếu cần
+            });
+            ck.on('change', function () {
+                Sample_HideButton(true, false, true, false);
+            });
+        </script>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-input">
+        <textarea id="sample-result" class="form-control height-2 pading-left-5 pading-right-5" onkeyup="Sample_HideButton(true, false, true, false)" placeholder="Kết luận ...">@sample?.Result</textarea>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-input">
+        <textarea id="sample-suggest" class="form-control height-2 pading-left-5 pading-right-5" onkeyup="Sample_HideButton(true, false, true, false)" placeholder="Đề nghị ...">@sample?.Suggest</textarea>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="child-01">
+        <div class="div-lable">Danh mục</div>
+        <select required id="sample-category" name="category" class="form-select height-28 valid" onchange="Sample_HideButton(true, false, true, false)">
+            <option value="" disabled selected>-- Chọn --</option>
+            @if (lstCategory != null)
+            {
+                foreach (var item in lstCategory)
+                {
+                    if (sample?.CategorieId == item?.Id)
+                    {
+                        <option selected value="@item.Id">@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+    <div class="child-02">
+         <div class="div-lable">Dịch vụ liên kết</div>
+        <select id="sample-service" name="service" class="form-select height-28" onchange="Sample_HideButton(true, false, true, false)">
+            <option value="" selected>-- Chọn --</option>
+            @if (lstService != null)
+            {
+                foreach (var item in lstService)
+                {
+                    if (sample?.ServiceId == item?.Id)
+                    {
+                        <option selected value="@item.Id">@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+</div>
+<div class="div-lable-input">
+    <div class="child-01">
+        <!-- ========== ÁP DỤNG CHO GIỚI TÍNH ========== -->
+        <div class="div-lable-input">
+            <div class="div-lable">Áp dụng cho giới tính</div>
+            <div class="div-input">
+                <div id="sample-gender-group" class="d-flex" style="gap:18px;">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="sample-gender"
+                               id="sample-gender-m"
+                               value="M"
+                               @(gender == "M" ? "checked" : "")
+                               onclick="Sample_HideButton(true, false, true, false)">
+                        <label class="form-check-label" for="sample-gender-m">Nam</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="sample-gender"
+                               id="sample-gender-f"
+                               value="F"
+                               @(gender == "F" ? "checked" : "")
+                               onclick="Sample_HideButton(true, false, true, false)">
+                        <label class="form-check-label" for="sample-gender-f">Nữ</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="sample-gender"
+                               id="sample-gender-mf"
+                               value="MF"
+                               @(gender == "MF" ? "checked" : "")
+                               onclick="Sample_HideButton(true, false, true, false)">
+                        <label class="form-check-label" for="sample-gender-mf">Nam & Nữ</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="child-02">
+        @{
+            if (sample != null)
+            {
+                if (sample.Active)
+                {
+                    <input class="form-check-input" type="checkbox" id="sample-active" onclick="Sample_HideButton(true, false, true, false)" checked>
+                    <label for="sample-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input" type="checkbox" id="sample-active" onclick="Sample_HideButton(true, false, true, false)">
+                    <label for="sample-active">Active</label>
+                }
+            }
+            else
+            {
+                <input class="form-check-input" type="checkbox" id="sample-active" onclick="Sample_HideButton(true, false, true, false)">
+                <label for="sample-active">Active</label>
+            }
+        }
+    </div>
+</div>

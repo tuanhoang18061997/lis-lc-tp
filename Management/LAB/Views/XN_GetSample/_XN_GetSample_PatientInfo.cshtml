@@ -1,0 +1,244 @@
+﻿@using Management.BL
+@{
+    var patientInfo = ViewData["patientInfo"] as Patient;
+    var lstObject = ViewData["lstObject"] as List<Management.Models.Object>;
+    var lstLocation = ViewData["lstLocation"] as List<Location>;
+    var lstDoctor = ViewData["lstDoctor"] as List<Doctor>;
+    var lstSexModel = ViewData["lstSexModel"] as List<SexModel>;
+    var lstBenhAnModel = ViewData["lstBenhAnModel"] as List<BenhAnModel>;
+    var lstHospital = ViewData["lstHospital"] as List<Hospital>;
+
+    var age = (patientInfo != null && patientInfo.Age != null) ? patientInfo?.Age?.ToString("yyyy-MM-dd") : string.Empty;
+    var getSampleTimeXN = (patientInfo != null && patientInfo.GetSampleTimeXN != null) ? DateTime.Parse(patientInfo.GetSampleTimeXN.ToString()) : DateTime.Now;
+    var insertTimeXN = (patientInfo != null && patientInfo.InsertTime != null) ? DateTime.Parse(patientInfo.InsertTime.ToString()) : DateTime.Now;
+}
+<div class="xn-right-info-title">THÔNG TIN BỆNH NHÂN</div>
+<div class="xn-right-info-div-1">
+    <div class="xn-right-info-div-combo-4">
+        <div class="xn-right-info-div-combo-4-label-age-object">
+            <label>Mã bệnh nhân</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_getsample_id" hidden value="@patientInfo?.Id" />
+            <input type="text" id="xn_getsample_patientId" value="@patientInfo?.PatientId" class="form-control height-28 pading-left-5 valid" onkeyup="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Mã bệnh nhân là bắt buộc" data-placement="top" autocomplete="off" />
+        </div>
+        <div class="xn-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label>Mã BA</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="text" id="xn_getsample_maBenhAn" value="@patientInfo?.MaBenhAn" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Mã bệnh phẩm</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <div class="xn-right-info-div-combo-2-input-input1">
+                <input type="text" id="xn_getsample_seq" value="@patientInfo?.Seq" class="form-control height-28 pading-left-5 pading-right-5" onkeyup="GetSample_HideButton(true, false, true, false, true, true); GetSID(this.value);" onchange="GetSample_GetSID(this.value)" autocomplete="off" />
+            </div>
+            <div class="xn-right-info-div-combo-2-input-input2">
+                <input type="text" id="xn_getsample_sid" value="@patientInfo?.Sid" class="form-control height-28 pading-left-5 pading-right-5 border-left-none" disabled />
+            </div>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Tên bệnh nhân</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="text" id="xn_getsample_patientName" value="@patientInfo?.PatientName" class="form-control height-28 pading-left-5 pading-right-5 valid" onkeyup="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Tên bệnh nhân là bắt buộc" data-placement="top" autocomplete="off" />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-4 div-margin-top-5">
+        <div class="xn-right-info-div-combo-4-label-age-object">
+            <label>Ngày sinh</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <input type="date" id="xn_getsample_age" value="@age" class="form-control height-28 pading-left-5 valid" onchange="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Ngày sinh là bắt buộc" data-placement="top" />
+        </div>
+        <div class="xn-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label>Giới tính</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <select required id="xn_getsample_sex" name="sex" class="form-select height-28 valid" onchange="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Giới tính là bắt buộc" data-placement="top">
+                <option value="" disabled selected>-- Chọn --</option>
+                @if (lstSexModel != null)
+                {
+                    foreach (var item in lstSexModel)
+                    {
+                        if (patientInfo?.Sex == item.Id.ToString())
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-4 div-margin-top-5">
+        <div class="xn-right-info-div-combo-4-label-age-object">
+            <label>Đối tượng</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <select required id="xn_getsample_obj" name="obj" class="form-select height-28 valid" onchange="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Đối tượng là bắt buộc" data-placement="top">
+                <option value="" disabled selected>-- Chọn --</option>
+                @if (lstObject != null)
+                {
+                    foreach (var item in lstObject)
+                    {
+                        if (patientInfo?.ObjectId == item.Id)
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        <div class="xn-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label> Bệnh án</label>
+        </div>
+        <div class="xn-right-info-div-combo-4-input">
+            <select required id="xn_getsample_type" name="type" class="form-select height-28 valid" onchange="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Bệnh án là bắt buộc" data-placement="top">
+                <option value="" disabled selected>-- Chọn --</option>
+                @if (lstBenhAnModel != null)
+                {
+                    foreach (var item in lstBenhAnModel)
+                    {
+                        if (patientInfo?.BenhAn == item.Id)
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</div>
+<div class="xn-right-info-div-2 pading-left-10">
+    <div class="xn-right-info-div-combo-2">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Địa chỉ</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <textarea id="xn_getsample_address" class="form-control height-60 pading-left-5 pading-right-5" onkeyup="GetSample_HideButton(true, false, true, false, true, true)">@patientInfo?.Address</textarea>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Nơi chỉ định</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <select id="xn_getsample_location" name="location" class="form-select height-28 valid" onchange="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Nơi chỉ định là bắt buộc" data-placement="top">
+                @if (lstLocation != null)
+                {
+                    foreach (var item in lstLocation)
+                    {
+                        if (patientInfo?.LocationId == item.Id)
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>BS chỉ định</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <select id="xn_getsample_doctor" name="doctor" class="form-select height-28 valid" onchange="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Bác sĩ chỉ định là bắt buộc" data-placement="top">
+                @if (lstDoctor != null)
+                {
+                    foreach (var item in lstDoctor)
+                    {
+                        if (patientInfo?.DoctorId == item.Id)
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Giờ lấy mẫu</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input">
+            <input type="datetime-local" id="xn_getsample_getSampleTime" value="@getSampleTimeXN.ToString("yyyy-MM-dd HH:mm")" class="form-control height-28 pading-left-5" onchange="GetSample_HideButton(true, false, true, false, true, true)" />
+            <input type="datetime-local" id="xn_getsample_insertTimeXN" value="@insertTimeXN.ToString("yyyy-MM-dd HH:mm")" hidden />
+        </div>
+    </div>
+</div>
+<div class="xn-right-info-div-3 pading-left-10">
+    <div class="xn-right-info-div-combo-2">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Chẩn đoán</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <textarea id="xn_getsample_diagnostic" style="height: 74px" class="form-control pading-left-5 pading-right-5" onkeyup="GetSample_HideButton(true, false, true, false, true, true)">@patientInfo?.Diagnostic</textarea>
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Số điện thoại</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <input type="text" id="xn_getsample_phone" value="@patientInfo?.Phone" class="form-control height-28 pading-left-5 pading-right-5 valid" onkeyup="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" data-placement="top" autocomplete="off" />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Mã đợt khám</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <input type="text" id="xn_getsample_maDotKham" value="@patientInfo?.MaDotKham" class="form-control height-28 pading-left-5 pading-right-5 valid" onkeyup="GetSample_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" data-placement="top" autocomplete="off" />
+        </div>
+    </div>
+    <div class="xn-right-info-div-combo-2 div-margin-top-5">
+        <div class="xn-right-info-div-combo-2-label">
+            <label>Bệnh viện</label>
+        </div>
+        <div class="xn-right-info-div-combo-2-input pading-left-10">
+            <select id="xn_getsample_hospital" name="hospital" class="form-select height-28" onchange="GetSample_HideButton(true, false, true, false, true, true)">
+                @if (lstHospital != null)
+                {
+                    <option value="" disabled selected>-- Chọn --</option>
+                    foreach (var item in lstHospital)
+                    {
+                        if (patientInfo?.HospitalId == item.Id)
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</div>

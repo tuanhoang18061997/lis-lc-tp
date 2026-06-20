@@ -1,0 +1,117 @@
+﻿@{
+    var lstresultCDHAs = ViewData["lstresultCDHAs"] as List<ResultCDHA>;
+}
+
+<div class="table-responsive">
+    <div class="left">
+        <div class="list-service">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr class="tr-title">
+                            <th class="th-check" style="width: 30px; text-align: center;">
+                                <input class="form-check-input" type="checkbox" id="ns_returnresult_chk_all" title="Chọn tất cả">
+                            </th>
+                            <th class="th-service" style="text-align: center;">Dịch vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-gridview-service" class="tbody-service">
+                        @{
+                            if (lstresultCDHAs != null && lstresultCDHAs.Count > 0)
+                            {
+                                var index = 0;
+                                foreach (var item in lstresultCDHAs)
+                                {
+                                    index++;
+                                    // Kiểm tra xem file PDF đã tồn tại chưa
+                                    var isPdfValidated = false;
+                                    if (!string.IsNullOrEmpty(item.KeyResultForHis))
+                                    {
+                                        var categoryCode = item.KeyResultForHis.Split('-').FirstOrDefault()?.ToLower() ?? "ns";
+                                        var pdfPath = System.IO.Path.Combine("wwwroot", "pdf", categoryCode, $"{item.KeyResultForHis}.pdf");
+                                        isPdfValidated = System.IO.File.Exists(pdfPath);
+                                    }
+                                    <tr id="start-camera" class="row-service" onclick="ReturnResult_CheckedBoxOnRow(@item.Id, event)">
+                                        <td class="td-check">
+                                            <input class="form-check-input ns-returnresult-chk-service" type="checkbox" value="@item.Id" data-key-result="@item.KeyResultForHis" id="flexCheckChecked_@item.Id">
+                                        </td>
+                                        <td class="td-name">
+                                            <div class="service-info">
+                                                <span class="serviceName">@item.Service.Name</span>
+                                                <span class="serviceId">Mã dv: @item.Id</span>
+                                            </div>
+                                            @if (item.SignStoreId != 0 && item.SignStatus == 1)
+                                            {
+                                                <span class="digital-sign-icon" title="Đã ký chữ ký điện tử">
+                                                    <i class="bi bi-shield-check text-success"></i>
+                                                    <small class="text-success">Đã ký số</small>
+                                                </span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Description) || !string.IsNullOrEmpty(item.Result))
+                                            {
+                                                <span class="result-status-icon" title="Đã có kết quả (mô tả | kết luận)">
+                                                    <i class="bi bi-check-circle-fill text-info"></i>
+                                                    <small class="text-info">Đã có kết quả (mô tả | kết luận)</small>
+                                                    <small class="text-info-image-count">&nbsp;&nbsp;&nbsp;&nbsp; @item?.ImageCDHAs.Count() hình ảnh</small>
+                                                </span>
+                                            }
+                                            @* Icon đã Valid (PDF) - MỚI THÊM *@
+                                            @if (isPdfValidated)
+                                            {
+                                                <span class="pdf-validated-icon" title="Đã Valid (PDF đã tồn tại)">
+                                                    <i class="bi bi-file-earmark-pdf-fill text-success"></i>
+                                                    <small class="text-success">Đã Valid (PDF)</small>
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="image-returnresult" class="image-returnresult"></div>
+        <!-- Modal Bootstrap -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 65rem;">
+                <div class="modal-content" style="width: 100%;">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" style="padding: 1.5rem 1.5rem;"></button>
+                    </div>
+                    <div class="modal-body text-center" style="overflow: hidden;">
+                        <img id="modalImage" src="" style="display: block; margin: 1rem; width: 95%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Bootstrap -->
+        <div style="float: left; height: 40px">
+            <button id="ns_returnresult_xem" class="btn btn-success margin-top-2 with-2" onclick="ReturnResult_XemHinh()" title="Xem hình" style="font-size: 14px">
+                <i class="bi bi-eye"></i><br /> Xem ảnh
+            </button>
+        </div>
+    </div>
+    <div class="right">
+        <div class="desscription">
+            <div class="content returnresult">
+                <textarea id="ns_returnresult_description" class="form-control textarea-desscription pading-left-5 pading-right-5" placeholder="Mô tả ..." disabled></textarea>
+                <script>
+                    var editor = CKEDITOR.replace('ns_returnresult_description');
+                    editor.on('instanceReady', function (evt) {
+                        editor.setReadOnly(true);
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="result-suggest">
+            <div class="result">
+                <textarea id="ns_returnresult_result" class="form-control textarea-result pading-left-5 pading-right-5" placeholder="Kết luận ..." disabled></textarea>
+            </div>
+            <div class="suggest">
+                <textarea id="ns_returnresult_suggest" class="form-control textarea-suggest pading-left-5 pading-right-5" placeholder="Đề nghị ..." disabled></textarea>
+            </div>
+        </div>
+    </div>
+</div>

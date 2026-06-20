@@ -1,0 +1,44 @@
+﻿@{
+    Layout = "_LayoutExport";
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var _serviceCDHA = ViewData["ServiceCDHA"] as Service;
+}
+@model Hospital
+<div class="service-sa">
+    <div class="title">II. DỊCH VỤ: <span class="service-name">@_serviceCDHA?.Name</span></div>
+</div>
+<div class="export-result-sa">
+    <div class="image">
+        <div class="title">
+            III. HÌNH ẢNH SIÊU ÂM
+        </div>
+        <div class="content @( _resultCDHA.ImageCDHAs.Count > 2 ? "four-images" : "two-images")">
+            @{
+                int count = 0;
+                foreach (var item in _resultCDHA.ImageCDHAs)
+                {
+                    count++;
+                    <img class="image-item" src="@item.ImagePath" />
+                    if (count == 4) break;
+                }
+            }
+        </div>
+    </div>
+    <div class="des-res-sug">
+        <div class="title">
+            IV. MÔ TẢ KẾT QUẢ
+        </div>
+        <div class="des">
+            <div class="des-title">Mô tả:</div>
+            <div class="des-content">@Html.Raw(@_resultCDHA?.Description)</div>
+        </div>
+        <div class="res">
+            <div class="res-title">Kết luận:</div>
+            <div class="res-content">@_resultCDHA?.Result</div>
+        </div>
+        <div class="sug">
+            <div class="sug-title">Đề nghị:</div>
+            <div class="sug-content">@_resultCDHA?.Suggest</div>
+        </div>
+    </div>
+</div>

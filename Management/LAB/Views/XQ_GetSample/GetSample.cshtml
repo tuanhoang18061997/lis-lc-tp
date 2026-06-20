@@ -1,0 +1,30 @@
+﻿@using Management.BL
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Đang chờ";
+    Layout = "_LayoutXQ";
+}
+
+<div class="xq-container">
+    <div class="xq-left">
+        <div class="xq-left-search">
+            @await Html.PartialAsync("_XQ_GetSample_Search")
+        </div>
+        <div id="listPatient" class="xq-left-list">
+            @await Html.PartialAsync("_XQ_GetSample_ListPatient")
+        </div>
+    </div>
+    <div class="xq-right">
+        <div id="patientInfo" class="xq-right-info">
+            @await Html.PartialAsync("_XQ_GetSample_PatientInfo")
+        </div>
+        <div id="patientService" class="xq-right-service">
+            <div id="xq-right-service-group" class="xq-right-service-group">
+                @await Html.PartialAsync("_XQ_GetSample_GroupButton")
+            </div>
+            <div id="xq-right-service-gridview" class="xq-right-service-gridview">
+                @await Html.PartialAsync("_XQ_GetSample_ListService")
+            </div>
+        </div>
+    </div>
+</div>

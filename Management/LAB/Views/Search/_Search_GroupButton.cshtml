@@ -1,0 +1,34 @@
+﻿@{
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+<div class="search-right-service-group-button">
+    <button id="search_downloadAllResults"
+            type="button"
+            class="btn btn-primary"
+            onclick="Search_DownloadAllResults()"
+            title="Tải tất cả kết quả PDF của bệnh nhân">
+        <i class="bi bi-download"></i> Download Kết Quả
+    </button>
+    @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "Download_All_XN_CDHA")
+            {
+                <button id="search_downloadAllPatients"
+                        type="button"
+                        class="btn btn-success"
+                        onclick="Search_DownloadAllPatientsResults()"
+                        title="Tải kết quả xét nghiệm của tất cả bệnh nhân trong danh sách">
+                    <i class="bi bi-cloud-download"></i> Download Xét Nghiệm Tất Cả
+                </button>
+                <button id="search_downloadAllPatientsCDHA"
+                        type="button"
+                        class="btn btn-info"
+                        onclick="Search_DownloadAllPatientsCDHAResults()"
+                        title="Tải kết quả CDHA của tất cả bệnh nhân trong danh sách">
+                    <i class="bi bi-file-earmark-medical"></i> Download CDHA Tất Cả
+                </button>
+            }
+        }
+    }
+</div>

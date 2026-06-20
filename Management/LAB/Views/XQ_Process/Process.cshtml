@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Đang thực hiện";
+    Layout = "_LayoutXQ";
+    var lstDevice = ViewData["lstDevice"] as List<Device>;
+}
+
+<div class="xq-container">
+    <div class="xq-left">
+        <div class="xq-left-search">
+            @await Html.PartialAsync("_XQ_Process_Search")
+        </div>
+        <div id="process_listPatient" class="xq-left-list">
+            @await Html.PartialAsync("_XQ_Process_ListPatient")
+        </div>
+    </div>
+    <div class="xq-right">
+        <div id="process_patientInfo" class="xq-right-info">
+            @await Html.PartialAsync("_XQ_Process_PatientInfo")
+        </div>
+        <div id="process_patientService" class="xq-right-service">
+            <div id="process_xq-right-service-group" class="xq-right-service-group">
+                @await Html.PartialAsync("_XQ_Process_GroupButton")
+            </div>
+            <div id="process_xq-right-service-gridview" class="xq-right-service-gridview">
+                @await Html.PartialAsync("_XQ_Process_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Loading")
+
+<!-- From chọn Device -->
+<div class="modal" id="addDeviceForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="xq-right-select-device-title">
+                <div class="title">CHỌN THIẾT BỊ</div>
+            </div>
+            <div class="xq-right-select-device">
+                <div class="title">Thiết bị</div>
+                <div class="content">
+                    <select id="xq_getsample_select_device_select" name="xq_getsample_select_device_select" class="form-select height-28">
+                        <option value=""></option>
+                        @if (lstDevice != null)
+                        {
+                            foreach (var item in lstDevice)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="xq-right-select-device-button">
+                <button id="xq_getsample_select_device_button" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="Process_SelectDevice()">
+                    <i class="bi bi-download"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- From chọn Device -->

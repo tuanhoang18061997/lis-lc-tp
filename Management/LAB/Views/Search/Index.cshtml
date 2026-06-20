@@ -1,0 +1,40 @@
+﻿@using Management.BL
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Tìm kết quả";
+    Layout = "_LayoutSearch"; 
+}
+<!-- Thêm vào phần control buttons -->
+@* <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group" role="group" aria-label="View options">
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="Search_NormalView()" title="Xem theo dịch vụ">
+            <i class="bi bi-list"></i> Theo dịch vụ
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm" onclick="Search_ToggleGroupView()" title="Xem theo danh mục">
+            <i class="bi bi-folder2-open"></i> Theo danh mục
+        </button>
+    </div>
+</div> *@
+<div class="search-container">
+    <div class="search-left">
+        <div class="search-left-search">
+            @await Html.PartialAsync("_Search_Search")
+        </div>
+        <div id="listPatient" class="search-left-list">
+            @await Html.PartialAsync("_Search_ListPatient")
+        </div>
+    </div>
+    <div class="search-right">
+        <div id="patientInfo" class="search-right-info">
+            @await Html.PartialAsync("_Search_PatientInfo")
+        </div>
+        <div id="patientService" class="search-right-service">
+            <div id="search-right-service-group" class="search-right-service-group">
+                @await Html.PartialAsync("_Search_GroupButton")
+            </div>
+            <div id="search-right-service-gridview" class="search-right-service-gridview">
+                @await Html.PartialAsync("_Search_ListService")
+            </div>
+        </div>
+    </div>
+</div>

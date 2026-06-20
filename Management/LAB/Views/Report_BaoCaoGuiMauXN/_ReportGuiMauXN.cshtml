@@ -1,0 +1,41 @@
+﻿@using Management.BL
+@{
+    var lstReportResult = ViewData["lstReportResult"] as List<TotalReportPatient>;
+}
+<div class="table-responsive">
+    <table id="table-export-to-excel" class="table table-bordered table-striped table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-total-patient" scope="col" colspan="2">TỔNG SỐ CA</th>
+                <th class="th-totalnt-patient" scope="col" colspan="2">TỔNG SỐ CA NỘI TRÚ</th>
+                <th class="th-totalngt-patient" scope="col" colspan="2">TỔNG SỐ CA NGOẠI TRÚ</th>
+            </tr>
+            <tr class="tr-title">
+                <td class="th-bhyt-patient" scope="col">BHYT</td>
+                <td class="th-tp-patient" scope="col">THU PHÍ</td>
+                <td class="th-bhytnt-patient" scope="col">BHYT</td>
+                <td class="th-tpnt-patient" scope="col">THU PHÍ</td>
+                <td class="th-bhytngt-patient" scope="col">BHYT</td>
+                <td class="th-tpngt-patient" scope="col">THU PHÍ</td>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstReportResult != null && lstReportResult.Count > 0)
+                {
+                    foreach (var item in lstReportResult)
+                    {
+                        <tr>
+                            <td class="td-bhyt-patient">@item.TotalBHYT</td>
+                            <td class="td-tp-patient">@item.TotalTP</td>
+                            <td class="td-bhytnt-patient">@item.TotalBHYT_NoiTru</td>
+                            <td class="td-tpnt-patient">@item.TotalTP_NoiTru</td>
+                            <td class="td-bhytngt-patient">@item.TotalBHYT_NgoaiTru</td>
+                            <td class="td-tpngt-patient">@item.TotalTP_NgoaiTru</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

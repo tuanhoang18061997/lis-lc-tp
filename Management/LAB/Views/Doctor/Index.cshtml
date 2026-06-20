@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý bác sĩ";
+    Layout = "_LayoutSettupDetail";
+    var doctor = ViewData["Doctor"] as Doctor;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH BÁC SĨ
+            </div>
+            <div class="search">
+                <input type="text" id="doctor-search" class="form-control height-28" onkeyup="Doctor_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="doctor-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Doctor_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN BÁC SĨ
+        </div>
+        <div id="doctor-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Doctor_Info")
+        </div>
+        <div id="doctor-settup-right-button" class="settup-right-button">
+            <button id="doctor-new" class="btn btn-success btn-blue" onclick="Doctor_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="doctor-save" class="btn btn-success btn-blue" onclick="Doctor_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="doctor-delete" class="btn btn-success btn-blue" onclick="Doctor_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="doctor-cancel" class="btn btn-success btn-blue" onclick="Doctor_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

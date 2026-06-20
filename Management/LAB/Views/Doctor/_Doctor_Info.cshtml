@@ -1,0 +1,42 @@
+﻿@{
+    var doctor = ViewData["Doctor"] as Doctor;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã bác sĩ</div>
+    <div class="div-input">
+        <input type="text" id="doctor-code" class="form-control height-28 valid" value="@doctor?.Code" onkeyup="Doctor_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên bác sĩ</div>
+    <div class="div-input">
+        <input type="text" id="doctor-name" class="form-control height-28 valid" value="@doctor?.Name" onkeyup="Doctor_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (doctor != null)
+            {
+                if (doctor.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="doctor-active" onclick="Doctor_HideButton(true, false, true, false)" checked>
+                    <label for="doctor-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="doctor-active" onclick="Doctor_HideButton(true, false, true, false)">
+                    <label for="doctor-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="doctor-active" onclick="Doctor_HideButton(true, false, true, false)">
+                <label for="doctor-active">Active</label>
+            }
+        }       
+    </div>
+</div>

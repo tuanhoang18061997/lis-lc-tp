@@ -1,0 +1,41 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport_Report";
+    var lstReportResult = ViewData["lstReportResult"] as List<ReportProcess>;  
+    var lstGroup = lstReportResult.GroupBy(p => p.DoctorID);
+}
+@model Hospital
+<div class="result-process">
+    <table class="table-result">
+        <thead class="thead">
+            <tr class="tr-title">
+                <th class="th-service" scope="col">DỊCH VỤ</th>
+                <th class="th-count" scope="col">SỐ LƯỢNG</th>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            @{
+                if (lstGroup != null)
+                {
+                    foreach (var group in lstGroup)
+                    {
+                        var lstItem = group.ToList();
+                        if (lstItem != null)
+                        {
+                            var sum = lstItem.Sum(p => p.Count);
+                            <tr class="tr-content">
+                                <td class="td-doctor" colspan="2">@lstItem[0].DoctorName (Tổng @sum)</td>
+                            </tr>
+                            foreach (var item in lstItem)
+                            {
+                                <tr class="tr-content">
+                                    <td class="td-service">@item.ServiceName</td>
+                                    <td class="td-count">@item.Count</td>
+                                </tr>
+                            }
+                        }
+                    }
+                }
+            }
+    </table>
+</div>

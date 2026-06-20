@@ -1,0 +1,52 @@
+﻿@{
+    var lstResultStandard = ViewData["lstResultStandard"] as List<Management.Models.ResultStandard>;
+}
+
+<div class="table-responsive">
+    <table id="table-export-to-excel" class="table table-bordered table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-checkbox" scope="col"></th>
+                <th class="th-seq" scope="col">Seq</th>
+                <th class="th-device" scope="col">Thiết Bị</th>
+                <th class="th-testcode" scope="col">Mã XN</th> 
+                <th class="th-testcodein" scope="col">Mã XN máy</th>
+                <th class="th-result" scope="col">Giá trị</th>
+                <th class="th-posneg" scope="col">Định tính</th>
+                <th class="th-status" scope="col">Trạng thái</th>
+                <th class="th-inserttime" scope="col">Ngày lưu</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstResultStandard != null && lstResultStandard.Count > 0)
+                {
+                    foreach (var item in lstResultStandard)
+                    {
+                        <tr class="row-resultstandard" onclick="ResultStandard_CheckedBoxOnRow('@item.Id')">
+                            <td class="td-checkbox">
+                                <input class="form-check-input" type="checkbox" value="@item.Id" id="flexCheckChecked">
+                            </td>
+                            <td class="td-seq">@item.Seq</td>
+                            <td class="td-device">@item?.Device?.Name</td>
+                            <td class="td-testcode">@item?.TestCode?.Name</td>
+                            <td class="td-testcodein">@item?.TestCodeIn</td>
+                            <td class="td-result">@item?.Result</td>
+                            <td class="td-posneg">@item?.PosNeg</td>
+                            <td class="td-status">@item?.Status</td>
+                            <td class="td-inserttime">@item?.InsertTime</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr id="noDataRow">
+                        <td colspan="9" class="text-center">
+                            Không có dữ liệu.
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,546 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport";
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var sieuamtimModel = ViewData["SieuAmTimModel"] as SieuAmTimModel;
+    var _printTime = (_resultCDHA != null) ? _resultCDHA?.Patient?.ReturnResultTimeSAT : DateTime.Now;
+    var _printTimeString = "Ngày " + _printTime?.Day.ToString().PadLeft(2, '0') + " tháng " + _printTime?.Month.ToString().PadLeft(2, '0') + " năm " + _printTime?.Year;
+    var _userReturnResult = (_resultCDHA != null) ? _resultCDHA?.Patient?.UserSAT?.Name : string.Empty;
+}
+@model Hospital
+<div class="hospital-sat">
+    <div class="hospital-logo">
+        <img class="image" src="~/images/logo/@Model.Logo" />
+    </div>
+    <div class="hospital-info">
+        <div class="hospital-info-name">
+            @Model.Name.ToUpper()
+        </div>
+        <div class="hospital-info-address">
+            @Model.Address
+        </div>
+        <div class="hospital-info-phonemail">
+            @Model.Phone | @Model.Email | @Model.Website
+        </div>
+        <div class="hospital-info-title">
+            PHIẾU KẾT QUẢ SIÊU ÂM TIM
+        </div>
+    </div>
+</div>
+<div class="patient-sat">
+    <div class="name-sex-age">
+        <div class="name">
+            <div class="label1">Họ tên</div>: @_resultCDHA?.Patient?.PatientName.ToUpper()
+        </div>
+        <div class="sex">
+            <div class="label2">Giới tính</div>: @_resultCDHA?.Patient?.Sex
+        </div>
+        <div class="age">
+            <div class="label2">Năm sinh</div>: @_resultCDHA?.Patient?.Age?.ToString("dd/MM/yyyy")
+        </div>
+    </div>
+    <div class="sid-obj">
+        <div class="sid">
+            <div class="label1">Mã bệnh phẩm</div>: @_resultCDHA?.Patient?.Sid
+        </div>
+        <div class="obj">
+            <div class="label2">Đối tượng</div>: @_resultCDHA?.Patient?.Object?.Name
+        </div>
+    </div>
+    <div class="address">
+        <div class="label1">Địa chỉ</div>: @_resultCDHA?.Patient?.Address
+    </div>
+@*     <div class="doctor-location">
+        <div class="doctor">
+            <div class="label1">Bác sĩ chỉ định</div>: @_resultCDHA?.Patient.Doctor.Name
+        </div>
+        <div class="location">
+            <div class="label2">Nơi chỉ định</div>: @_resultCDHA?.Patient.Location.Name
+        </div>
+    </div> *@
+    <div class="diagnostic">
+        <div class="label1">Chẩn đoán</div>: @_resultCDHA?.Patient.Diagnostic
+    </div>
+</div>
+<div class="export-result-sat">
+    <div class="image">
+        <div class="title">
+            HÌNH ẢNH SIÊU ÂM
+        </div>
+        <div class="content">
+            @{
+                if (_resultCDHA != null && _resultCDHA.ImageCDHAs != null)
+                {
+                    int count = 0;
+                    foreach (var item in _resultCDHA.ImageCDHAs)
+                    {
+                        count++;
+                        if (count <= 2)
+                        {
+                            <img class="image-item" src="@item.ImagePath" />
+                        }
+                    }
+                }
+            }
+        </div>
+    </div>
+
+    @*Siêu âm tim*@
+    <div class="sieu-am-tim">
+
+        @* THỂ TRỌNG *@
+        <div class="fieldset-thetrong">
+            <div class="row-thetrong">
+                <div class="child">
+                    <div class="label">Chiều cao : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_chieucao</label> &nbsp;cm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Cân nặng : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_cannang</label> &nbsp;kg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">BSA : </div>
+                    <div class="input">
+                        <label class="result"> @sieuamtimModel?.sat_bsa</label> &nbsp;m2
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">BMI : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_bmi</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* TM *@
+        <div class="fieldset-all">
+            <div class="row-title">TM</div>
+
+            @*Left*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">ĐM chủ (AO) : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dmchu</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Nhĩ trái (LA) : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_nhitrai</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">IVSd : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_ivsd</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">LVIDd : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_lvidd</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">LVPWd : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_lvpwd</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">RVDd : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_rvdd</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">FS : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_fs</label> &nbsp;%
+                    </div>
+                </div>
+            </div>
+
+            @*Right*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Thất phải : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_thatphai</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">IVSs : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_ivss</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">LVIDs : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_lvids</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">LVPWs : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_lvpws</label> &nbsp;mm
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">LVEDV : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_lvedv</label> &nbsp;ml
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">EF : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_ef</label> &nbsp;%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* DOPPLER - DÒNG QUA VAN HAI LÁ *@
+        <div class="fieldset-all">
+            <div class="row-title">DOPPLER - DÒNG QUA VAN HAI LÁ</div>
+
+            @*Left*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vantoctoida_haila</label> &nbsp;m/s
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Chênh áp tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_chenhaptoida_haila</label> &nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Độ hở van : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dohovan_haila</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Hẹp van 2 lá : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_hepvanhaila_haila</label>
+                    </div>
+                </div>
+            </div>
+
+            @* Right *@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">E/A : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_ea_haila</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Gd mean : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_gdmean_haila</label> &nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Loại hở : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_loaiho_haila</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* DOPPLER - DÒNG QUA VAN BA LÁ *@
+        <div class="fieldset-all">
+            <div class="row-title">DOPPLER - DÒNG QUA VAN BA LÁ</div>
+
+            @*Left*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vantoctoida_bala</label> &nbsp;m/s
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Chênh áp tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_chenhaptoida_bala</label> &nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Hở van : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_hovan_bala</label>
+                    </div>
+                </div>
+            </div>
+
+            @* Right *@
+            <div class="row-left">
+                <div class="child"></div>
+                <div class="child">
+                    <div class="label">Chênh áp TB : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_chenhaptb_bala</label>&nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">PAPs : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_paps_bala</label>&nbsp;mmHg
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*  DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH PHỔI *@
+        <div class="fieldset-all">
+            <div class="row-title"> DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH PHỔI</div>
+
+            @*Left*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vantoctoida_dongmachphoi</label> &nbsp;m/s
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Chênh áp tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_chenhaptoida_dongmachphoi</label> &nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">PAPm : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_papm_dongmachphoi</label> &nbsp;mmHg
+                    </div>
+                </div>
+            </div>
+
+            @* Right *@
+            <div class="row-left">
+                <div class="child">
+                </div>
+                <div class="child">
+                    <div class="label">Gd mean : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_gdmean_dongmachphoi</label> &nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">PAPd : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_papd_dongmachphoi</label> &nbsp;mmHg
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @* DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH CHỦ *@
+        <div class="fieldset-all" style="margin-top: 70px">
+            <div class="row-title"> DOPPLER - DÒNG QUA VAN ĐỘNG MẠCH CHỦ</div>
+
+            @*Left*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Vận tốc tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vantoctoida_dongmachchu</label> &nbsp;m/s
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Hở van ĐM chủ : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_hovandmchu_dongmachchu</label>
+                    </div>
+                </div>
+            </div>
+
+            @* Right *@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Chênh áp tối đa : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_chenhaptoida_dongmachchu</label> &nbsp;mmHg
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Hẹp van ĐM chủ : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_hepvandmchu_dongmachchu</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @* *KHÔNG CÓ TIÊU ĐỀ *@
+        <div class="fieldset-all">
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Dòng qua vách liên nhĩ : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dongquavachliennhi</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Dòng qua vách liên thất : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dongquavachlienthat</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Dòng bất thường khác : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dongbatthuongkhac</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* 2D *@
+        <div class="fieldset-all">
+            <div class="row-title"> 2D</div>
+
+            @*Left*@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">Tư thế tim (Situs) : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_tuthetim_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Màng ngoài tim : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_mangngoaitim_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Nhĩ trái : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_nhitrai_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Nhĩ phải : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_nhiphai_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Tĩnh mạch : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_tinhmach_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">ĐM chủ : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dmchu_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Van ĐMP : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vandmp_2d</label>
+                    </div>
+                </div>
+            </div>
+
+            @* Right *@
+            <div class="row-left">
+                <div class="child">
+                    <div class="label">ĐM phổi : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dmphoi_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">ĐM vành : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_dmvanh_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Xoang vành : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_xoangvanh_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Van hai lá : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vanhaila_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Van ba lá : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vanbala_2d</label>
+                    </div>
+                </div>
+                <div class="child">
+                    <div class="label">Van ĐMC : </div>
+                    <div class="input">
+                        <label class="result">@sieuamtimModel?.sat_vandmc_2d</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="des-res-sug">
+        <div class="title">
+            MÔ TẢ KẾT QUẢ SIÊU ÂM
+        </div>
+        <div class="des">
+            <div class="des-title">Mô tả:</div>
+            <div class="des-content">@Html.Raw(@_resultCDHA?.Description)</div>
+        </div>
+        <div class="res">
+            <div class="res-title">Kết luận:</div>
+            <div class="res-content">@_resultCDHA?.Result</div>
+        </div>
+        <div class="sug">
+            <div class="sug-title">Đề nghị:</div>
+            <div class="sug-content">@_resultCDHA?.Suggest</div>
+        </div>
+    </div>
+</div>
+<div class="signature-page-sat">
+    <div class="signature">
+        <div class="signature-left">
+        </div>
+        <div class="signature-right">
+            <div class="signature-right-time">
+                @_printTimeString
+            </div>
+            <div class="signature-right-title">
+                BÁC SĨ THỰC HIỆN
+            </div>
+            <div class="signature-right-user">
+                @_userReturnResult
+            </div>
+        </div>
+    </div>
+</div>
+
+

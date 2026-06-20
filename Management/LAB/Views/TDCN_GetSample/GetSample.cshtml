@@ -1,0 +1,30 @@
+@using Management.BL
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Thăm Dò Chức Năng - Đang chờ";
+    Layout = "_LayoutTDCN";
+}
+
+<div class="tdcn-container">
+    <div class="tdcn-left">
+        <div class="tdcn-left-search">
+            @await Html.PartialAsync("_TDCN_GetSample_Search")
+        </div>
+        <div id="listPatient" class="tdcn-left-list">
+            @await Html.PartialAsync("_TDCN_GetSample_ListPatient")
+        </div>
+    </div>
+    <div class="tdcn-right">
+        <div id="patientInfo" class="tdcn-right-info">
+            @await Html.PartialAsync("_TDCN_GetSample_PatientInfo")
+        </div>
+        <div id="patientService" class="tdcn-right-service">
+            <div id="tdcn-right-service-group" class="tdcn-right-service-group">
+                @await Html.PartialAsync("_TDCN_GetSample_GroupButton")
+            </div>
+            <div id="tdcn-right-service-gridview" class="tdcn-right-service-gridview">
+                @await Html.PartialAsync("_TDCN_GetSample_ListService")
+            </div>
+        </div>
+    </div>
+</div>

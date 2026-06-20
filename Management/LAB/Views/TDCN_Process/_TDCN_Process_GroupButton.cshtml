@@ -1,0 +1,65 @@
+@{
+    var lstSampleResult = ViewData["lstSampleResult"] as List<Sample>;
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+
+<div class="tdcn-right-service-group-button">
+    <button id="tdcn_process_saveresult_genpdf"
+            class="btn btn-success btn-blue"
+            onclick="Process_SaveResultAndGenPDF()">
+        <i class="bi bi-file-earmark-pdf"></i> Lưu & tạo PDF
+    </button>
+
+    <button id="tdcn_process_mark_done"
+            class="btn btn-success btn-blue"
+            onclick="Process_MarkPatientAsDone()">
+        <i class="bi bi-check2-circle"></i> Đã thực hiện
+    </button>
+    @*     <button id="tdcn_process_cancelresult" class="btn btn-success btn-blue" onclick="Process_CancelResultt()">
+        <i class="bi bi-arrow-return-left"></i> Bỏ qua
+    </button> *@
+    @* @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "ValidPrintResult")
+            {
+                <button id="tdcn_process_valid_in" class="btn btn-success btn-blue" onclick="TDCN_Process_ValidPrintByMode()">
+                    <i class="bi bi-printer"></i> Valid & In
+                </button>
+            }
+        }
+    } *@
+    <button id="tdcn_process_getsample" class="btn btn-success btn-blue" onclick="Process_GetSample()">
+        <i class="bi bi-arrow-left"></i> Đang chờ
+    </button>
+    @* @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "ValidAndKySoMySign")
+            {
+                <button id="tdcn_process_signpdf"
+                        type="button"
+                        class="btn btn-warning btn-md tdcn_process_signpdf"
+                        onclick="TDCN_Process_SignPdfByMode('selected')">
+                    <i class="fa fa-certificate"></i> In & Ký số
+                </button>
+            }
+        }
+    } *@
+</div>
+<div class="tdcn-right-service-group-button-title-sample">
+    <div class="title-process">
+        MÔ TẢ
+    </div>
+    <div class="sample">
+        <select id="tdcn_process_sampleresult" name="tdcn_process_sampleresult" class="form-select height-28" onchange="GetSampleForService(this.value)">
+            @if (lstSampleResult != null)
+            {
+                foreach (var item in lstSampleResult)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            }
+        </select>
+    </div>
+</div>

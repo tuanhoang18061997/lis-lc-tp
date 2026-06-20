@@ -1,0 +1,42 @@
+﻿@{
+    var testType = ViewData["TestType"] as TestType;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã loại mẫu</div>
+    <div class="div-input">
+        <input type="text" id="testtype-code" class="form-control height-28 valid" value="@testType?.Code" onkeyup="TestType_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên loại mẫu</div>
+    <div class="div-input">
+        <input type="text" id="testtype-name" class="form-control height-28 valid" value="@testType?.Name" onkeyup="TestType_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (testType != null)
+            {
+                if (testType.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="testtype-active" onclick="TestType_HideButton(true, false, true, false)" checked>
+                    <label for="testtype-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="testtype-active" onclick="TestType_HideButton(true, false, true, false)">
+                    <label for="testtype-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="testtype-active" onclick="TestType_HideButton(true, false, true, false)">
+                <label for="testtype-active">Active</label>
+            }
+        }       
+    </div>
+</div>

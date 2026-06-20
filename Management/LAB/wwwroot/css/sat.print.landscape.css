@@ -1,0 +1,480 @@
+﻿/* ====== KHUNG 2 CỘT – KHÔNG GRID/FLEX ====== */
+
+/* Bọc 2 cột, dùng clearfix để ôm float */
+.pdf-container {
+    position: relative;
+}
+
+    .pdf-container::after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+
+/* Cột trái/phải 50/50 bằng float */
+.sat-left {
+    float: left !important;
+    width: 65% !important;
+    box-sizing: border-box;
+    padding-right: 6mm; /* khoảng cách giữa 2 cột */
+}
+
+.sat-right {
+    float: right !important;
+    width: 35% !important;
+    box-sizing: border-box;
+    padding-left: 3mm;
+}
+
+/* Ép các block con không còn 50%/float từ CSS cũ */
+.pdf-landscape .patient-sat,
+.pdf-landscape .title-sat,
+.pdf-landscape .des-res-sug,
+.pdf-landscape .export-result-sat,
+.pdf-landscape .export-result-sat .image,
+.pdf-landscape .signature-page-sat {
+    width: 100% !important;
+    float: none !important;
+}
+
+/* ====== HEADER bên trong cột trái (logo + info) ====== */
+.hospital-sat::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.hospital-sat {
+    display: flex;
+    align-items: center; /* logo và text căn giữa theo chiều dọc */
+    margin-bottom: 6mm;
+}
+
+.hospital-logo {
+    flex: 0 0 auto;
+    padding-right: 20px; /* khoảng cách bên phải logo */
+    border-right: 1px dotted #999; /* gạch chấm mờ màu xám */
+    margin-right: 20px; /* khoảng cách giữa gạch và phần info */
+}
+
+    .hospital-logo .image {
+        width: 120px; /* chỉnh kích thước logo */
+        height: auto;
+    }
+
+.hospital-info {
+    flex: 1;
+}
+
+.hospital-info-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #0076A3;
+}
+
+.hospital-info-address,
+.hospital-info-phonemail {
+    font-size: 12px;
+}
+
+.title-barcode-sat {
+    position: relative;
+    width: 100%;
+    margin-bottom: 8px;
+    text-align: center; /* căn giữa cho .title */
+    margin-bottom: 6mm;
+}
+
+    .title-barcode-sat .title {
+        font-size: 22px;
+        font-weight: bold;
+        display: inline-block; /* giữ nội dung gọn */
+        color: red
+    }
+
+    .title-barcode-sat .barcode {
+        position: absolute;
+        right: 0; /* barcode dính phải */
+        top: 50%; /* căn giữa theo chiều dọc của dòng */
+        transform: translateY(-50%);
+        text-align: center;
+    }
+
+        .title-barcode-sat .barcode img {
+            height: 50px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .title-barcode-sat .barcode div {
+            font-size: 11px;
+        }
+
+    /* Patient block & mô tả nối tiếp dưới header */
+/* ==== PATIENT INFO: label + value trên cùng 1 dòng (không dùng flex/grid) ==== */
+.patient-sat {
+    clear: both;
+    font-size: 16px;
+    margin-bottom: 3mm;
+}
+.patient-sat .title {
+    font-size: 17px;
+    text-decoration: underline;
+    font-weight: bold;
+    margin-bottom: 1mm;
+    color: red;
+}
+    /* Label chung */
+    .patient-sat .label1,
+    .patient-sat .label2 {
+        display: inline-block;
+        font-weight: 600;
+        min-width: 70px; /* độ rộng tối thiểu cho label, để không dính vào value */
+    }
+
+    .patient-sat .label2 {
+        width: 115px;
+    }
+        /* label2 nhỏ hơn */
+        .patient-sat .label1::after,
+        .patient-sat .label2::after {
+            content: ":";
+            margin: 0 4px;
+        }
+
+    /* Hủy các float cũ để tránh rớt dòng */
+    .patient-sat .label1,
+    .patient-sat .label2,
+    .patient-sat .name-sex-age .name,
+    .patient-sat .name-sex-age .sex,
+    .patient-sat .name-sex-age .age,
+    .patient-sat .sid-obj .sid,
+    .patient-sat .sid-obj .obj,
+    .patient-sat .doctor-location .doctor,
+    .patient-sat .doctor-location .location {
+        float: none !important;
+    }
+
+    /* ===== Hàng 3 cột: Họ tên / Giới tính / Năm sinh ===== */
+    .patient-sat .name-sex-age {
+        white-space: nowrap;
+    }
+
+        .patient-sat .name-sex-age .name,
+        .patient-sat .name-sex-age .sex,
+        .patient-sat .name-sex-age .age {
+            display: inline-block;
+            vertical-align: top;
+            white-space: normal; /* cho phép xuống dòng nếu text dài */
+            box-sizing: border-box;
+            padding-right: 10px; /* tạo khoảng cách giữa các cột */
+        }
+
+        /* chia đều tỷ lệ */
+        .patient-sat .name-sex-age .name {
+            width: 40%;
+            font-weight: bold;
+        }
+
+        .patient-sat .name-sex-age .sex {
+            width: 25%;
+        }
+
+        .patient-sat .name-sex-age .age {
+            width: 35%;
+        }
+
+    /* ===== Hàng 2 cột: Mã bệnh phẩm / Đối tượng ===== */
+    .patient-sat .sid-obj {
+        white-space: nowrap;
+    }
+
+        .patient-sat .sid-obj .sid,
+        .patient-sat .sid-obj .obj {
+            display: inline-block;
+            vertical-align: top;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .patient-sat .sid-obj .sid {
+            width: 50%;
+        }
+
+        .patient-sat .sid-obj .obj {
+            width: 50%;
+        }
+
+    /* ===== Hàng 2 cột: Bác sĩ chỉ định / Nơi chỉ định ===== */
+    .patient-sat .doctor-location {
+        white-space: nowrap;
+    }
+
+        .patient-sat .doctor-location .doctor,
+        .patient-sat .doctor-location .location {
+            display: inline-block;
+            vertical-align: top;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .patient-sat .doctor-location .doctor {
+            width: 50%;
+        }
+
+        .patient-sat .doctor-location .location {
+            width: 50%;
+        }
+
+    /* ===== Hàng full-width: Địa chỉ / Chẩn đoán ===== */
+    .patient-sat .address,
+    .patient-sat .diagnostic {
+        white-space: normal; /* cho phép xuống dòng nếu dài */
+    }
+/*Dịch vụ Siêu Âm*/
+.service-sat {
+    clear: both;
+    margin-bottom: 3mm;
+}
+
+    .service-sat .title {
+        font-size: 17px;
+        text-decoration: underline;
+        font-weight: bold;
+        color: red;
+    }
+/* 4 cột ổn định cho SelectPdf */
+/* ===== Quy tắc in cho SelectPdf ===== */
+
+/* 1) Mặc định: cho phép ngắt trang bên trong các khối lớn */
+.sieu-am-tim,
+.sieu-am-tim * {
+    page-break-inside: auto; /* chuẩn */
+    break-inside: auto; /* hiện đại hơn, nhiều engine cũng hiểu */
+}
+    .sieu-am-tim .title {
+        font-size: 17px;
+        text-decoration: underline;
+        font-weight: bold;
+        margin-bottom: 1mm;
+        color: red;
+    }
+/* 2) Giữ từng dòng kết quả (label + value) nằm cùng một trang */
+.fieldset-all .child,
+.fieldset-thetrong .child {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    white-space: nowrap; /* tránh tách label/value */
+    margin-bottom: 2mm;
+}
+.fieldset-all .row-title {
+    font-weight: bold;
+    font-size: 15px
+}
+/* 3) Tiêu đề/nhóm không bị tách khỏi dòng kế tiếp */
+.row-title,
+.group-title,
+.keep-with-next {
+    page-break-after: avoid;
+    break-after: avoid;
+    margin-bottom: 2mm;
+}
+
+/* 4) Hai cột cho phần TM (giữ như trước, nhưng KHÔNG chặn ngắt trong toàn khối) */
+/* Bọc ngoài */
+.fieldset-all {
+    font-size: 14px;
+    margin-bottom: 4mm;
+    clear: both; /* tránh tràn float */
+    overflow: visible;
+}
+
+    /* Mỗi cột: chiếm 50% */
+    .fieldset-all .row-left,
+    .fieldset-all .row-right {
+        float: left;
+        width: 50%; /* 48–50% tùy lề */
+        box-sizing: border-box;
+        page-break-inside: auto; /* cho phép tách trang bên trong cột */
+        break-inside: auto;
+    }
+
+    /* Cột phải bỏ padding phải, thêm padding trái */
+    .fieldset-all .row-right {
+        padding: 0 0 0 6mm;
+    }
+
+    /* Mỗi dòng chỉ tiêu */
+    .fieldset-all .child {
+        margin-bottom: 2mm;
+        white-space: nowrap;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .fieldset-all .label {
+        display: inline-block;
+        min-width: 120px; /* chỉnh tùy độ dài label */
+        font-weight: 600;
+    }
+
+    .fieldset-all .input {
+        display: inline-block;
+    }
+
+/* 5) 4 cột cho “Thể trọng” (tránh rớt dòng ô cuối) */
+.fieldset-thetrong {
+    white-space: nowrap;
+}
+
+    .fieldset-thetrong .child {
+        display: inline-block;
+        vertical-align: top;
+        width: 24%; /* <25% để dư biên, không rớt */
+        box-sizing: border-box;
+        margin-right: 0.5%;
+    }
+
+        .fieldset-thetrong .child:last-child {
+            margin-right: 0;
+        }
+
+    .fieldset-thetrong .label {
+        display: inline-block;
+        font-weight: 600;
+        min-width: 90px;
+    }
+
+    .fieldset-thetrong .input {
+        display: inline-block;
+    }
+
+/* 6) Tiện ích chủ động chèn ngắt trang khi cần */
+.page-break-before {
+    page-break-before: always;
+    break-before: page;
+}
+
+.page-break-after {
+    page-break-after: always;
+    break-after: page;
+}
+
+.description-sat {
+    clear: both;
+    margin-bottom: 3mm;
+}
+    .description-sat .title {
+        font-size: 17px;
+        text-decoration: underline;
+        font-weight: bold;
+
+        color: red;
+    }
+/* ====== ẢNH & CHỮ KÝ ở cột phải – KHÔNG FLEX ====== */
+.export-result-sat .image .title {
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+    margin-bottom: 2mm;
+}
+/* .content chứa ảnh: xếp 2 ảnh/row bằng inline-block */
+/* Mặc định: full width (1 ảnh/row) */
+.export-result-sat .image.few .content .image-item {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Nếu có nhiều ảnh (>=3): 2 ảnh/row */
+.export-result-sat .image.many .content {
+    font-size: 0; /* chống khoảng trắng giữa inline-block */
+}
+
+    .export-result-sat .image.many .content .image-item {
+        display: inline-block;
+        width: 49%;
+        vertical-align: top;
+        margin: 0 1% 8px 0;
+    }
+
+        .export-result-sat .image.many .content .image-item:nth-child(2n) {
+            margin-right: 0; /* bỏ margin ảnh thứ 2 trong dòng */
+        }
+.res-sug {
+    clear: both; /* thoát khỏi 2 cột */
+    float: none;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 6mm;
+    /* CHO phép tách trang bên trong */
+    page-break-inside: auto;
+    break-inside: auto;
+}
+    .res-sug .res,
+    .res-sug .sug {
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+    /* giữ tiêu đề đi kèm đoạn ngay sau (không tách riêng tiêu đề) */
+    .res-sug .res-title,
+    .res-sug .sug-title {
+        font-size: 17px; /* 15px cho Đề nghị nếu muốn */
+        text-decoration: underline;
+        font-weight: bold;
+        color: red;
+        page-break-after: avoid;
+        break-after: avoid;
+        margin-bottom: 2mm;
+    }
+
+    /* nội dung đoạn văn: cho xuống dòng bình thường */
+    .res-sug .res-content,
+    .res-sug .sug-content {
+        white-space: normal; /* rất quan trọng nếu trên có đặt nowrap cho các dòng */
+        line-height: 1.4;
+        margin-bottom: 3mm;
+    }
+
+/* Khối chữ ký nằm cuối trang, canh phải */
+.signature-page-sat {
+    width: 100%;
+    margin-top: 40px;
+    text-align: right;
+    /* ép bắt đầu TRANG MỚI → luôn là trang cuối */
+    page-break-before: always;
+    break-before: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    clear: both; /* phòng khi trên có float */
+}
+
+    /* tránh Flex nếu engine PDF không ổn định */
+    .signature-page-sat .signature {
+        display: inline-block;
+    }
+
+/* khối bên phải */
+.signature-page-sat .signature-right {
+    text-align: center; /* canh giữa các dòng trong khối chữ ký */
+    min-width: 200px; /* chiều rộng tối thiểu */
+}
+
+/* Thời gian in */
+.signature-page-sat .signature-right-time {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* Tiêu đề “BÁC SĨ THỰC HIỆN” */
+.signature-page-sat .signature-right-title {
+    font-weight: bold;
+    margin-bottom: 60px; /* tạo khoảng trống để ký */
+    font-size: 15px;
+}
+/* ====== Ép vừa 1 trang (tuỳ bạn đang dùng) ====== */
+.sat-left, .sat-right {
+    max-height: none;
+    overflow: visible;
+}

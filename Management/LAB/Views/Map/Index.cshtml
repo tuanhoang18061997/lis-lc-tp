@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Quản lý mã xét nghiệm máy";
+    Layout = "_LayoutSettupDetail";
+    var lstTestCode = ViewData["lstTestCode"] as List<Management.Models.TestCode>;
+}
+
+<div class="settup-container">
+    <div class="settup-left-map">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH THIẾT BỊ
+            </div>
+        </div>
+        <div id="map-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Map_List")
+        </div>
+    </div>
+    <div class="settup-right-map">
+        <div class="settup-right-title-search">
+            <div class="title">
+                DANH SÁCH MÃ MÁY
+            </div>
+        </div>
+        <div id="map-settup-right-list" class="settup-right-list">
+            @await Html.PartialAsync("_Map_Info")
+        </div>
+        <div id="map-settup-right-button" class="settup-right-button">
+            <button id="map-new" class="btn btn-success btn-blue" data-bs-toggle="modal" data-bs-target="#addTestCode" onclick="Map_AddTestCode_New()">
+                <i class="bi bi-person-plus"></i> Thêm
+            </button>
+            <button id="map-edit" class="btn btn-success btn-blue" data-bs-toggle="modal" data-bs-target="#addTestCode" onclick="Map_AddTestCode_Edit()">
+                <i class="bi bi-pencil"></i> Sửa
+            </button>
+            <button id="map-delete" class="btn btn-success btn-blue" onclick="Map_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+        </div>
+    </div>
+    
+    <!-- From Map -->
+    <div class="modal" id="addTestCode" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="map-addtestcode-title">
+                    <div class="title">MÃ XÉT NGHIỆM MÁY</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id="map-addtestcode-content" class="map-addtestcode-content">
+                    <div class="div-lable-input">
+                        <div class="div-lable">Mã xét nghiệm</div>
+                        <div class="div-input">
+                            <input hidden type="text" id="map-addtestcode-id" class="form-control height-28" value="" />
+                            <select id="map-addtestcode-testcode" class="form-select height-28 valid">
+                                <option value="" disabled selected>-- Chọn mã xét nghiệm --</option>
+                                @if (lstTestCode != null)
+                                {
+                                    foreach (var item in lstTestCode)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="div-lable-input">
+                        <div class="div-lable">Mã máy 1</div>
+                        <div class="div-input">
+                            <input type="text" id="map-addtestcode-testcodein" class="form-control height-28 valid" value="" />
+                        </div>
+                    </div>
+                    <div class="div-lable-input">
+                        <div class="div-lable">Mã máy 2</div>
+                        <div class="div-input">
+                            <input type="text" id="map-addtestcode-testcodein2" class="form-control height-28" value="" />
+                        </div>
+                    </div>
+                    <div class="div-lable-input">
+                        <div class="div-lable">Ghi chú</div>
+                        <div class="div-input">
+                            <input type="text" id="map-addtestcode-note" class="form-control height-28" value="" />
+                        </div>
+                    </div>
+                    <div class="div-lable-input">
+                        <div class="div-lable">Định dạng kết quả</div>
+                        <div class="div-input">
+                            <input type="text" id="map-addtestcode-formatnumber" class="form-control height-28" value="" />
+                        </div>
+                    </div>
+                </div>
+                <div class="map-addtestcode-button">
+                    <button id="map-addtestcode-save" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="Map_Save()">
+                        <i class="bi bi-download"></i> Lưu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

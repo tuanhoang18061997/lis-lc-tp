@@ -1,0 +1,362 @@
+﻿@using Management.BL
+@model PatientServiceResultReport
+
+<div class="box box-primary" style="height: 78vh; overflow: hidden;">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            Danh sách khách hàng thực hiện dịch vụ xét nghiệm
+            (@Model.FromDate.ToString("dd/MM/yyyy") - @Model.ToDate.ToString("dd/MM/yyyy"))
+        </h3>
+    </div>
+
+    <div class="box-body no-padding">
+        <div class="filter-row">
+            <div class="row">
+                <!-- Cột 1: Filter thông tin chung -->
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Tên khách hàng</label>
+                                <input type="text" id="filterPatientName" class="form-control" placeholder="Tìm theo tên...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Giới tính</label>
+                                <select id="filterGender" class="form-control">
+                                    <option value="">-- Tất cả --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Đợt khám</label>
+                                <input type="text" id="filterMaDotKham" class="form-control" placeholder="Tìm theo đợt khám...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Mã bệnh án</label>
+                                <input type="text" id="filterMaBenhAn" class="form-control" placeholder="Tìm theo mã BA...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Seq</label>
+                                <input type="text" id="filterSeq" class="form-control" placeholder="Tìm theo Seq...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Dịch vụ</label>
+                                <input type="text" id="filterServiceName" class="form-control" placeholder="Tìm theo dịch vụ...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Trạng thái kết quả</label>
+                                <select id="filterResultStatus" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option value="complete">Đủ kết quả</option>
+                                    <option value="incomplete">Chưa đủ kết quả</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Từ ngày</label>
+                                <input type="date" id="filterFromDate" class="form-control"
+                                       value="@Model.FromDate.ToString("yyyy-MM-dd")"
+                                       min="@Model.FromDate.ToString("yyyy-MM-dd")"
+                                       max="@Model.ToDate.ToString("yyyy-MM-dd")">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Đến ngày</label>
+                                <input type="date" id="filterToDate" class="form-control"
+                                       value="@Model.ToDate.ToString("yyyy-MM-dd")"
+                                       min="@Model.FromDate.ToString("yyyy-MM-dd")"
+                                       max="@Model.ToDate.ToString("yyyy-MM-dd")">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Filter TestCode -->
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">TestCode (Ctrl để chọn nhiều)</label>
+                        <select id="filterTestCode" class="form-control" multiple>
+                            @if (Model.TestCodes != null && Model.TestCodes.Any())
+                            {
+                                foreach (var tc in Model.TestCodes)
+                                {
+                                    <option value="@tc.Id" selected>@tc.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sticky-table-wrapper">
+            <table class="table table-bordered table-striped table-hover sticky-table" id="resultTable">
+                <thead>
+                    <tr style="text-align: center; vertical-align: middle">
+                        <th style="width:40px; text-align:center;">STT</th>
+                        <th style="min-width:150px;">Tên khách hàng</th>
+                        <th style="min-width:80px;">Giới tính</th>
+                        <th style="min-width:70px;">Tuổi</th>
+                        <th style="min-width:120px;">Đợt khám</th>
+                        <th style="min-width:120px;">Mã bệnh án</th>
+                        <th style="min-width:80px;">Seq</th>
+                        <th style="min-width:120px;">SID</th>
+                        <th style="min-width:180px;">Dịch vụ</th>
+                        <th style="min-width:120px;">Ngày tiếp nhận</th>
+
+                        @foreach (var tc in Model.TestCodes)
+                        {
+                            <th style="text-align:center; white-space:nowrap; min-width:100px;"
+                                class="testcode-column"
+                                data-testcode-id="@tc.Id">
+                                @tc.Name
+                                @if (!string.IsNullOrEmpty(tc.Unit))
+                                {
+                                    <span>(@tc.Unit)</span>
+                                }
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Rows != null && Model.Rows.Any())
+                    {
+                        int index = 1;
+                        foreach (var row in Model.Rows)
+                        {
+                            <tr data-patient-name="@(row.PatientName ?? "")"
+                                data-gender="@(row.Gender ?? "")"
+                                data-age="@(row.Age)"
+                                data-madotkham="@(row.MaDotKham ?? "")"
+                                data-mabenhan="@(row.MaBenhAn ?? "")"
+                                data-seq="@(row.Seq ?? "")"
+                                data-sid="@(row.Sid ?? "")"
+                                data-servicename="@(row.ServiceName ?? "")"
+                                data-datesearch="@(row.DateSearch?.ToString("yyyy-MM-dd"))">
+                                <td style="text-align:center;" class="stt-column">@index</td>
+                                <td>@row.PatientName</td>
+                                <td>@row.Gender</td>
+                                <td style="text-align:center;">@row.Age</td>
+                                <td>@row.MaDotKham</td>
+                                <td>@row.MaBenhAn</td>
+                                <td>@row.Seq</td>
+                                <td>@row.Sid</td>
+                                <td>@row.ServiceName</td>
+                                <td style="text-align:center;">@(row.DateSearch?.ToString("dd/MM/yyyy"))</td>
+
+                                @foreach (var tc in Model.TestCodes)
+                                {
+                                    string value = null;
+                                    if (row.ResultsByTestCode != null && row.ResultsByTestCode.ContainsKey(tc.Id))
+                                    {
+                                        value = row.ResultsByTestCode[tc.Id];
+                                    }
+
+                                    <td style="text-align:center;"
+                                        class="testcode-column"
+                                        data-testcode-id="@tc.Id">
+                                        @value
+                                    </td>
+                                }
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noDataRow">
+                            <td colspan="@(10 + (Model.TestCodes?.Count ?? 0))" class="text-center">
+                                Không có dữ liệu.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        function updateSTT_XN() {
+            var index = 1;
+            $('#resultTable tbody tr').each(function () {
+                if (!$(this).hasClass('hidden-row') && $(this).attr('id') !== 'noDataRow') {
+                    $(this).find('.stt-column').text(index);
+                    index++;
+                }
+            });
+        }
+
+        function isRowComplete(row) {
+            var isComplete = true;
+
+            $('#resultTable thead .testcode-column:not(.hidden-column)').each(function () {
+                var testCodeId = $(this).data('testcode-id');
+                var cellValue = row.find('td.testcode-column[data-testcode-id="' + testCodeId + '"]').text().trim();
+
+                if (!cellValue || cellValue === '' || cellValue === 'null') {
+                    isComplete = false;
+                    return false;
+                }
+            });
+
+            return isComplete;
+        }
+
+        function getVisibleColumnsCount() {
+            var fixedColumns = 10;
+            var visibleTestCodeColumns = $('#resultTable thead .testcode-column').not('.hidden-column').length;
+            return fixedColumns + visibleTestCodeColumns;
+        }
+
+        function updateNoDataColspan() {
+            var colspan = getVisibleColumnsCount();
+            $('#noDataRow td').attr('colspan', colspan);
+        }
+
+        function filterTable() {
+            var patientName = ($('#filterPatientName').val() || '').toLowerCase().trim();
+            var gender = ($('#filterGender').val() || '').toLowerCase().trim();
+            var maDotKham = ($('#filterMaDotKham').val() || '').toLowerCase().trim();
+            var maBenhAn = ($('#filterMaBenhAn').val() || '').toLowerCase().trim();
+            var seq = ($('#filterSeq').val() || '').toLowerCase().trim();
+            var serviceName = ($('#filterServiceName').val() || '').toLowerCase().trim();
+            var fromDate = $('#filterFromDate').val();
+            var toDate = $('#filterToDate').val();
+            var resultStatus = $('#filterResultStatus').val();
+
+            var visibleCount = 0;
+
+            $('#resultTable tbody tr').each(function () {
+                if ($(this).attr('id') === 'noDataRow') return;
+
+                var row = $(this);
+                var show = true;
+
+                var rowPatientName = (row.data('patient-name') || '').toString().toLowerCase();
+                var rowGender = (row.data('gender') || '').toString().toLowerCase();
+                var rowMaDotKham = (row.data('madotkham') || '').toString().toLowerCase();
+                var rowMaBenhAn = (row.data('mabenhan') || '').toString().toLowerCase();
+                var rowSeq = (row.data('seq') || '').toString().toLowerCase();
+                var rowServiceName = (row.data('servicename') || '').toString().toLowerCase();
+                var dateSearch = row.data('datesearch');
+
+                if (patientName && rowPatientName.indexOf(patientName) === -1) {
+                    show = false;
+                }
+
+                if (gender && rowGender !== gender) {
+                    show = false;
+                }
+
+                if (maDotKham && rowMaDotKham.indexOf(maDotKham) === -1) {
+                    show = false;
+                }
+
+                if (maBenhAn && rowMaBenhAn.indexOf(maBenhAn) === -1) {
+                    show = false;
+                }
+
+                if (seq && rowSeq.indexOf(seq) === -1) {
+                    show = false;
+                }
+
+                if (serviceName && rowServiceName.indexOf(serviceName) === -1) {
+                    show = false;
+                }
+
+                if (dateSearch) {
+                    if (fromDate && dateSearch < fromDate) {
+                        show = false;
+                    }
+                    if (toDate && dateSearch > toDate) {
+                        show = false;
+                    }
+                }
+
+                if (resultStatus) {
+                    var rowComplete = isRowComplete(row);
+                    if (resultStatus === 'complete' && !rowComplete) {
+                        show = false;
+                    } else if (resultStatus === 'incomplete' && rowComplete) {
+                        show = false;
+                    }
+                }
+
+                if (show) {
+                    row.removeClass('hidden-row').show();
+                    visibleCount++;
+                } else {
+                    row.addClass('hidden-row').hide();
+                }
+            });
+
+            updateNoDataColspan();
+
+            if (visibleCount === 0) {
+                if ($('#noDataRow').length === 0) {
+                    var colspan = getVisibleColumnsCount();
+                    $('#resultTable tbody').append('<tr id="noDataRow"><td colspan="' + colspan + '" class="text-center">Không có dữ liệu phù hợp với bộ lọc.</td></tr>');
+                } else {
+                    $('#noDataRow').show();
+                }
+            } else {
+                $('#noDataRow').hide();
+            }
+
+            updateSTT_XN();
+        }
+
+        function filterTestCodeColumns() {
+            var selectedTestCodes = $('#filterTestCode').val() || [];
+
+            if (selectedTestCodes.length === 0) {
+                $('.testcode-column').removeClass('hidden-column').show();
+            } else {
+                $('.testcode-column').addClass('hidden-column').hide();
+
+                selectedTestCodes.forEach(function (testCodeId) {
+                    $('.testcode-column[data-testcode-id="' + testCodeId + '"]').removeClass('hidden-column').show();
+                });
+            }
+
+            updateNoDataColspan();
+            filterTable();
+        }
+
+        $('#filterPatientName, #filterMaDotKham, #filterMaBenhAn, #filterSeq, #filterServiceName').on('keyup', function () {
+            filterTable();
+        });
+
+        $('#filterGender, #filterFromDate, #filterToDate, #filterResultStatus').on('change', function () {
+            filterTable();
+        });
+
+        $('#filterTestCode').on('change', function () {
+            filterTestCodeColumns();
+        });
+
+        filterTestCodeColumns();
+        filterTable();
+    });
+</script>

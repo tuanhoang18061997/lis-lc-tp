@@ -1,0 +1,113 @@
+﻿@using Management.BL
+@{
+    var lstSearch = ViewData["lstSearch"] as List<object>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-number" scope="col">STT</th>
+                <th class="th-name" scope="col">TÊN DỊCH VỤ</th>
+                <th class="th-status" scope="col">TRẠNG THÁI</th>
+                <th class="th-print" scope="col"></th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstSearch != null && lstSearch.Count > 0)
+                {
+                    var index = 0;
+                    foreach (dynamic item in lstSearch)
+                    {
+                        index++;
+                        <tr>
+                            <td class="td-number">@index</td>
+                            <td class="td-name">
+                                @item.ServiceName
+                                @if (item.IsGrouped)
+                                {
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-link p-0 text-decoration-none text-muted dropdown-toggle"
+                                                data-bs-toggle="dropdown"
+                                                style="font-size: 0.875rem; border: none; background: none;">
+                                            (@item.ChildServices.Count dịch vụ)
+                                        </button>
+                                        <ul class="dropdown-menu" style="width: max-content;">
+                                            <li><h6 class="dropdown-header">Danh sách xét nghiệm:</h6></li>
+                                            @foreach (var childService in item.ChildServices)
+                                            {
+                                                <li>
+                                                    <div class="dropdown-item-text d-flex justify-content-between align-items-center">
+                                                        <span>
+                                                            <i class="bi bi-flask me-1"></i>
+                                                            @childService.ServiceName
+                                                            <small class="text-muted ms-2">
+                                                                @if (childService.Status == "Valid")
+                                                                {
+                                                                    <span class="badge bg-success">@childService.Status</span>
+                                                                }
+                                                                else if (childService.Status == "Process")
+                                                                {
+                                                                    <span class="badge bg-warning">@childService.Status</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-secondary">@childService.Status</span>
+                                                                }
+                                                            </small>
+                                                        </span>
+                                                        @*
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm ms-2"
+                                                                onclick="Search_PrintChildService(@childService.ServiceId, @childService.PatientIdTable)"
+                                                                title="In kết quả dịch vụ này">
+                                                            <i class="bi bi-printer"></i>
+                                                        </button>
+                                                        *@
+                                                    </div>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </td>
+
+                            @{
+                                if (@item.Status == "Wait")
+                                {
+                                    <td class="td-status">@item.Status</td>
+                                    <td class="td-print"></td>
+                                }
+                                else if (@item.Status == "Process")
+                                {
+                                    <td class="td-status">@item.Status</td>
+                                    <td class="td-print"></td>
+                                }
+                                else
+                                {
+                                    <td class="td-status" style="color: #198754">@item.Status</td>
+                                    <td class="td-print">
+                                        @if (item.IsGrouped)
+                                        {
+                                            // Chỉ hiển thị nút in ở cấp parent cho nhóm XN
+                                            <button type="button" class="btn btn-outline-success btn-blue-in-gridview" onclick="Search_PrintGroupedXN('@item.KeyResultForHis')">
+                                                <i class="bi bi-printer"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-success btn-blue-in-gridview" value="@item.KeyResultForHis" onclick="Search_Print(this.value)">
+                                                <i class="bi bi-printer"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

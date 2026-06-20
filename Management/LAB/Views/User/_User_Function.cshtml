@@ -1,0 +1,62 @@
+﻿@{
+    var lstFunction = ViewData["lstFunction"] as List<Function>;
+    var user = ViewData["User"] as User;
+}
+<div class="modal" id="addFunction" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="user-function-title">
+                <div class="title">PHÂN QUYỀN NGƯỜI DÙNG</div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="user-function-content">
+                @{
+                    if (lstFunction != null && lstFunction.Count > 0)
+                    {
+                        var count = 0;
+                        foreach (var item in lstFunction)
+                        {
+                            count++;
+                            
+                            if (user != null)
+                            {
+                                if(count == 9)
+                                {
+                                    <hr class="hr"/>
+                                }
+                                var userFunction = user.UserFunctions.Where(p => p.FunctionId == item.Id).FirstOrDefault();
+                                if (userFunction != null)
+                                {
+                                    <div class="row-function">
+                                        <input id="@item.Id" class="form-check-input function" type="checkbox" value="@item.Id" checked>
+                                        <label for="@item.Id">@item.Name</label>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="row-function">
+                                        <input id="@item.Id" class="form-check-input function" type="checkbox" value="@item.Id">
+                                        <label for="@item.Id">@item.Name</label>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="row-function">
+                                    <input id="@item.Id" class="form-check-input function" type="checkbox" value="@item.Id">
+                                    <label for="@item.Id">@item.Name</label>
+                                </div>
+                            }
+
+                        }
+                    }
+                }
+            </div>
+            <div class="user-function-button">
+                <button id="user-function" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="User_SaveUserFunction()">
+                    <i class="bi bi-download"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

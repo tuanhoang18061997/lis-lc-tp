@@ -1,0 +1,42 @@
+﻿@{
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+<div class="xn-right-service-group-button">
+    <button id="xn_process_saveresult" class="btn btn-success btn-blue" onclick="Process_SaveResult(false)">
+        <i class="bi bi-download"></i> Lưu
+    </button>
+    <button id="xn_process_cancelresult" class="btn btn-success btn-blue" onclick="Process_CancelResultt()">
+        <i class="bi bi-arrow-return-left"></i> Bỏ qua
+    </button>
+    <button id="xn_process_valid_in" class="btn btn-success btn-blue" onclick="Process_ValidPrint()">
+        <i class="bi bi-printer"></i> Valid & In
+    </button>
+    <button id="xn_process_getsample" class="btn btn-success btn-blue" onclick="Process_GetSample()">
+        <i class="bi bi-arrow-left"></i> Lấy mẫu
+    </button>
+    <button id="xn_process_valid_in" class="btn btn-warning" onclick="Process_ValidNotFullResult()">
+        <i class="bi bi-printer"></i> Valid (Chưa đủ kết quả)
+    </button>
+    @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "ValidAndKySoMySign")
+            {
+                <button id="xn_process_signpdf"
+                        type="button"
+                        class="btn btn-warning btn-md"
+                        onclick="Process_SignPdf()">
+                    <i class="fa fa-certificate"></i> In & Ký số
+                </button>
+            }
+        }
+    }
+
+    <button type="button"
+            class="btn btn-primary"
+            data-toggle="modal"
+            data-target="#modal-import-external"
+            onclick="Process_ShowImportModal()">
+        <i class="fa fa-file-pdf-o mr-1"></i> Import xét nghiệm ngoài
+    </button>
+</div>

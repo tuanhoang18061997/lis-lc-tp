@@ -1,0 +1,101 @@
+@{
+    var lstresultCDHAs = ViewData["lstresultCDHAs"] as List<ResultCDHA>;
+}
+
+<div class="tdcn-card tdcn-service-card">
+    <div class="tdcn-card-title tdcn-card-title-between">
+        <div>
+            <i class="bi bi-list-check"></i>
+            <span>Danh sách dịch vụ</span>
+        </div>
+        <small id="tdcn_service_mode_hint" class="tdcn-muted-text">Chọn dịch vụ để nhập kết quả</small>
+    </div>
+
+    <input type="hidden" id="tdcn_all_result_cdha_ids" value="@string.Join(",", (lstresultCDHAs ?? new List<ResultCDHA>()).Select(x => x.Id))" />
+
+
+    <div class="table-responsive tdcn-service-table-wrap">
+        <table class="table table-hover table-bordered tdcn-service-table" id="tdcn_list_service">
+            <thead>
+                <tr>
+                    @* <th style="width:32px; text-align:center;">
+                        <input type="checkbox" id="tdcn_chk_all" />
+                    </th> *@
+                    <th>Dịch vụ</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-gridview-service" class="tbody-service">
+                @{
+                    if (lstresultCDHAs != null && lstresultCDHAs.Count > 0)
+                    {
+                        foreach (var item in lstresultCDHAs)
+                        {
+                            var hasNormalResult = !string.IsNullOrWhiteSpace(item.Description) || !string.IsNullOrWhiteSpace(item.Result);
+                            var isPdfValidated = false;
+                            if (!string.IsNullOrEmpty(item.KeyResultForHis))
+                            {
+                                var categoryCode = item.KeyResultForHis.Split('-').FirstOrDefault()?.ToLower() ?? "tdcn";
+                                var pdfPath = System.IO.Path.Combine("wwwroot", "pdf", categoryCode, $"{item.KeyResultForHis}.pdf");
+                                isPdfValidated = System.IO.File.Exists(pdfPath);
+                            }
+
+                            <tr id="tdcn_service_row_@item.Id"
+                                class="row-service tdcn-shared-service-row"
+                                data-result-id="@item.Id"
+                                data-key-result="@item.KeyResultForHis"
+                                data-has-normal-result="@(hasNormalResult ? "true" : "false")"
+                                data-has-pdf="@(isPdfValidated ? "true" : "false")"
+                                onclick="Process_CheckedBoxOnRow(@item.Id)">
+                                <td class="td-check">
+                                    <input class="form-check-input tdcn-chk-service"
+                                           type="checkbox"
+                                           value="@item.Id"
+                                           data-key-result="@item.KeyResultForHis" />
+                                </td>
+                                <td class="td-name">
+                                    <div class="service-info">
+                                        <span class="serviceName">@item.Service.Name</span>
+                                        <span class="serviceId">Mã dv: @item.Id</span>
+                                    </div>
+
+                                    <div class="tdcn-service-badges">
+                                        @if (item.SignStoreId != 0 && item.SignStatus == 1)
+                                        {
+                                            <span class="tdcn-status-badge tdcn-status-signed digital-sign-icon" title="Đã ký chữ ký điện tử">
+                                                <i class="bi bi-shield-check"></i>
+                                                <small>Đã ký số</small>
+                                            </span>
+                                        }
+
+                                        @if (hasNormalResult)
+                                        {
+                                            <span class="tdcn-status-badge tdcn-status-normal result-status-icon" title="Đã có kết quả mô tả/kết luận">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                <small>Mô tả/Kết luận</small>
+                                                <small class="tdcn-image-count">@((item.ImageCDHAs != null) ? item.ImageCDHAs.Count() : 0) hình</small>
+                                            </span>
+                                        }
+
+                                        @if (isPdfValidated)
+                                        {
+                                            <span class="tdcn-status-badge tdcn-status-pdf pdf-validated-icon" title="Đã có PDF kết quả">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                                <small>PDF</small>
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-muted text-center py-3">Không có dịch vụ TDCN.</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

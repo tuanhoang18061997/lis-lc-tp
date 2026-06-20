@@ -1,0 +1,136 @@
+﻿@using Management.BL
+@{
+    var lstReportResult = ViewData["lstReportResult"] as List<TotalReportService>;
+    double sumBHYT = 0, sumTP = 0, sumBHYTNT = 0, sumTPNT = 0, sumBHYTNGT = 0, sumTPNGT = 0, sumTP_Out = 0, sumTP_Pakage = 0;
+    if (lstReportResult != null && lstReportResult.Count > 0)
+    {
+        foreach (var item in lstReportResult)
+        {
+            sumBHYT += item.TotalBHYT;
+            sumBHYTNT += item.TotalBHYT_NoiTru;
+            sumBHYTNGT += item.TotalBHYT_NgoaiTru;
+            sumTP += item.TotalTP;
+            sumTP_Pakage += item.TotalTP_Pakage;
+            sumTP_Out += item.TotalTP_Out;
+            sumTPNT += item.TotalTP_NoiTru;
+            sumTPNGT += item.TotalTP_NgoaiTru;
+        }
+    }
+}
+@* <div class="table-responsive">
+    <table id="table-export-to-excel" class="table table-bordered table-striped table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-stt" scope="col" rowspan="2">STT</th>
+                <th class="th-service" scope="col" rowspan="2">DANH MỤC XÉT NGHIỆM</th>
+                <th class="th-total" scope="col" colspan="2">TỔNG</th>
+                <th class="th-totalnt" scope="col" colspan="2">TỔNG NỘI TRÚ</th>
+                <th class="th-totalngt" scope="col" colspan="2">TỔNG NGOẠI TRÚ</th>
+            </tr>
+            <tr class="tr-title">
+                <td class="th-bhyt" scope="col">BHYT</td>
+                <td class="th-tp" scope="col">THU PHÍ</td>
+                <td class="th-bhytnt" scope="col">BHYT</td>
+                <td class="th-tpnt" scope="col">THU PHÍ</td>
+                <td class="th-bhytngt" scope="col">BHYT</td>
+                <td class="th-tpngt" scope="col">THU PHÍ</td>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstReportResult != null && lstReportResult.Count > 0)
+                {
+                    foreach (var item in lstReportResult)
+                    {
+                        <tr>
+                            <td class="td-stt">@item.STT</td>
+                            <td class="td-service">@item.ServiceName</td>
+                            <td class="td-bhyt">@item.TotalBHYT</td>
+                            <td class="td-tp">@item.TotalTP</td>
+                            <td class="td-bhytnt">@item.TotalBHYT_NoiTru</td>
+                            <td class="td-tpnt">@item.TotalTP_NoiTru</td>
+                            <td class="td-bhytngt">@item.TotalBHYT_NgoaiTru</td>
+                            <td class="td-tpngt">@item.TotalTP_NgoaiTru</td>
+                        </tr>
+                    }
+                    <tr class="tr-content">
+                        <td class="td-stt"></td>
+                        <td class="td-service" style="font-weight: bold; text-align: center">Tổng</td>
+                        <td class="td-bhyt" style="font-weight: bold">@sumBHYT</td>
+                        <td class="td-tp" style="font-weight: bold">@sumTP</td>
+                        <td class="td-bhytnt" style="font-weight: bold">@sumBHYTNT</td>
+                        <td class="td-tpnt" style="font-weight: bold">@sumTPNT</td>
+                        <td class="td-bhytngt" style="font-weight: bold">@sumBHYTNGT</td>
+                        <td class="td-tpngt" style="font-weight: bold">@sumTPNGT</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div> *@
+<div class="table-responsive">
+    <table id="table-export-to-excel" class="table table-bordered table-striped table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-stt" scope="col" rowspan="1">STT</th>
+                <th class="th-service" scope="col" rowspan="1">DANH MỤC XÉT NGHIỆM</th>
+                <th class="th-total" scope="col" rowspan="1">SỐ LƯỢNG</th>
+                @* <th class="th-total" scope="col" colspan="2">TỔNG</th> *@
+            </tr>
+            @* <tr class="tr-title">
+                <td class="th-bhyt" scope="col">KHÁCH ĐOÀN</td>
+                <td class="th-tp" scope="col">LẼ</td>
+            </tr> *@
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstReportResult != null && lstReportResult.Count > 0)
+                {
+                    foreach (var item in lstReportResult)
+                    {
+                        <tr onclick="Report_ViewServiceDetail(@item.ServiceID)">
+                            <td class="td-stt">@item.STT</td>
+                            <td class="td-service">@item.ServiceName</td>
+                            <td class="td-tp">@item.TotalTP</td>
+                           @* <td class="td-tp">@item.TotalTP_Pakage</td>
+                             <td class="td-tp">@item.TotalTP_Out</td> *@
+                        </tr>
+                    }
+                    <tr class="tr-content">
+                        <td class="td-stt"></td>
+                        <td class="td-service" style="font-weight: bold; text-align: center">Tổng</td>
+                        <td class="td-tp" style="font-weight: bold">@sumTP</td>
+                        @*<td class="td-tp" style="font-weight: bold">@sumTP_Pakage</td>
+                        <td class="td-tp" style="font-weight: bold">@sumTP_Out</td> *@
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!-- Modal xem chi tiết báo cáo theo dịch vụ -->
+<div class="modal fade" id="modal-service-detail" tabindex="-1" role="dialog" aria-labelledby="serviceDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document" style="max-width: 1440px;">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="serviceDetailLabel">Chi tiết kết quả xét nghiệm</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body" id="report-service-detail" style="max-height:82vh; overflow-y:auto;">
+                <!-- Nội dung PartialView _ReportByServiceDetail.cshtml sẽ được load vào đây -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fa fa-times"></i> Đóng
+                </button>
+                <button type="button" id="btn-export-detail" class="btn btn-success">
+                    <i class="fa fa-file-excel-o"></i> Xuất Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

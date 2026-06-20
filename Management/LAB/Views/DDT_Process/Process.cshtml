@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Đang thực hiện";
+    Layout = "_LayoutDDT";
+    var lstDevice = ViewData["lstDevice"] as List<Device>;
+}
+
+<div class="ddt-container">
+    <div class="ddt-left">
+        <div class="ddt-left-search">
+            @await Html.PartialAsync("_DDT_Process_Search")
+        </div>
+        <div id="process_listPatient" class="ddt-left-list">
+            @await Html.PartialAsync("_DDT_Process_ListPatient")
+        </div>
+    </div>
+    <div class="ddt-right">
+        <div id="process_patientInfo" class="ddt-right-info">
+            @await Html.PartialAsync("_DDT_Process_PatientInfo")
+        </div>
+        <div id="process_patientService" class="ddt-right-service">
+            <div id="process_ddt-right-service-group" class="ddt-right-service-group">
+                @await Html.PartialAsync("_DDT_Process_GroupButton")
+            </div>
+            <div id="process_ddt-right-service-gridview" class="ddt-right-service-gridview">
+                @await Html.PartialAsync("_DDT_Process_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Loading")
+
+<!-- From chọn Device -->
+<div class="modal" id="addDeviceForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="ddt-right-select-device-title">
+                <div class="title">CHỌN THIẾT BỊ</div>
+            </div>
+            <div class="ddt-right-select-device">
+                <div class="title">Thiết bị</div>
+                <div class="content">
+                    <select id="ddt_getsample_select_device_select" name="ddt_getsample_select_device_select" class="form-select height-28">
+                        <option value=""></option>
+                        @if (lstDevice != null)
+                        {
+                            foreach (var item in lstDevice)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="ddt-right-select-device-button">
+                <button id="ddt_getsample_select_device_button" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="Process_SelectDevice()">
+                    <i class="bi bi-download"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- From chọn Device -->

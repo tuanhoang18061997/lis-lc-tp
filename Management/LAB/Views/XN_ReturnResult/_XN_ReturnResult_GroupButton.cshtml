@@ -1,0 +1,64 @@
+﻿@{
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+<div class="xn-right-service-group-button">
+    <button id="xn_returnresult_print" class="btn btn-success btn-blue" onclick="ReturnResult_Print()">
+        <i class="bi bi-printer"></i> Print
+    </button>
+
+    <button id="xn_returnresult_invalid" class="btn btn-success btn-blue" onclick="ReturnResult_Invalid()">
+        <i class="bi bi-arrow-left"></i> Invalid
+    </button>
+
+@*     <button id="xn_returnresult_print_signed"
+            type="button"
+            class="btn btn-success btn-md btn-blue"
+            onclick="ReturnResult_ViewSignedPdf()">
+        <i class="fa fa-download"></i> Tải PDF đã ký
+    </button> *@
+    @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "ValidAndKySoMySign")
+            {
+                <button id="xn_returnresult_sign_pdf"
+                        type="button"
+                        class="btn btn-warning btn-md xn_returnresult_print_signed"
+                        onclick="ReturnResult_SignPdf()">
+                    <i class="fa fa-signature"></i> Ký số
+                </button>
+                <button id="xn_returnresult_print_signed"
+                        type="button"
+                        class="btn btn-primary btn-md xn_returnresult_print_signed"
+                        onclick="ReturnResult_ViewSignedPdf()">
+                    <i class="fa fa-download"></i> Xem PDF đã ký
+                </button>
+                <button id="xn_returnresult_invalid_removedigitalsign" class="btn btn-danger btn-md xn_returnresult_invalid_removedigitalsign" onclick="ReturnResult_Invalid_RemoveDigitalSign()">
+                    <i class="bi bi-arrow-left"></i> Invalid & Xóa Ký Số
+                </button>
+            }
+        }
+    }
+    <button type="button"
+            class="btn btn-primary"
+            data-toggle="modal"
+            data-target="#modal-import-external"
+            onclick="Returnresult_ShowImportModal()">
+        <i class="fa fa-file-pdf-o mr-1"></i> Import xét nghiệm ngoài
+    </button>
+    @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "SendZns")
+            {
+                <button type="button"
+                        id="btnSendZnsResultXN"
+                        class="btn btn-success"
+                        onclick="ReturnResult_SendZns();">
+                    <i class="fa fa-paper-plane"></i> Gửi ZNS
+                </button>
+            }
+        }
+    }
+
+</div>

@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý đối tượng";
+    Layout = "_LayoutSettupDetail";
+    var obj = ViewData["Object"] as Management.Models.Object;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH ĐỐI TƯỢNG
+            </div>
+            <div class="search">
+                <input type="text" id="object-search" class="form-control height-28" onkeyup="Object_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="object-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Object_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN ĐỐI TƯỢNG
+        </div>
+        <div id="object-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Object_Info")
+        </div>
+        <div id="object-settup-right-button" class="settup-right-button">
+            <button id="object-new" class="btn btn-success btn-blue" onclick="Object_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="object-save" class="btn btn-success btn-blue" onclick="Object_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="object-delete" class="btn btn-success btn-blue" onclick="Object_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="object-cancel" class="btn btn-success btn-blue" onclick="Object_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport_Report";
+    var lstReportResult = ViewData["lstReportResult"] as List<ReportCovid>;
+    var _printTimeString = "Ngày " + DateTime.Now.Day.ToString().PadLeft(2, '0') + " tháng " + DateTime.Now.Month.ToString().PadLeft(2, '0') + " năm " + DateTime.Now.Year;
+    var _userReturnResult = (lstReportResult != null && lstReportResult.Count > 0) ? lstReportResult[0].User : string.Empty;
+}
+@model Hospital
+<div class="signature-page-covid">
+    <div class="signature">
+        <div class="signature-left">
+        </div>
+        <div class="signature-right">
+            <div class="signature-right-time">
+                @_printTimeString
+            </div>
+            <div class="signature-right-title">
+                NGƯỜI BÁO CÁO
+            </div>
+            <div class="signature-right-user">
+                @_userReturnResult
+            </div>
+        </div>
+    </div>
+    @*<div class="page">
+        Trang 1/1
+    </div>*@
+</div>

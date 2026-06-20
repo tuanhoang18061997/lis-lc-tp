@@ -1,0 +1,17 @@
+﻿@{
+    var activeTab = ViewBag.ZaloOATab as string ?? "";
+}
+
+<div class="zalooa-tabs">
+    <a href="/Setting/Index" class="zalooa-tab @(activeTab == "setting" ? "active" : "")">
+        Cấu hình hệ thống
+    </a>
+
+    <a href="/ZaloOAConfig/Index" class="zalooa-tab @(activeTab == "config" ? "active" : "")">
+        ZaloOA Config
+    </a>
+
+    <a href="/ZaloOATemplate/Index" class="zalooa-tab @(activeTab == "template" ? "active" : "")">
+        ZaloOA Templates
+    </a>
+</div>

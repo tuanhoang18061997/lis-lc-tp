@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý khoa phòng";
+    Layout = "_LayoutSettupDetail";
+    var location = ViewData["Location"] as Location;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH KHOA PHÒNG
+            </div>
+            <div class="search">
+                <input type="text" id="location-search" class="form-control height-28" onkeyup="Location_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="location-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Location_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN KHOA PHÒNG
+        </div>
+        <div id="location-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Location_Info")
+        </div>
+        <div id="location-settup-right-button" class="settup-right-button">
+            <button id="location-new" class="btn btn-success btn-blue" onclick="Location_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="location-save" class="btn btn-success btn-blue" onclick="Location_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="location-delete" class="btn btn-success btn-blue" onclick="Location_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="location-cancel" class="btn btn-success btn-blue" onclick="Location_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

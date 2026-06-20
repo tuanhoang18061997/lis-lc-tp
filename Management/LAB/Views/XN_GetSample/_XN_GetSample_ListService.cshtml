@@ -1,0 +1,132 @@
+﻿@using Management.Extensions
+@{
+    var lstresultXNs = ViewData["lstResultXNs"] as List<ResultXN>;
+    var lstCategory = ViewData["lstCategory"] as List<Category>;
+    var lstService = ViewData["lstService"] as List<Service>;
+
+    var _groupResultByCategory = lstresultXNs?.GroupBy(p => p.Service.CategoryId); // Bật hiển thị xét nghiệm theo nhóm danh mục
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-number" scope="col">STT</th>
+                <th class="th-code" scope="col">MÃ XÉT NGHIỆM</th>
+                <th class="th-name" scope="col">TÊN XÉT NGHIỆM</th>
+                <th class="th-delete" scope="col"></th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (_groupResultByCategory != null)
+                {
+                    var index = 0;
+                    
+                    foreach (var _group in _groupResultByCategory)
+                    {
+                        var _results = _group.ToList();
+                        if (_results != null && _results.Count > 0)
+                        {
+                            // Hiển thị tên danh mục
+                            <tr class="tr-category">
+                                <td class="td-category" colspan="4">@_results[0].Service?.Category?.Name.ToUpper()</td>
+                            </tr>
+
+                            foreach (var item in _results)
+                            {
+                                index++;
+                                if (index % 2 != 0)
+                                {
+                                    <tr class="tr-content">
+                                        <td class="td-number">@index</td>
+                                        <td class="td-code">@item.TestCode.Code</td>
+                                        @{
+                                            if (item.TestCode.IsTestChild == true)
+                                            {
+                                                <td class="td-name-getsample">&nbsp;&nbsp;&nbsp;&nbsp;@item.TestCode.Name</td>
+                                            }
+                                            else
+                                            {
+                                                <td class="td-name-getsample">@item.TestCode.Name</td>
+                                            }
+                                        }
+                                        <td class="td-delete">
+                                            <button type="button" class="btn btn-outline-danger btn-red-in-gridview" value="@item.Id" onclick="GetSample_DeleteServiceForPatient(this.value)">x</button>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td class="td-number">@index</td>
+                                        <td class="td-code">@item.TestCode.Code</td>
+                                        @{
+                                            if (item.TestCode.IsTestChild == true)
+                                            {
+                                                <td class="td-name-getsample">&nbsp;&nbsp;&nbsp;&nbsp;@item.TestCode.Name</td>
+                                            }
+                                            else
+                                            {
+                                                <td class="td-name-getsample">@item.TestCode.Name</td>
+                                            }
+                                        }
+                                        <td class="td-delete">
+                                            <button type="button" class="btn btn-outline-danger btn-red-in-gridview" value="@item.Id" onclick="GetSample_DeleteServiceForPatient(this.value)">x</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- From thêm dịch vụ cho bệnh nhân -->
+<div class="modal" id="addServiceForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="xn-right-add-service-for-patient-title">
+                <div class="title">THÊM DỊCH VỤ</div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="xn-right-add-service-for-patient-category">
+                <div class="title">Danh mục</div>
+                <div class="content">
+                    <select id="xn_getsample_category" name="category" class="form-select height-28" onchange="GetSample_LoadService(this.value)">
+                        @if (lstCategory != null)
+                        {
+                            foreach (var item in lstCategory)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="xn-right-add-service-for-patient-service">
+                <div class="title">Dịch vụ</div>
+                <div class="content">
+                    <select id="xn_getsample_service" name="service" class="form-select height-28">
+                        @if (lstService != null)
+                        {
+                            foreach (var item in lstService)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="xn-right-add-service-for-patient-button">
+                <button id="xn_getsample_addserviceforpatient" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="GetSample_AddServiceForPatient()">
+                    <i class="bi bi-download"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- From thêm dịch vụ cho bệnh nhân -->

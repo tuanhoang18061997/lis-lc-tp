@@ -1,0 +1,59 @@
+﻿@{
+    var _hospital = ViewData["Hospital"] as Hospital;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã bệnh viện</div>
+    <div class="div-input">
+        <input type="text" id="hospital-code" class="form-control height-28 valid" value="@_hospital?.Code" disabled/>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên bệnh viện</div>
+    <div class="div-input">
+        <input type="text" id="hospital-name" class="form-control height-28 valid" value="@_hospital?.Name" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên bệnh viện bằng tiếng anh</div>
+    <div class="div-input">
+        <input type="text" id="hospital-nameen" class="form-control height-28" value="@_hospital?.NameEN" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Địa chỉ</div>
+    <div class="div-input">
+        <input type="text" id="hospital-address" class="form-control height-28" value="@_hospital?.Address" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Điện thoại</div>
+    <div class="div-input">
+        <input type="text" id="hospital-phone" class="form-control height-28" value="@_hospital?.Phone" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Website</div>
+    <div class="div-input">
+        <input type="text" id="hospital-website" class="form-control height-28" value="@_hospital?.Website" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Email</div>
+    <div class="div-input">
+        <input type="text" id="hospital-email" class="form-control height-28" value="@_hospital?.Email" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Logo</div>
+    <div class="div-input">
+        <input type="text" id="hospital-logo" class="form-control height-28" value="@_hospital?.Logo" onkeyup="Hospital_HideButton(true, false, false)" />
+    </div>
+</div>

@@ -1,0 +1,42 @@
+﻿@{
+    var obj = ViewData["Object"] as Management.Models.Object;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã đối tượng</div>
+    <div class="div-input">
+        <input type="text" id="object-code" class="form-control height-28 valid" value="@obj?.Code" onkeyup="Object_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên đối tượng</div>
+    <div class="div-input">
+        <input type="text" id="object-name" class="form-control height-28 valid" value="@obj?.Name" onkeyup="Object_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (obj != null)
+            {
+                if (obj.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="object-active" onclick="Object_HideButton(true, false, true, false)" checked>
+                    <label for="object-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="object-active" onclick="Object_HideButton(true, false, true, false)">
+                    <label for="object-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="object-active" onclick="Object_HideButton(true, false, true, false)">
+                <label for="object-active">Active</label>
+            }
+        }       
+    </div>
+</div>

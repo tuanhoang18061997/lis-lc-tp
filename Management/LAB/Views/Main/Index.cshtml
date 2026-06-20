@@ -1,0 +1,186 @@
+﻿@using Management.BL
+@using Newtonsoft.Json
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    Layout = "_LayoutMain";
+    ViewData["Title"] = HttpContextAccessor.HttpContext.Request.Cookies[SessionKeyModel._sessionHospital];
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+
+<div class="main-parent">
+    <div class="main-child">
+        @{
+            if (_lstUserFunction != null && _lstUserFunction.Count > 0)
+            {
+                var actionXN = "ToXN";
+                var imageXN = "XN.png";
+                var titleXN = "XÉT NGHIỆM";
+
+                var actionSA = "ToSA";
+                var imageSA = "SA.png";
+                var titleSA = "SIÊU ÂM";
+
+                var actionSAT = "ToSAT";
+                var imageSAT = "SAT.png";
+                var titleSAT = "SIÊU ÂM TIM";
+
+                var actionDDT = "ToDDT";
+                var imageDDT = "DDT.png";
+                var titleDDT = "ĐO ĐIỆN TIM";
+
+                var actionXQ = "ToXQ";
+                var imageXQ = "XQ.png";
+                var titleXQ = "X-QUANG";
+
+                var actionNS = "ToNS";
+                var imageNS = "NS.png";
+                var titleNS = "NỘI SOI";
+
+                var actionNSCTC = "ToNSCTC";
+                var imageNSCTC = "NS-CTC.png";
+                var titleNSCTC = "NỘI SOI CTC";
+
+                var actionTDCN = "ToTDCN";
+                var imageTDCN = "TDCN.png";
+                var titleTDCN = "THĂM DÒ CN";
+
+                var actionReport = "ToReport";
+                var imageReport = "Report.png";
+                var titleReport = "BÁO CÁO";
+
+                var actionSettup = "ToSettup";
+                var imageSettup = "Settup.png";
+                var titleSettup = "CẤU HÌNH";
+
+                var actionSearch = "ToSearch";
+                var imageSearch = "Search.png";
+                var titleSearch = "TÌM KẾT QUẢ";
+
+                foreach (var item in _lstUserFunction)
+                {
+                    if (item.Function.Code == "XN")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionXN">
+                                <img class="card-img-top" src="~/images/logo/@imageXN" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleXN</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "SA")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionSA">
+                                <img class="card-img-top" src="~/images/logo/@imageSA" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleSA</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "SAT")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionSAT">
+                                <img class="card-img-top" src="~/images/logo/@imageSAT" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleSAT</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "DDT")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionDDT">
+                                <img class="card-img-top" src="~/images/logo/@imageDDT" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleDDT</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "XQ")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionXQ">
+                                <img class="card-img-top" src="~/images/logo/@imageXQ" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleXQ</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "NS")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionNS">
+                                <img class="card-img-top" src="~/images/logo/@imageNS" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleNS</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "NSCTC")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionNSCTC">
+                                <img class="card-img-top" src="~/images/logo/@imageNSCTC" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleNSCTC</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "TDCN")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionTDCN">
+                                <img class="card-img-top" src="~/images/logo/@imageTDCN" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleTDCN</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Report")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionReport">
+                                <img class="card-img-top" src="~/images/logo/@imageReport" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleReport</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Search")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionSearch">
+                                <img class="card-img-top" src="~/images/logo/@imageSearch" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleSearch</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Settup")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionSettup">
+                                <img class="card-img-top" src="~/images/logo/@imageSettup" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleSettup</h5>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>

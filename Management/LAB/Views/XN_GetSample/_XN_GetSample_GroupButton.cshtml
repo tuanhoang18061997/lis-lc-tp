@@ -1,0 +1,37 @@
+﻿<div class="xn-right-service-group-button">
+    <button id="xn_getsample_printseq"
+            type="button"
+            class="btn btn-outline-primary btn-sm ml-2"
+            title="In mã SEQ"
+            onclick="GetSample_PrintSEQ(1)">
+        <i class="fa fa-barcode"></i> In SEQ <b style="color: red">(X2)</b>
+    </button>
+    <button id="xn_getsample_printseq"
+            type="button"
+            class="btn btn-outline-primary btn-sm ml-2"
+            title="In mã SEQ"
+            onclick="GetSample_PrintSEQ(2)">
+        <i class="fa fa-barcode"></i> In SEQ <b style="color: red">(X4)</b>
+    </button>
+    <button id="xn_getsample_newpatient" class="btn btn-success btn-blue" onclick="GetSample_NewPatient()">
+        <i class="bi bi-person-plus"></i> Mới
+    </button>
+    <button id="xn_getsample_savepatient" class="btn btn-success btn-blue" onclick="GetSample_SavePatient()">
+        <i class="bi bi-download"></i> Lưu
+    </button>
+    <button id="xn_getsample_deletepatient" class="btn btn-success btn-blue" onclick="GetSample_DeletePatient()">
+        <i class="bi bi-person-x"></i> Xoá
+    </button>
+    <button id="xn_getsample_cancelpatient" class="btn btn-success btn-blue" onclick="GetSample_CancelPatient()">
+        <i class="bi bi-arrow-return-left"></i> Bỏ qua
+    </button>
+    <button id="xn_getsample_addService" class="btn btn-success btn-blue" data-bs-toggle="modal" data-bs-target="#addServiceForm" onclick="GetSample_AddService()">
+        <i class="bi bi-file-earmark-plus"></i> Thêm DV
+    </button>
+    <button id="xn_getsample_processresult" class="btn btn-success btn-blue" onclick="GetSample_ProcessResult()">
+        <i class="bi bi-arrow-right"></i> Xử lý KQ
+    </button>
+    <button id="xn_getsample_processresult_all" class="btn btn-outline-primary btn-sm ml-2" onclick="GetSample_ProcessResultAll()">
+        <i class="bi bi-arrow-right-circle"></i> Xử lý KQ TẤT CẢ
+    </button>
+</div>

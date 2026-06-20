@@ -1,0 +1,39 @@
+﻿@{
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+<div class="ddt-right-service-group-button">
+    <button id="ddt_returnresult_print" class="btn btn-success btn-blue" onclick="ReturnResult_Print()">
+        <i class="bi bi-printer"></i> Print
+    </button>
+
+    <button id="ddt_returnresult_invalid" class="btn btn-success btn-blue" onclick="ReturnResult_Invalid()">
+        <i class="bi bi-arrow-left"></i> Invalid
+    </button>
+    @{
+        foreach (var item in _lstUserFunction)
+        {
+            if (item.Function.Code == "ValidAndKySoMySign")
+            {
+                <button id="ddt_returnresult_sign_pdf"
+                        type="button"
+                        class="btn btn-warning btn-md ddt_returnresult_print_signed"
+                        onclick="ReturnResult_SignPdf_Multi('selected')">
+                    <i class="fa fa-signature"></i> Ký số
+                </button>
+                <button id="ddt_returnresult_print_signed"
+                        type="button"
+                        class="btn btn-primary btn-md ddt_returnresult_print_signed"
+                        onclick="ReturnResult_ViewSignedPdf()">
+                    <i class="fa fa-download"></i> Xem PDF đã ký
+                </button>
+                <button id="ddt_returnresult_invalid_removedigitalsign" class="btn btn-danger btn-md ddt_returnresult_invalid_removedigitalsign" onclick="ReturnResult_Invalid_RemoveDigitalSign()">
+                    <i class="bi bi-arrow-left"></i> Invalid & Xóa Ký Số
+                </button>
+            }
+        }
+    }
+    @*<a asp-action="Print" asp-controller="ddt_ReturnResult">Test In HTML</a>*@
+</div>
+<div class="ddt-right-service-group-button-title-sample">
+    <div class="title-returnresult"> MÔ TẢ KẾT QUẢ </div>
+</div>

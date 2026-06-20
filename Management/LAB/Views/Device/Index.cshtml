@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý thiết bị";
+    Layout = "_LayoutSettupDetail";
+    var device = ViewData["Device"] as Management.Models.Device;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH THIẾT BỊ
+            </div>
+            <div class="search">
+                <input type="text" id="device-search" class="form-control height-28" onkeyup="Device_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="device-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Device_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN THIẾT BỊ
+        </div>
+        <div id="device-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Device_Info")
+        </div>
+        <div id="device-settup-right-button" class="settup-right-button">
+            <button id="device-new" class="btn btn-success btn-blue" onclick="Device_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="device-save" class="btn btn-success btn-blue" onclick="Device_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="device-delete" class="btn btn-success btn-blue" onclick="Device_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="device-cancel" class="btn btn-success btn-blue" onclick="Device_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

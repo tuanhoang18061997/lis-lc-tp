@@ -1,0 +1,215 @@
+﻿@{
+    var testCode = ViewData["TestCode"] as TestCode;
+    var lstTestType = ViewData["lstTestType"] as List<TestType>;
+    var lstCategory = ViewData["lstCategory"] as List<Category>;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã XN</div>
+    <div class="div-input">
+        <input type="text" id="testcode-code" class="form-control height-28 valid" value="@testCode?.Code" onkeyup="TestCode_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên XN</div>
+    <div class="div-input">
+        <input type="text" id="testcode-name" class="form-control height-28 valid" value="@testCode?.Name" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">CSBT Nam</div>
+    <div class="div-input">
+        <input type="text" id="testcode-normalrangem" class="form-control height-28" value="@testCode?.NormalRangeM" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">CSBT Nữ</div>
+    <div class="div-input">
+        <input type="text" id="testcode-normalrangef" class="form-control height-28" value="@testCode?.NormalRangeF" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">CSBT</div>
+    <div class="div-input">
+        <input type="text" id="testcode-normalresult" class="form-control height-28" value="@testCode?.NormalResult" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Giới hạn thấp</div>
+    <div class="div-input">
+        <input type="number" id="testcode-lowerlimit" class="form-control height-28" value="@testCode?.LowerLimit" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Giới hạn cao</div>
+    <div class="div-input">
+        <input type="number" id="testcode-higherlimit" class="form-control height-28" value="@testCode?.HigherLimit" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Giới hạn thấp (nữ)</div>
+    <div class="div-input">
+        <input type="number" id="testcode-lowerlimit-f" class="form-control height-28" value="@testCode?.LowerLimitF" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Giới hạn cao (nữ)</div>
+    <div class="div-input">
+        <input type="number" id="testcode-higherlimit-f" class="form-control height-28" value="@testCode?.HigherLimitF" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Đơn vị</div>
+    <div class="div-input">
+        <input type="text" id="testcode-unit" class="form-control height-28" value="@testCode?.Unit" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Thứ tự in</div>
+    <div class="div-input">
+        <input type="number" id="testcode-printorder" class="form-control height-28" value="@testCode?.PrintOrder" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã BHYT</div>
+    <div class="div-input">
+        <input type="text" id="testcode-codebhyt" class="form-control height-28" value="@testCode?.CodeBHYT" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên BHYT</div>
+    <div class="div-input">
+        <input type="text" id="testcode-namebhyt" class="form-control height-28" value="@testCode?.NameBHYT" onkeyup="TestCode_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Loại mẫu</div>
+    <div class="div-input">
+        <select required id="testcode-testtype" name="category" class="form-select height-28 valid" onchange="TestCode_HideButton(true, false, true, false)">
+            <option value="" disabled selected>-- Chọn --</option>
+            @if (lstTestType != null)
+            {
+                foreach (var item in lstTestType)
+                {
+                    if (testCode?.TestTypeId == item?.Id)
+                    {
+                        <option selected value="@item.Id">@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Danh mục</div>
+    <div class="div-input">
+        <select required id="testcode-category" name="category" class="form-select height-28 valid" onchange="TestCode_HideButton(true, false, true, false)">
+            <option value="" disabled selected>-- Chọn --</option>
+            @if (lstCategory != null)
+            {
+                foreach (var item in lstCategory)
+                {
+                    if (testCode?.CategoryId == item?.Id)
+                    {
+                        <option selected value="@item.Id">@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">&nbsp;</div>
+    <div class="div-input">
+        <div class="div-input-child">
+            @{
+                if (testCode != null)
+                {
+                    if (testCode.IsTestHead)
+                    {
+                        <input class="form-check-input" type="checkbox" id="testcode-istesthead" onclick="TestCode_HideButton(true, false, true, false)" checked>
+                        <label for="testcode-istesthead">Test Header</label>
+                    }
+                    else
+                    {
+                        <input class="form-check-input" type="checkbox" id="testcode-istesthead" onclick="TestCode_HideButton(true, false, true, false)">
+                        <label for="testcode-istesthead">Test Header</label>
+                    }
+                }
+                else
+                {
+                    <input class="form-check-input" type="checkbox" id="testcode-istesthead" onclick="TestCode_HideButton(true, false, true, false)">
+                    <label for="testcode-istesthead">Test Header</label>
+                }
+            }
+        </div>
+        <div class="div-input-child">
+            @{
+                if (testCode != null)
+                {
+                    if (testCode.IsTestChild)
+                    {
+                        <input class="form-check-input" type="checkbox" id="testcode-istestchild" onclick="TestCode_HideButton(true, false, true, false)" checked>
+                        <label for="testcode-istestchild">Test Child</label>
+                    }
+                    else
+                    {
+                        <input class="form-check-input" type="checkbox" id="testcode-istestchild" onclick="TestCode_HideButton(true, false, true, false)">
+                        <label for="testcode-istestchild">Test Child</label>
+                    }
+                }
+                else
+                {
+                    <input class="form-check-input" type="checkbox" id="testcode-istestchild" onclick="TestCode_HideButton(true, false, true, false)">
+                    <label for="testcode-istestchild">Test Child</label>
+                }
+            }
+        </div>
+        <div class="div-input-child">
+            @{
+                if (testCode != null)
+                {
+                    if (testCode.Active)
+                    {
+                        <input class="form-check-input" type="checkbox" id="testcode-active" onclick="TestCode_HideButton(true, false, true, false)" checked>
+                        <label for="testcode-active">Active</label>
+                    }
+                    else
+                    {
+                        <input class="form-check-input" type="checkbox" id="testcode-active" onclick="TestCode_HideButton(true, false, true, false)">
+                        <label for="testcode-active">Active</label>
+                    }
+                }
+                else
+                {
+                    <input class="form-check-input" type="checkbox" id="testcode-active" onclick="TestCode_HideButton(true, false, true, false)">
+                    <label for="testcode-active">Active</label>
+                }
+            }
+        </div>
+    </div>
+</div>

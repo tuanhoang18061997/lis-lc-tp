@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Xử lý kết quả";
+    Layout = "_LayoutXN";   
+}
+
+<div class="xn-container">
+    <div class="xn-left">
+        <div class="xn-left-search">
+            @await Html.PartialAsync("_XN_Process_Search")
+        </div>
+        <div id="process_listPatient" class="xn-left-list">
+            @await Html.PartialAsync("_XN_Process_ListPatient")
+        </div>
+    </div>
+    <div class="xn-right">
+        <div id="process_patientInfo" class="xn-right-info">
+            @await Html.PartialAsync("_XN_Process_PatientInfo")
+        </div>
+        <div id="process_patientService" class="xn-right-service">
+            <div id="process_xn-right-service-group" class="xn-right-service-group">
+                @await Html.PartialAsync("_XN_Process_GroupButton")
+            </div>
+            <div id="process_xn-right-service-gridview" class="xn-right-service-gridview">
+                @await Html.PartialAsync("_XN_Process_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

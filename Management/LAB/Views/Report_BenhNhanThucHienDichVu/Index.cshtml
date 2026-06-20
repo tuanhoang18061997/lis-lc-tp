@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Báo cáo bệnh nhân thực hiện dịch vụ";
+    Layout = "_LayoutReport";
+}
+
+<div class="report-container">
+    <div id="report-option-search" class="report-option-search">
+        <div class="input1">
+            <label for="report-madotkham">Mã đợt khám</label>
+            <input type="text"
+                   id="report-madotkham"
+                   class="form-control height-28"
+                   placeholder="Nhập MaDotKham (ví dụ: CHUẨN VIỆT 20.21.22/11/2025)" />
+        </div>
+
+        <div class="button-group" style="margin-top: 8px; display: flex; gap: 8px;">
+            <div class="button">
+                <button id="report-search" class="btn btn-success btn-blue" onclick="Report_BenhNhanThucHienDichVu_Search()">
+                    <i class="bi bi-search"></i> Xem báo cáo
+                </button>
+            </div>
+            <div class="button">
+                <button id="report-pdf" class="btn btn-success btn-blue" onclick="Report_BenhNhanThucHienDichVu_PDF()">
+                    <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
+                </button>
+            </div>
+            <div class="button">
+                <button id="report-excel" class="btn btn-success btn-blue" onclick="Report_Excel('xlsx')">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Xuất Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-result" class="report-result">
+        @* Khi load lần đầu, cho hiển thị bảng rỗng *@
+        @await Html.PartialAsync("_ReportBenhNhanThucHienDichVu")
+    </div>
+</div>
+
+@await Html.PartialAsync("_Loading")

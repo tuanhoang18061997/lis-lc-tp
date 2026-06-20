@@ -1,0 +1,47 @@
+﻿@{
+    var lstDevice = ViewData["lstDevice"] as List<Management.Models.Device>;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Từ ngày</div>
+    <div class="div-input">
+        <input type="date" id="resultstandard-from" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+    </div>
+</div>
+<div class="div-lable-input">
+    <div class="div-lable">Đến ngày</div>
+    <div class="div-input">
+        <input type="date" id="resultstandard-to" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Thiết bị</div>
+    <div class="div-input">
+        <select id="resultstandard-device" class="form-select height-28 valid">
+            <option value="" disabled selected>-- Chọn thiết bị --</option>
+            <option value=""></option>
+            @if (lstDevice != null)
+            {
+                foreach (var item in lstDevice)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Seq</div>
+    <div class="div-input">
+        <input type="text" id="resultstandard-seq" class="form-control height-28" value="" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Status (NOT or UPD)</div>
+    <div class="div-input">
+        <input type="text" id="resultstandard-status" class="form-control height-28" value=""/>
+    </div>
+</div>

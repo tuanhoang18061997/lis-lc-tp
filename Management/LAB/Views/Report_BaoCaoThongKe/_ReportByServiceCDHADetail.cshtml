@@ -1,0 +1,345 @@
+﻿@using Management.BL
+@model ServicePatientCDHAResultReport
+
+<style>
+    .sticky-table-wrapper {
+        position: relative;
+        overflow: auto;
+        height: 60vh;
+    }
+
+    .sticky-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .sticky-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f4f4f4;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Cố định 3 cột đầu tiên */
+    .sticky-table thead th:nth-child(1),
+    .sticky-table tbody td:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 9;
+        background-color: #fff;
+    }
+
+    .sticky-table thead th:nth-child(2),
+    .sticky-table tbody td:nth-child(2) {
+        position: sticky;
+        left: 40px;
+        z-index: 9;
+        background-color: #fff;
+    }
+
+    .sticky-table thead th:nth-child(3),
+    .sticky-table tbody td:nth-child(3) {
+        position: sticky;
+        left: 200px;
+        z-index: 9;
+        background-color: #fff;
+    }
+
+    /* Header của các cột cố định có z-index cao hơn */
+    .sticky-table thead th:nth-child(1),
+    .sticky-table thead th:nth-child(2),
+    .sticky-table thead th:nth-child(3) {
+        z-index: 11;
+        background-color: #f4f4f4;
+    }
+
+    /* Border cho cột cố định cuối */
+    .sticky-table th:nth-child(3),
+    .sticky-table td:nth-child(3) {
+        box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-row {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .filter-row .form-group {
+        margin-bottom: 0;
+    }
+
+    .filter-row input,
+    .filter-row select {
+        height: 32px;
+        font-size: 13px;
+    }
+
+    .hidden-row {
+        display: none;
+    }
+</style>
+
+<div class="box box-primary" style="height: 78vh; overflow: hidden;">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            Chi tiết Chẩn đoán hình ảnh:
+            <strong id="service-name-title">
+                @Model.ServiceName
+            </strong>
+            (@Model.FromDate.ToString("dd/MM/yyyy")
+            - @Model.ToDate.ToString("dd/MM/yyyy"))
+        </h3>
+    </div>
+
+    <div class="box-body no-padding">
+        <div class="filter-row">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Tên khách hàng</label>
+                        <input type="text" id="filterPatientNameCDHA" class="form-control" placeholder="Tìm theo tên...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Giới tính</label>
+                        <select id="filterGenderCDHA" class="form-control">
+                            <option value="">-- Tất cả --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Đợt khám</label>
+                        <input type="text" id="filterMaDotKhamCDHA" class="form-control" placeholder="Tìm theo đợt khám...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Mã bệnh án</label>
+                        <input type="text" id="filterMaBenhAnCDHA" class="form-control" placeholder="Tìm theo mã BA...">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Trạng thái kết quả</label>
+                        <select id="filterResultStatusCDHA" class="form-control">
+                            <option value="">Tất cả</option>
+                            <option value="complete">Đủ kết quả</option>
+                            <option value="incomplete">Chưa đủ kết quả</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Từ ngày</label>
+                        <input type="date" id="filterFromDateCDHA" class="form-control"
+                               value="@Model.FromDate.ToString("yyyy-MM-dd")"
+                               min="@Model.FromDate.ToString("yyyy-MM-dd")"
+                               max="@Model.ToDate.ToString("yyyy-MM-dd")">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Đến ngày</label>
+                        <input type="date" id="filterToDateCDHA" class="form-control"
+                               value="@Model.ToDate.ToString("yyyy-MM-dd")"
+                               min="@Model.FromDate.ToString("yyyy-MM-dd")"
+                               max="@Model.ToDate.ToString("yyyy-MM-dd")">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sticky-table-wrapper">
+            <table class="table table-bordered table-striped table-hover sticky-table" id="cdhaTable">
+                <thead>
+                    <tr>
+                        <th style="width:40px; text-align:center;">STT</th>
+                        <th style="min-width:160px;">Tên khách hàng</th>
+                        <th style="min-width:80px;">Giới tính</th>
+                        <th style="min-width:80px;">Ngày sinh</th>
+                        <th style="min-width:100px;">Đợt Khám</th>
+                        <th style="min-width:120px;">Mã bệnh án</th>
+                        <th style="min-width:220px;">Mô tả</th>
+                        <th style="min-width:220px;">Kết luận</th>
+                        <th style="min-width:180px;">Đề nghị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Rows != null && Model.Rows.Any())
+                    {
+                        int index = 1;
+                        foreach (var row in Model.Rows)
+                        {
+                            <tr data-patient-name="@row.PatientName"
+                                data-gender="@row.Gender"
+                                data-age="@row.Age"
+                                data-madotkham="@row.MaDotKham"
+                                data-mabenhan="@row.MaBenhAn"
+                                data-datesearch="@(row.DateSearch?.ToString("yyyy-MM-dd"))">
+                                <td style="text-align:center;" class="stt-column">@index</td>
+                                <td>@row.PatientName</td>
+                                <td>@row.Gender</td>
+                                <td>@row.Age?.ToString("dd/MM/yyyy")</td>
+                                <td>@row.MaDotKham</td>
+                                <td>@row.MaBenhAn</td>
+                                <td>@Html.Raw(row.Description)</td>
+                                <td class="result-column">@row.Result</td>
+                                <td>@row.Suggest</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noDataRowCDHA">
+                            <td colspan="0" class="text-center">
+                                Không có dữ liệu.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+        // Filter table chi tiết dịch vụ cdha
+    $(document).ready(function () {
+        // Hàm cập nhật STT cho bảng CDHA
+        function updateSTT_CDHA() {
+            var index = 1;
+            $('#cdhaTable tbody tr').each(function () {
+                if (!$(this).hasClass('hidden-row') && $(this).find('.stt-column').length > 0) {
+                    $(this).find('.stt-column').text(index);
+                    index++;
+                }
+            });
+        }
+
+        // Hàm kiểm tra row có đủ kết quả không (dựa vào cột Kết luận)
+        function isRowCompleteCDHA(row) {
+            // Lấy giá trị cột "Kết luận" (index 7)
+            var resultValue = row.find('td.result-column').text().trim();
+
+            // Nếu cột "Kết luận" có giá trị (không rỗng, không null) => Đủ kết quả
+            if (resultValue && resultValue !== '' && resultValue !== 'null') {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Filter cho bảng CDHA
+        function filterTableCDHA() {
+            var patientName = $('#filterPatientNameCDHA').val().toLowerCase().trim();
+            var gender = $('#filterGenderCDHA').val().toLowerCase().trim();
+            var maDotKham = $('#filterMaDotKhamCDHA').val().toLowerCase().trim();
+            var maBenhAn = $('#filterMaBenhAnCDHA').val().toLowerCase().trim();
+            var fromDate = $('#filterFromDateCDHA').val();
+            var toDate = $('#filterToDateCDHA').val();
+            var resultStatus = $('#filterResultStatusCDHA').val();
+
+            var visibleCount = 0;
+
+            $('#cdhaTable tbody tr').each(function () {
+                if ($(this).attr('id') === 'noDataRowCDHA') return;
+
+                var row = $(this);
+                var show = true;
+
+                // Filter by patient name
+                if (patientName && row.data('patient-name').toLowerCase().indexOf(patientName) === -1) {
+                    show = false;
+                }
+
+                // Filter by gender
+                if (gender && row.data('gender').toLowerCase() !== gender) {
+                    show = false;
+                }
+
+                // Filter by ma dot kham
+                if (maDotKham && row.data('madotkham').toLowerCase().indexOf(maDotKham) === -1) {
+                    show = false;
+                }
+
+                // Filter by ma benh an
+                if (maBenhAn && row.data('mabenhan').toLowerCase().indexOf(maBenhAn) === -1) {
+                    show = false;
+                }
+
+                // Filter by date range: fromDate <= dateSearch <= toDate
+                var dateSearch = row.data('datesearch');
+                if (dateSearch) {
+                    if (fromDate && dateSearch < fromDate) {
+                        show = false;
+                    }
+                    if (toDate && dateSearch > toDate) {
+                        show = false;
+                    }
+                }
+
+                // Filter by result status (dựa vào cột Kết luận)
+                if (resultStatus) {
+                    var rowComplete = isRowCompleteCDHA(row);
+                    if (resultStatus === 'complete' && !rowComplete) {
+                        show = false;
+                    } else if (resultStatus === 'incomplete' && rowComplete) {
+                        show = false;
+                    }
+                }
+
+                if (show) {
+                    row.removeClass('hidden-row');
+                    visibleCount++;
+                } else {
+                    row.addClass('hidden-row');
+                }
+            });
+
+            // Update no data message colspan
+            updateNoDataColspan();
+
+            // Show/hide no data message
+            if (visibleCount === 0) {
+                if ($('#noDataRowCDHA').length === 0) {
+                    $('#cdhaTable tbody').append('<tr id="noDataRowCDHA"><td colspan="9" class="text-center">Không có dữ liệu phù hợp với bộ lọc.</td></tr>');
+                } else {
+                    $('#noDataRowCDHA').show();
+                }
+            } else {
+                $('#noDataRowCDHA').hide();
+            }
+
+            // Cập nhật lại STT sau khi filter
+            updateSTT_CDHA();
+        }
+
+        function updateNoDataColspan() {
+            var colspan = 9; // Cố định 9 cột cho bảng CDHA
+            $('#noDataRowCDHA td').attr('colspan', colspan);
+        }
+
+        function getVisibleColumnsCount() {
+            return 9; // 9 cột cố định cho bảng CDHA
+        }
+
+        // Bind filter events cho bảng CDHA
+        $('#filterPatientNameCDHA, #filterMaDotKhamCDHA, #filterMaBenhAnCDHA').on('keyup', function () {
+            filterTableCDHA();
+        });
+
+        $('#filterGenderCDHA, #filterFromDateCDHA, #filterToDateCDHA, #filterResultStatusCDHA').on('change', function () {
+            filterTableCDHA();
+        });
+    });
+</script>

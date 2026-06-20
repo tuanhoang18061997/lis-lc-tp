@@ -1,0 +1,42 @@
+﻿@{
+    var category = ViewData["Category"] as Category;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã danh mục</div>
+    <div class="div-input">
+        <input type="text" id="category-code" class="form-control height-28 valid" value="@category?.Code" onkeyup="Category_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên danh mục</div>
+    <div class="div-input">
+        <input type="text" id="category-name" class="form-control height-28 valid" value="@category?.Name" onkeyup="Category_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (category != null)
+            {
+                if (category.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="category-active" onclick="Category_HideButton(true, false, true, false)" checked>
+                    <label for="category-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="category-active" onclick="Category_HideButton(true, false, true, false)">
+                    <label for="category-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="category-active" onclick="Category_HideButton(true, false, true, false)">
+                <label for="category-active">Active</label>
+            }
+        }       
+    </div>
+</div>

@@ -1,0 +1,276 @@
+﻿@{
+    var lstresultCDHAs = ViewData["lstresultCDHAs"] as List<ResultCDHA>;
+    var patientInfos = ViewData["patientInfos"] as Patient;
+}
+<!-- Modal: Import xét nghiệm ngoài -->
+<div class="modal fade" id="modal-import-external" tabindex="-1" role="dialog" aria-labelledby="importExternalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title" id="importExternalLabel">Import kết quả ngoài (PDF)</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true ">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body pt-2">
+                <form id="form-import-external" onsubmit="return false;">
+                    <!-- patientId lấy từ màn hình xử lý -->
+                    <input type="hidden" id="import_patientId" />
+                    <input type="hidden" id="import_idTablePatient" />
+                    <input type="hidden" id="import_patientName" />
+                    <input type="hidden" id="import_maBenhAn" />
+
+                    <div class="form-row row">
+                        <!-- CỘT TRÁI: các input -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tệp PDF kết quả (từ cơ sở ngoài):</label>
+                                <input type="file"
+                                       id="import_pdf_file"
+                                       accept="application/pdf"
+                                       class="form-control"
+                                       onchange="Process_HandlePdfPreview(this)" />
+                                <small class="form-text text-muted">
+                                    Chỉ nhận PDF. Dung lượng lớn vui lòng chờ sau khi nhấn "Import".
+                                </small>
+                            </div>
+                            <div class="form-group" >
+                                <label>Tùy chọn:</label>
+                                <div class="custom-control custom-checkbox" style="display: none">
+                                    <input type="checkbox" checked class="custom-control-input" id="import_overwrite">
+                                    <label class="custom-control-label" for="import_overwrite">
+                                        Ghi đè giá trị đang có (nếu trùng mã xét nghiệm)
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-checkbox mt-2" style="display: none">
+                                    <input type="checkbox" checked class="custom-control-input" id="import_mark_valid">
+                                    <label class="custom-control-label" for="import_mark_valid">
+                                        Đặt trạng thái <em>Valid</em> cho các chỉ số import
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-switch mt-2">
+                                    <input type="checkbox" checked class="custom-control-input" id="import_is_visible_to_user">
+                                    <label class="custom-control-label" for="import_is_visible_to_user">
+                                        Cho phép hiển thị file này cho người dùng
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted ml-1">
+                                    Bật: file sẽ hiển thị trong danh sách cho người dùng. Tắt: chỉ lưu nội bộ trên hệ thống.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- CỘT PHẢI: danh sách PDF đã import -->
+                        <div class="col-md-8">
+                            <label>Các tệp đã import gần đây:</label>
+                            <div id="imported_pdf_list"
+                                 class="border rounded"
+                                 style="height: 180px; overflow:auto; background:#fff;">
+                                <div class="text-muted p-2">Chưa tải danh sách…</div>
+                            </div>
+                            <small class="text-muted">Bấm vào tên tệp để xem trước ở khung dưới.</small>
+                        </div>
+                    </div>
+                    <div class="border rounded p-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>Preview PDF</strong>
+                            <span class="text-muted small">Hiển thị ngay khi bạn chọn file</span>
+                        </div>
+                        <div id="pdfPreview" class="w-100" style="height:70vh; background:#f8f9fa; display:flex; align-items:center; justify-content:center; border:1px dashed #ced4da;">
+                            <em class="text-muted">Chưa có tệp được chọn…</em>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" id="btn_reset_modal_pdf_setting" class="btn btn-success"
+                        onclick="Process_ResetExternalImportMode()" style="margin-right: 3rem;">
+                    Làm mới
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="Process_ResetExternalImportMode()">Đóng</button>
+                <button type="button" id="btn_import_external_pdf" class="btn btn-primary" onclick="Process_SubmitExternalImport()">
+                    <i class="fa fa-cloud-upload mr-1"></i> Import
+                </button>
+                <button type="button" id="btn_save_imported_pdf_setting" class="btn btn-success" onclick="Process_SaveImportedPdfSetting()" style="display:none;">
+                    Lưu
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <div class="left">
+        <div class="list-service">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered" id="ddt_list_service">
+                    <thead>
+                        <tr>
+                            <th style="width:32px; text-align:center;">
+                                <input type="checkbox" id="ddt_chk_all" />
+                            </th>
+                            <th>Dịch vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-gridview-service" class="tbody-service">
+                        @{
+                            if (lstresultCDHAs != null && lstresultCDHAs.Count > 0)
+                            {
+                                var index = 0;
+                                foreach (var item in lstresultCDHAs)
+                                {
+                                    index++;
+                                    // Kiểm tra xem file PDF đã tồn tại chưa
+                                    var isPdfValidated = false;
+                                    if (!string.IsNullOrEmpty(item.KeyResultForHis))
+                                    {
+                                        var categoryCode = item.KeyResultForHis.Split('-').FirstOrDefault()?.ToLower() ?? "ddt";
+                                        var pdfPath = System.IO.Path.Combine("wwwroot", "pdf", categoryCode, $"{item.KeyResultForHis}.pdf");
+                                        isPdfValidated = System.IO.File.Exists(pdfPath);
+                                    }
+                                    <tr id="start-camera" class="row-service" onclick="Process_CheckedBoxOnRow(@item.Id)">
+                                        <td class="td-check">
+                                            <input class="form-check-input ddt-chk-service" type="checkbox" value="@item.Id" id="flexCheckChecked">
+                                        </td>
+                                        <td class="td-name">
+                                            <div class="service-info">
+                                                <span class="serviceName">@item.Service.Name</span>
+                                                <span class="serviceId">Mã dv: @item.Id</span>
+                                            </div>
+                                            @if (item.SignStoreId != 0 && item.SignStatus == 1)
+                                            {
+                                                <span class="digital-sign-icon" title="Đã ký chữ ký điện tử">
+                                                    <i class="bi bi-shield-check text-success"></i>
+                                                    <small class="text-success">Đã ký số</small>
+                                                </span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(item.Description) || !string.IsNullOrEmpty(item.Result))
+                                            {
+                                                <span class="result-status-icon" title="Đã có kết quả (mô tả | kết luận)">
+                                                    <i class="bi bi-check-circle-fill text-info"></i>
+                                                    <small class="text-info">Đã có kết quả (mô tả | kết luận)</small>
+                                                    <small class="text-info-image-count">&nbsp;&nbsp;&nbsp;&nbsp; @item?.ImageCDHAs.Count() hình ảnh</small>
+                                                </span>
+                                            }
+                                            @* Icon đã Valid (PDF) - MỚI THÊM *@
+                                            @if (isPdfValidated)
+                                            {
+                                                <span class="pdf-validated-icon" title="Đã Valid (PDF đã tồn tại)">
+                                                    <i class="bi bi-file-earmark-pdf-fill text-success"></i>
+                                                    <small class="text-success">Đã Valid (PDF)</small>
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="contain-hinh">
+        </div>
+        <!-- Modal Bootstrap -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 100%;">
+                <div class="modal-content">
+                    <div class="modal-header d-flex justify-content-between align-items-center">
+                        <div class="zoom-controls">
+                            <button type="button" class="btn btn-outline-secondary" id="zoomOut" title="Thu nhỏ">
+                                <i class="bi bi-zoom-out"></i>
+                            </button>
+                            <span id="zoomLevel" class="mx-2">100%</span>
+                            <button type="button" class="btn btn-outline-secondary" id="zoomIn" title="Phóng to">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="resetZoom" title="Đặt lại">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center" style="overflow: hidden;">
+                        <img id="modalImage" src="" style="display: block; margin: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Bootstrap -->
+        <div style="float: left; height: 40px">
+            <label for="fileInput" class="custom-upload"><i class="bi bi-upload"></i></label>
+            <input type="file" id="fileInput" name="file" onchange="UploadHinh(this)" title="Tải hình" accept="image/png, image/jpeg">
+            <button id="ddt_process_xem" class="btn btn-success with-2" onclick="XemHinh()" title="Xem hình" style="font-size: 14px">
+                <i class="bi bi-eye"></i>
+            </button>
+            <button id="ddt_process_delete" class="btn btn-danger with-2" onclick="DeleteHinh()" title="Xoá hình" style="font-size: 14px">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        <div class="ecg-tools-row">
+            @{
+                if (patientInfos != null)
+                {
+                    <input id="ddt_text_key" class="form-control" placeholder="Nhập Mã Hồ Sơ Khám (ví dụ: BA0000001)" value="@patientInfos.MaBenhAn">
+                }
+                else
+                {
+                    <input id="ddt_text_key" class="form-control" placeholder="Nhập Mã Hồ Sơ Khám (ví dụ: BA0000001)">
+                }
+            }
+            <button id="ddt_process_reload"
+                    class="btn btn-warning ecg-btn"
+                    onclick="ECGFS.Reload()">
+              <i class="bi bi-arrow-clockwise"></i> Reload ảnh ECG
+            </button>
+
+            <button id="ddt_process_changefolder"
+                    class="btn btn-secondary ecg-btn"
+                    onclick="ECGFS.ChangeFolder()">
+              <i class="bi bi-folder2-open"></i> Đổi thư mục ECG
+            </button>
+
+          <!-- Nhãn hiển thị thư mục đang chọn -->
+            <span id="ecg_current_folder" class="ecg-folder-badge">Chưa chọn thư mục</span>
+        </div>
+    </div>
+    <div class="right">
+        <div class="desscription">
+            <div class="content">
+                <textarea id="ddt_process_description" class="form-control textarea-desscription pading-left-5 pading-right-5" placeholder="Mô tả ..."></textarea>
+                <script>
+                    CKEDITOR.replace('ddt_process_description', {
+                        customConfig: '@Url.Content("~/lib/ckeditor/config.js")',
+                        toolbar: 'Full',
+                        extraPlugins: 'image,table,specialchar' // ép nạp plugin nếu cần
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="result-suggest">
+            <div class="result">
+                <div class="result-title">Kết luận:</div>
+                <textarea id="ddt_process_result" class="form-control textarea-result pading-left-5 pading-right-5" placeholder="Kết luận ..."></textarea>
+            </div>
+            <div class="suggest">
+                <div class="suggest-title">Đề nghị:</div>
+                <textarea id="ddt_process_suggest" class="form-control textarea-suggest pading-left-5 pading-right-5" placeholder="Đề nghị ..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // ECGFS.SetSelectors({ patientCode: '#ddt_process_seq' });
+    $(function () {
+        ECGFS.MountFolderLabel('#ecg_current_folder');
+        ECGFS.SetSelectors({ textKey: '#ddt_text_key' });
+        ECGFS.EnableBarcodeAutoReload({
+            minLen: 6,      // điều chỉnh theo độ dài mã của bạn
+            fastMs: 35,     // 25–45ms là hợp lý tùy scanner
+            endGapMs: 120,  // thời gian nghỉ để kết thúc một lần quét
+            enableGlobalCapture: true
+        });
+    });
+</script>

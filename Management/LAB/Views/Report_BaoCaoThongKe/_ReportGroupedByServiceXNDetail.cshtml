@@ -1,0 +1,556 @@
+﻿@using Management.BL
+@model PatientServiceGroupedResultReport
+<style>
+    .grouped-report-container {
+        /* height: 78vh; */
+        padding-right: 4px;
+    }
+
+    .report-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #fff;
+        padding: 10px 0 12px 0;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 15px;
+    }
+
+    .service-report-block {
+        margin-bottom: 18px;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        overflow: visible;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        background: #fff;
+    }
+
+        .service-report-block .box-header {
+            background: linear-gradient(to right, #f9f9f9, #f3f6f9);
+            border-bottom: 1px solid #e5e5e5;
+            padding: 10px 12px;
+        }
+
+    .service-block-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .service-block-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .service-block-sub {
+        color: #777;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+
+    .service-block-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-collapse-service {
+        border: 1px solid #cfd8dc;
+        background: #fff;
+        color: #34495e;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        outline: none;
+    }
+
+        .btn-collapse-service:hover {
+            background: #f5f7fa;
+        }
+
+    .service-report-block.collapsed .box-body {
+        display: none;
+    }
+
+    .sticky-table-wrapper {
+        overflow-x: auto;
+        overflow-y: visible;
+        width: 100%;
+    }
+
+    .grouped-service-table {
+        margin-bottom: 0;
+        width: max-content;
+        min-width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .grouped-service-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #f8fafc;
+            vertical-align: middle !important;
+            border-bottom: 2px solid #d9e2ec !important;
+            box-shadow: inset 0 -1px 0 #d9e2ec;
+        }
+
+    .service-report-block .sticky-table-wrapper {
+        max-height: 420px;
+        height: fit-content;
+        overflow: auto;
+    }
+
+        .service-report-block .sticky-table-wrapper::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        .service-report-block .sticky-table-wrapper::-webkit-scrollbar-thumb {
+            background: #c7ced6;
+            border-radius: 10px;
+        }
+
+        .service-report-block .sticky-table-wrapper::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+
+    .grouped-service-table tbody tr:hover {
+        background: #fcfcfd;
+    }
+
+    .grouped-service-table td,
+    .grouped-service-table th {
+        white-space: nowrap;
+    }
+
+        .grouped-service-table td.result-cell {
+            min-width: 95px;
+            font-weight: 500;
+        }
+
+    .summary-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #eef5ff;
+        color: #2c5aa0;
+        border: 1px solid #d7e7ff;
+    }
+
+    .toolbar-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+        .toolbar-actions .btn {
+            min-width: 110px;
+        }
+
+    @@media (max-width: 768px) {
+        .service-block-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .service-block-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .grouped-report-container {
+            height: auto;
+            max-height: none;
+        }
+
+        .service-report-block .sticky-table-wrapper {
+            max-height: none;
+        }
+
+        .grouped-service-table thead th {
+            position: static;
+        }
+    }
+</style>
+@if (Model == null)
+{
+    <div class="alert alert-warning">Model đang null.</div>
+    return;
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            Danh sách khách hàng thực hiện xét nghiệm theo từng dịch vụ
+            (@Model.FromDate.ToString("dd/MM/yyyy") - @Model.ToDate.ToString("dd/MM/yyyy"))
+        </h3>
+    </div>
+
+    <div class="box-body">
+        <div class="grouped-report-container">
+            <div class="report-toolbar">
+                <div class="filter-row">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Tên khách hàng</label>
+                                <input type="text" id="globalFilterPatientName" class="form-control" placeholder="Tìm theo tên...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Giới tính</label>
+                                <select id="globalFilterGender" class="form-control">
+                                    <option value="">-- Tất cả --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Mã bệnh án</label>
+                                <input type="text" id="globalFilterMaBenhAn" class="form-control" placeholder="Tìm theo mã BA...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Seq</label>
+                                <input type="text" id="globalFilterSeq" class="form-control" placeholder="Tìm theo Seq...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Dịch vụ</label>
+                                <input type="text" id="globalFilterServiceName" class="form-control" placeholder="Tìm theo dịch vụ...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label style="font-size: 12px;">Trạng thái kết quả</label>
+                                <select id="globalFilterResultStatus" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option value="complete">Đủ kết quả</option>
+                                    <option value="incomplete">Chưa đủ kết quả</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar-actions">
+                        <button type="button" class="btn btn-default btn-sm" id="btnExpandAllServiceBlocks">
+                            Mở tất cả
+                        </button>
+                        <button type="button" class="btn btn-default btn-sm" id="btnCollapseAllServiceBlocks">
+                            Thu gọn tất cả
+                        </button>
+                        <span class="summary-chip">
+                            Tổng dịch vụ: @(Model.Services?.Count ?? 0)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @if (Model.Services != null && Model.Services.Any())
+        {
+            foreach (var service in Model.Services)
+            {
+                var blockId = "service_block_" + service.ServiceId;
+                var tableId = "table_service_" + service.ServiceId;
+                var noDataId = "no_data_" + service.ServiceId;
+
+                <div class="box box-default service-report-block"
+                     id="@blockId"
+                     data-service-name="@(service.ServiceName ?? "")">
+                    <div class="box-header with-border">
+                        <div class="service-block-header">
+                            <h4 class="service-block-title">
+                                Dịch vụ: @service.ServiceName
+                                <span class="service-block-sub">(@(service.Rows?.Count ?? 0) khách hàng)</span>
+                                <span class="service-block-sub">| @(service.TestCodes?.Count ?? 0) chỉ số</span>
+                            </h4>
+
+                            <div class="service-block-actions">
+                                <button type="button"
+                                        class="btn-collapse-service"
+                                        data-target="#@blockId">
+                                    Thu gọn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box-body no-padding">
+                        <div class="sticky-table-wrapper">
+                            <table class="table table-bordered table-striped table-hover grouped-service-table"
+                                   id="@tableId"
+                                   data-service-id="@service.ServiceId">
+                                <thead>
+                                    <tr style="text-align:center; vertical-align:middle;">
+                                        <th style="width:40px; text-align:center;">STT</th>
+                                        <th style="min-width:150px;">Tên khách hàng</th>
+                                        <th style="min-width:80px;">Giới tính</th>
+                                        <th style="min-width:70px;">Tuổi</th>
+                                        <th style="min-width:120px;">Đợt khám</th>
+                                        <th style="min-width:120px;">Mã bệnh án</th>
+                                        <th style="min-width:80px;">Seq</th>
+                                        <th style="min-width:120px;">SID</th>
+                                        <th style="min-width:120px;">Ngày tiếp nhận</th>
+
+                                        @if (service.TestCodes != null && service.TestCodes.Any())
+                                        {
+                                            foreach (var tc in service.TestCodes)
+                                            {
+                                                <th style="text-align:center; white-space:nowrap; min-width:100px;">
+                                                    @tc.Name
+                                                    @if (!string.IsNullOrEmpty(tc.Unit))
+                                                    {
+                                                        <span>(@tc.Unit)</span>
+                                                    }
+                                                </th>
+                                            }
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (service.Rows != null && service.Rows.Any())
+                                    {
+                                        int index = 1;
+                                        foreach (var row in service.Rows)
+                                        {
+                                            <tr class="service-data-row"
+                                                data-patient-name="@(row.PatientName ?? "")"
+                                                data-gender="@(row.Gender ?? "")"
+                                                data-mabenhan="@(row.MaBenhAn ?? "")"
+                                                data-seq="@(row.Seq ?? "")"
+                                                data-servicename="@(service.ServiceName ?? "")"
+                                                data-datesearch="@(row.DateSearch?.ToString("yyyy-MM-dd"))">
+
+                                                <td class="stt-column" style="text-align:center;">@index</td>
+                                                <td>@row.PatientName</td>
+                                                <td>@row.Gender</td>
+                                                <td style="text-align:center;">@row.Age</td>
+                                                <td>@row.MaDotKham</td>
+                                                <td>@row.MaBenhAn</td>
+                                                <td>@row.Seq</td>
+                                                <td>@row.Sid</td>
+                                                <td style="text-align:center;">@(row.DateSearch?.ToString("dd/MM/yyyy"))</td>
+
+                                                @if (service.TestCodes != null && service.TestCodes.Any())
+                                                {
+                                                    foreach (var tc in service.TestCodes)
+                                                    {
+                                                        string value = null;
+                                                        if (row.ResultsByTestCode != null && row.ResultsByTestCode.ContainsKey(tc.Id))
+                                                        {
+                                                            value = row.ResultsByTestCode[tc.Id];
+                                                        }
+
+                                                        <td class="result-cell" style="text-align:center;">@value</td>
+                                                    }
+                                                }
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr class="no-data-row" id="@noDataId">
+                                            <td colspan="@(9 + (service.TestCodes?.Count ?? 0))" class="text-center">
+                                                Không có dữ liệu.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-info">
+                Không có dữ liệu trong khoảng thời gian đã chọn.
+            </div>
+        }
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        function isRowComplete(row) {
+            var isComplete = true;
+
+            row.find('td.result-cell').each(function () {
+                var value = ($(this).text() || '').trim();
+                if (!value || value === '' || value === 'null') {
+                    isComplete = false;
+                    return false;
+                }
+            });
+
+            return isComplete;
+        }
+
+        function updateBlockSTT(table) {
+            var index = 1;
+            table.find('tbody tr.service-data-row:visible').each(function () {
+                $(this).find('.stt-column').text(index);
+                index++;
+            });
+        }
+
+        function updateCollapseButtonText(block) {
+            var button = block.find('.btn-collapse-service').first();
+            if (block.hasClass('collapsed')) {
+                button.text('Mở rộng');
+            } else {
+                button.text('Thu gọn');
+            }
+        }
+
+        function collapseBlock(block) {
+            block.addClass('collapsed');
+            updateCollapseButtonText(block);
+        }
+
+        function expandBlock(block) {
+            block.removeClass('collapsed');
+            updateCollapseButtonText(block);
+        }
+
+        function toggleBlock(block) {
+            if (block.hasClass('collapsed')) {
+                expandBlock(block);
+            } else {
+                collapseBlock(block);
+            }
+        }
+
+        function filterGroupedReport() {
+            var patientName = ($('#globalFilterPatientName').val() || '').toLowerCase().trim();
+            var gender = ($('#globalFilterGender').val() || '').toLowerCase().trim();
+            var maBenhAn = ($('#globalFilterMaBenhAn').val() || '').toLowerCase().trim();
+            var seq = ($('#globalFilterSeq').val() || '').toLowerCase().trim();
+            var serviceName = ($('#globalFilterServiceName').val() || '').toLowerCase().trim();
+            var resultStatus = $('#globalFilterResultStatus').val();
+
+            $('.service-report-block').each(function () {
+                var block = $(this);
+                var blockServiceName = (block.data('service-name') || '').toString().toLowerCase();
+                var table = block.find('table.grouped-service-table');
+                var visibleCount = 0;
+
+                var serviceMatched = true;
+                if (serviceName && blockServiceName.indexOf(serviceName) === -1) {
+                    serviceMatched = false;
+                }
+
+                table.find('tbody tr.service-data-row').each(function () {
+                    var row = $(this);
+                    var show = true;
+
+                    var rowPatientName = (row.data('patient-name') || '').toString().toLowerCase();
+                    var rowGender = (row.data('gender') || '').toString().toLowerCase();
+                    var rowMaBenhAn = (row.data('mabenhan') || '').toString().toLowerCase();
+                    var rowSeq = (row.data('seq') || '').toString().toLowerCase();
+
+                    if (!serviceMatched) {
+                        show = false;
+                    }
+
+                    if (patientName && rowPatientName.indexOf(patientName) === -1) {
+                        show = false;
+                    }
+
+                    if (gender && rowGender !== gender) {
+                        show = false;
+                    }
+
+                    if (maBenhAn && rowMaBenhAn.indexOf(maBenhAn) === -1) {
+                        show = false;
+                    }
+
+                    if (seq && rowSeq.indexOf(seq) === -1) {
+                        show = false;
+                    }
+
+                    if (resultStatus) {
+                        var rowComplete = isRowComplete(row);
+
+                        if (resultStatus === 'complete' && !rowComplete) {
+                            show = false;
+                        }
+                        else if (resultStatus === 'incomplete' && rowComplete) {
+                            show = false;
+                        }
+                    }
+
+                    if (show) {
+                        row.show();
+                        visibleCount++;
+                    } else {
+                        row.hide();
+                    }
+                });
+
+                var noDataRow = block.find('tr.no-data-row');
+
+                if (visibleCount === 0) {
+                    block.hide();
+                } else {
+                    block.show();
+                    noDataRow.hide();
+                    updateBlockSTT(table);
+                }
+            });
+        }
+
+        $(document).on('click', '.btn-collapse-service', function () {
+            var target = $(this).data('target');
+            var block = $(target);
+
+            if (block.length) {
+                toggleBlock(block);
+            }
+        });
+
+        $('#btnExpandAllServiceBlocks').on('click', function () {
+            $('.service-report-block').each(function () {
+                expandBlock($(this));
+            });
+        });
+
+        $('#btnCollapseAllServiceBlocks').on('click', function () {
+            $('.service-report-block').each(function () {
+                collapseBlock($(this));
+            });
+        });
+
+        $('#globalFilterPatientName, #globalFilterMaBenhAn, #globalFilterSeq, #globalFilterServiceName').on('keyup', function () {
+            filterGroupedReport();
+        });
+
+        $('#globalFilterGender, #globalFilterResultStatus').on('change', function () {
+            filterGroupedReport();
+        });
+
+        $('.service-report-block').each(function () {
+            updateCollapseButtonText($(this));
+        });
+
+        filterGroupedReport();
+    });
+</script>

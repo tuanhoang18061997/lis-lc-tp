@@ -1,0 +1,247 @@
+﻿@using Management.BL
+@using Management.Models
+@using Newtonsoft.Json
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    Layout = "_LayoutSettup";
+    ViewData["Title"] = "Cấu hình";
+    var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
+}
+
+<div class="main-parent">
+    <div class="main-child-settup">
+        @{
+            if (_lstUserFunction != null && _lstUserFunction.Count > 0)
+            {
+                var toUser = "ToUser";
+                var imageUser = "User.png";
+                var titleUser = "NGƯỜI DÙNG";
+
+                var toHospital = "ToHospital";
+                var imageHospital = "Hospital.png";
+                var titleHospital = "BỆNH VIỆN";
+
+                var toLocation = "ToLocation";
+                var imageLocation = "Location.png";
+                var titleLocation = "KHOA PHÒNG";
+
+                var toDoctor = "ToDoctor";
+                var imageDoctor = "Doctor.png";
+                var titleDoctor = "BÁC SĨ";
+
+                var toObject = "ToObject";
+                var imageObject = "Object.png";
+                var titleObject = "ĐỐI TƯỢNG";
+
+                var toTestType = "ToTestType";
+                var imageTestType = "TestType.png";
+                var titleTestType = "LOẠI MẪU";
+
+                var toCategory = "ToCategory";
+                var imageCategory = "Category.png";
+                var titleCategory = "DANH MỤC";
+
+                var toService = "ToService";
+                var imageService = "Service.png";
+                var titleService = "DỊCH VỤ";
+
+                var toTestCode = "ToTestCode";
+                var imageTestCode = "TestCode.png";
+                var titleTestCode = "MÃ XN";
+
+                var toServiceTest = "ToServiceTest";
+                var imageServiceTest = "ServiceTest.png";
+                var titleServiceTest = "DV & MÃ XN";
+
+                var toDevice = "ToDevice";
+                var imageDevice = "Device.png";
+                var titleDevice = "THIẾT BỊ";
+
+                var toMap = "ToMap";
+                var imageMap = "Map.png";
+                var titleMap = "MÃ XN MÁY";
+
+                var toSample = "ToSample";
+                var imageSample = "Sample.png";
+                var titleSample = "MẪU KẾT QUẢ";
+
+                var toManageData = "ToManageData";
+                var imageManageData = "ManageData.png";
+                var titleManageData = "DỮ LIỆU";
+
+                var toManageConfigSystem = "ToManageConfigSystem";
+                var imageManageConfigSystem = "ManageConfigSystem.png";
+                var titleManageConfigSystem = "HỆ THỐNG";
+
+                foreach (var item in _lstUserFunction)
+                {
+                    if (item.Function.Code == "User")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toUser">
+                                <img class="card-img-top" src="~/images/logo/@imageUser" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleUser</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Hospital")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toHospital">
+                                <img class="card-img-top" src="~/images/logo/@imageHospital" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleHospital</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Location")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toLocation">
+                                <img class="card-img-top" src="~/images/logo/@imageLocation" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleLocation</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Object")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toObject">
+                                <img class="card-img-top" src="~/images/logo/@imageObject" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleObject</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Doctor")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toDoctor">
+                                <img class="card-img-top" src="~/images/logo/@imageDoctor" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleDoctor</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "TestType")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toTestType">
+                                <img class="card-img-top" src="~/images/logo/@imageTestType" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleTestType</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Category")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toCategory">
+                                <img class="card-img-top" src="~/images/logo/@imageCategory" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleCategory</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Service")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toService">
+                                <img class="card-img-top" src="~/images/logo/@imageService" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleService</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "TestCode")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toTestCode">
+                                <img class="card-img-top" src="~/images/logo/@imageTestCode" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleTestCode</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "ServiceTest")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toServiceTest">
+                                <img class="card-img-top" src="~/images/logo/@imageServiceTest" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleServiceTest</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Device")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toDevice">
+                                <img class="card-img-top" src="~/images/logo/@imageDevice" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleDevice</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Map")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toMap">
+                                <img class="card-img-top" src="~/images/logo/@imageMap" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleMap</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "Sample")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toSample">
+                                <img class="card-img-top" src="~/images/logo/@imageSample" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleSample</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "ManageData")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toManageData">
+                                <img class="card-img-top" src="~/images/logo/@imageManageData" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleManageData</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "ManageConfigSystem")
+                    {
+                        <div class="main-card-settup">
+                            <a asp-controller="Settup" asp-action="@toManageConfigSystem">
+                                <img class="card-img-top" src="~/images/logo/@imageManageConfigSystem" alt="Card image cap">
+                            </a>
+                            <div class="main-card-body-settup">
+                                <h5 class="main-card-title-settup">@titleManageConfigSystem</h5>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>

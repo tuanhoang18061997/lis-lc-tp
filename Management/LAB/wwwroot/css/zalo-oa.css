@@ -1,0 +1,362 @@
+﻿.zalooa-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #1f2937;
+    padding: 6px 12px;
+    min-height: 46px;
+}
+
+.zalooa-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    padding: 8px 16px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+    .zalooa-tab:hover {
+        color: #fff;
+        text-decoration: none;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .zalooa-tab.active {
+        border-color: #ef4444;
+        background: rgba(255,255,255,0.04);
+    }
+
+.zalooa-page {
+    padding: 16px;
+    background: #f3f4f6;
+    min-height: calc(100vh - 46px);
+}
+
+.zalooa-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.zalooa-page__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.zalooa-page__subtitle {
+    margin: 4px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.zalooa-page__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.zalooa-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.zalooa-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.zalooa-card__header {
+    padding: 16px 18px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+    .zalooa-card__header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #111827;
+    }
+
+.zalooa-search {
+    min-width: 240px;
+    max-width: 320px;
+    width: 100%;
+    height: 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 0 12px;
+    outline: none;
+}
+
+    .zalooa-search:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+.zalooa-table-wrap {
+    overflow: auto;
+}
+
+.zalooa-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 860px;
+}
+
+    .zalooa-table thead th {
+        background: #f9fafb;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+    }
+
+    .zalooa-table tbody td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #eef2f7;
+        color: #111827;
+        vertical-align: middle;
+    }
+
+    .zalooa-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+.zalooa-form-panel {
+    position: sticky;
+    top: 16px;
+}
+
+.zalooa-form {
+    padding: 16px 18px 18px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+.form-input {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+    .form-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+.form-textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.form-check-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin: 10px 0 16px;
+}
+
+.form-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.btn {
+    border: none;
+    border-radius: 10px;
+    min-height: 40px;
+    padding: 0 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn--sm {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.btn--primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+    .btn--primary:hover {
+        background: #1d4ed8;
+    }
+
+.btn--secondary {
+    background: #0f766e;
+    color: #fff;
+}
+
+    .btn--secondary:hover {
+        background: #0d5f59;
+    }
+
+.btn--danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+    .btn--danger:hover {
+        background: #b91c1c;
+    }
+
+.btn--info {
+    background: #475569;
+    color: #fff;
+}
+
+    .btn--info:hover {
+        background: #334155;
+    }
+
+.btn--ghost {
+    background: #eef2f7;
+    color: #111827;
+}
+
+    .btn--ghost:hover {
+        background: #e5e7eb;
+    }
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+    .status-badge.is-yes {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-badge.is-no {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.auth-key-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+    .auth-key-wrap .form-input {
+        flex: 1;
+        font-family: monospace;
+        background: #f9fafb;
+    }
+
+.form-note {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+@media (max-width: 1100px) {
+    .zalooa-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .zalooa-form-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .zalooa-page {
+        padding: 12px;
+    }
+
+    .zalooa-page__title {
+        font-size: 20px;
+    }
+
+    .zalooa-card__header,
+    .zalooa-form {
+        padding: 14px;
+    }
+
+    .zalooa-tab {
+        min-width: auto;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .zalooa-search {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .form-actions,
+    .zalooa-page__actions {
+        width: 100%;
+    }
+
+        .form-actions .btn,
+        .zalooa-page__actions .btn {
+            flex: 1 1 auto;
+        }
+}

@@ -1,0 +1,87 @@
+﻿@using Management.BL
+@{
+    var report = ViewData["Report"] as ServiceUsageMatrixReport;
+}
+
+<div class="table-fixed-wrapper">
+    <table id="table-export-to-excel" class="table table-bordered table-striped table-hover table-fixed-service-usage">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th scope="col">STT</th>
+                <th scope="col">SEQ</th>
+                <th scope="col">Mã Bệnh Án</th>
+                <th scope="col">Mã bệnh nhân</th>
+                <th scope="col">Tên bệnh nhân</th>
+
+                @if (report != null && report.Services != null && report.Services.Any())
+                {
+                    foreach (var svc in report.Services)
+                    {
+                        <th scope="col" class="text-center" title="[@svc.ServiceCode] @svc.ServiceName">
+                            <div class="service-code">@svc.ServiceCode</div>
+                            <div class="service-name">@svc.ServiceName</div>
+                        </th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (report == null || report.Rows == null || !report.Rows.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        Không có dữ liệu.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                var index = 1;
+                foreach (var row in report.Rows)
+                {
+                    <tr>
+                        <td>@index</td>
+                        <td>@row.Seq</td>
+                        <td>@row.MaBenhAn</td>
+                        <td>@row.PatientId</td>
+                        <td>@row.PatientName</td>
+
+                        @foreach (var svc in report.Services)
+                        {
+                            string mark = "";
+                            if (row.ServiceMarks != null &&
+                            row.ServiceMarks.TryGetValue(svc.ServiceId, out var value) &&
+                            !string.IsNullOrEmpty(value))
+                            {
+                                mark = value;
+                            }
+
+                            <td class="text-center">@mark</td>
+                        }
+                    </tr>
+                    index++;
+                }
+            }
+        </tbody>
+        @if (report != null && report.Services != null && report.Services.Any())
+        {
+            <tfoot>
+                <tr class="table-footer-total">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="text-end fw-bold">
+                        <i class="bi bi-calculator"></i> TỔNG CỘNG
+                    </td>
+                    @foreach (var svc in report.Services)
+                    {
+                        <td class="text-center fw-bold">
+                            @svc.TotalPatients
+                        </td>
+                    }
+                </tr>
+            </tfoot>
+        }
+    </table>
+</div>

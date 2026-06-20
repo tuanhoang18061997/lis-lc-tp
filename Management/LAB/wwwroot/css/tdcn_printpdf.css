@@ -1,0 +1,424 @@
+﻿/********************************************************************************************** Export Result */
+.hospital-tdcn { /***************************************************** Hospital */
+    width: 100%;
+    height: 70px;
+    float: left;
+    font-family: 'Times New Roman';
+}
+
+    .hospital-tdcn .hospital-logo {
+        width: 260px;
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-tdcn .hospital-logo .image {
+            width: 230px;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .hospital-tdcn .hospital-info {
+        width: calc(100% - 260px);
+        height: 100%;
+        float: left;
+    }
+
+        .hospital-tdcn .hospital-info .hospital-info-name {
+            width: 100%;
+            height: 30px;
+            float: left;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .hospital-tdcn .hospital-info .hospital-info-address {
+            width: 100%;
+            height: 25px;
+            font-size: 18px;
+            float: left;
+        }
+
+        .hospital-tdcn .hospital-info .hospital-info-phonemail {
+            width: 100%;
+            height: 20px;
+            font-size: 18px;
+            float: left;
+        }
+
+    .hospital-tdcn .title-barcode-tdcn {
+        width: 100%;
+        display: flex;
+        align-items: center; /* căn giữa theo chiều dọc */
+        justify-content: center; /* mặc định căn giữa cho .title */
+        position: relative; /* để barcode tuyệt đối trong box */
+        margin-bottom: 6mm;
+        top: 3mm;
+    }
+
+        .hospital-tdcn .title-barcode-tdcn .title {
+            font-size: 25px;
+            font-weight: bold;
+            color: red;
+        }
+
+        .hospital-tdcn .title-barcode-tdcn .barcode {
+            position: absolute;
+            right: 10%; /* dính ddtng phải */
+            top: 50%; /* giữa dòng */
+            transform: translateY(-50%);
+            text-align: center;
+        }
+
+            .hospital-tdcn .title-barcode-tdcn .barcode img {
+                height: 50px;
+                display: block;
+                margin: 0 auto;
+            }
+
+            .hospital-tdcn .title-barcode-tdcn .barcode div {
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+.patient-tdcn { /***************************************************** Patient */
+    width: 100%;
+    margin-top: 15mm; /* tuỳ chỉnh khoảng cách trên */
+    margin-bottom: 1mm; /* thêm chút khoảng cách dưới */
+    font-size: 19px;
+    font-family: 'Times New Roman';
+    /* sửa quan trọng */
+    height: auto; /* bỏ chiều cao cố định */
+    overflow: hidden; /* bao hết float con */
+    float: left;
+    padding: 0; /* đảm bảo không có padding dư */
+}
+    /* Clear float bên trong patient-sa */
+    .patient-tdcn::after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+
+    .patient-tdcn .title {
+        width: 100%;
+        height: 25px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        float: left;
+        text-decoration: underline;
+        color: red;
+    }
+
+    .patient-tdcn .label1 {
+        width: 135px;
+        height: 100%;
+        float: left;
+    }
+
+    .patient-tdcn .label2 {
+        width: 115px;
+        height: 100%;
+        float: left;
+    }
+
+    .patient-tdcn .name-sex-age {
+        width: 100%;
+        height: 30px;
+        float: left;
+    }
+
+        .patient-tdcn .name-sex-age .name {
+            width: 500px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-tdcn .name-sex-age .sex {
+            width: 220px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-tdcn .name-sex-age .age {
+            width: calc(100% - 500px - 220px);
+            height: 100%;
+            float: left;
+        }
+
+    .patient-tdcn .sid-obj {
+        width: 100%;
+        height: 30px;
+        float: left;
+    }
+
+        .patient-tdcn .sid-obj .sid {
+            width: 500px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-tdcn .sid-obj .obj {
+            width: calc(100% - 500px);
+            height: 100%;
+            float: left;
+        }
+
+    .patient-tdcn .address {
+        width: 100%;
+        min-height: 30px;
+        float: left;
+    }
+
+    .patient-tdcn .doctor-location {
+        width: 100%;
+        height: 30px;
+        float: left;
+    }
+
+        .patient-tdcn .doctor-location .doctor {
+            width: 500px;
+            height: 100%;
+            float: left;
+        }
+
+        .patient-tdcn .doctor-location .location {
+            width: calc(100% - 500px);
+            height: 100%;
+            float: left;
+        }
+
+    .patient-tdcn .diagnostic {
+        width: 100%;
+        min-height: 30px;
+        float: left;
+    }
+
+/*Dịch vụ Siêu Âm*/
+.service-tdcn {
+    clear: both;
+    margin-bottom: 3mm;
+    font-size: 19px;
+    font-family: 'Times New Roman';
+}
+
+    .service-tdcn .title {
+        text-decoration: underline;
+        font-weight: bold;
+        color: red;
+    }
+
+    .service-tdcn .service-name {
+        font-weight: 400;
+        color: black;
+    }
+
+.export-result-tdcn { /***************************************************** Result */
+    width: 100%;
+    float: left;
+    font-size: 19px;
+    font-family: 'Times New Roman';
+}
+    /* Hình ảnh */
+    .export-result-tdcn .image {
+        width: 100%;
+        float: left;
+    }
+
+        .export-result-tdcn .image .title {
+            width: 100%;
+            height: 25px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            float: left;
+            color: red;
+            text-decoration: underline;
+        }
+        /* ---- quan trọng: dùng flex để canh ảnh ---- */
+        .export-result-tdcn .image .content {
+            width: 100%;
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* 2 ảnh: dàn đều */
+            gap: 10px; /* tương đương margin-right cũ */
+            flex-wrap: nowrap; /* luôn cùng 1 hàng */
+        }
+
+            /* ảnh */
+            .export-result-tdcn .image .content .image-item {
+                width: 100%;
+                height: 450px;
+                /* bỏ float */
+                display: block;
+                object-fit: fill; /* tránh méo hình nếu cần */
+            }
+
+            /* 1 ảnh: đặt giữa */
+            .export-result-tdcn .image .content > .image-item:only-child {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+    .export-result-tdcn .des-res-sug {
+        width: 100%;
+        float: left;
+        font-family: 'Times New Roman';
+        margin-top: 30px;
+    }
+
+        .export-result-tdcn .des-res-sug .title {
+            width: 100%;
+            height: 25px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            float: left;
+            color: red;
+            text-decoration: underline;
+        }
+
+        .export-result-tdcn .des-res-sug .des {
+            width: 100%;
+            float: left;
+            margin-bottom: 10px;
+        }
+
+            .export-result-tdcn .des-res-sug .des .des-title {
+                width: 100%;
+                float: left;
+                font-weight: bold;
+            }
+
+            .export-result-tdcn .des-res-sug .des .des-content {
+                width: 100%;
+                float: left;
+                padding-left: 10px;
+                padding-right: 20px;
+                font-size: 19px;
+            }
+
+        .export-result-tdcn .des-res-sug .res {
+            width: 100%;
+            float: left;
+            margin-bottom: 10px;
+        }
+
+            .export-result-tdcn .des-res-sug .res .res-title {
+                width: 100%;
+                float: left;
+                font-weight: bold;
+                color: red;
+                text-decoration: underline;
+            }
+
+            .export-result-tdcn .des-res-sug .res .res-content {
+                width: 100%;
+                float: left;
+                padding-left: 10px;
+                padding-right: 20px;
+                white-space: pre-line;
+                color: blue;
+            }
+
+        .export-result-tdcn .des-res-sug .sug {
+            width: 100%;
+            float: left;
+            margin-bottom: 10px;
+        }
+
+            .export-result-tdcn .des-res-sug .sug .sug-title {
+                width: 100%;
+                float: left;
+                font-weight: bold;
+                color: red;
+                text-decoration: underline;
+            }
+
+            .export-result-tdcn .des-res-sug .sug .sug-content {
+                width: 100%;
+                float: left;
+                padding-left: 10px;
+                padding-right: 20px;
+                white-space: pre-line;
+            }
+
+
+/* Toàn bộ khối chữ ký: không cho ngắt trang bên trong, tách khỏi float trước đó */
+.signature-page-tdcn {
+    clear: both;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding-top: 6mm; /* tạo khoảng cách an toàn với phần trên */
+}
+
+    /* 2 cột: bên trái chỉ là khoảng trống, bên phải chứa toàn bộ thông tin */
+    .signature-page-tdcn .signature {
+        display: flex;
+        justify-content: flex-end; /* dồn nội dung sang phải */
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+        /* Cột trái làm “đệm” */
+        .signature-page-tdcn .signature .signature-left {
+            flex: 1 1 auto; /* chiếm phần còn lại để đẩy cột phải sang mép phải */
+        }
+
+        /* Cột phải chứa nội dung chữ ký */
+        .signature-page-tdcn .signature .signature-right {
+            width: 420px; /* tùy trang A4 dọc, bạn có thể 380–460px */
+            text-align: center;
+            font-size: 19px;
+        }
+
+            /* Dòng thời gian */
+            .signature-page-tdcn .signature .signature-right .signature-right-time {
+                line-height: 24px;
+                margin-bottom: 5px;
+            }
+
+            /* Tiêu đề */
+            .signature-page-tdcn .signature .signature-right .signature-right-title {
+                font-weight: 700;
+                line-height: 10px;
+                margin-bottom: 5px;
+            }
+
+            /* Khung ảnh chữ ký – bỏ height cố định để tránh cắt ảnh */
+            .signature-page-tdcn .signature .signature-right .signature-right-cks {
+                /* KHÔNG dùng height: 55px; */
+                min-height: 50px; /* giữ không gian tối thiểu */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                /* Ảnh chữ ký – tự co giãn, không méo, không tràn khung */
+                .signature-page-tdcn .signature .signature-right .signature-right-cks img {
+                    max-width: 80%;
+                    max-height: 100px; /* tăng/giảm nếu ảnh nhỏ/quá to */
+                    height: auto;
+                    width: auto;
+                    object-fit: contain;
+                    image-rendering: -webkit-optimize-contrast;
+                }
+
+            /* Tên bác sĩ – to, rõ, không bị đè */
+            .signature-page-tdcn .signature .signature-right .signature-right-user {
+                font-weight: 700;
+                font-size: 21px;
+                line-height: 24px;
+                margin-top: .1rem;
+            }
+
+/* Khi in PDF, cho phép co giãn tốt hơn để tránh bị cắt */
+@media print {
+    .signature-page-tdcn {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+        .signature-page-tdcn .signature .signature-right .signature-right-cks {
+            min-height: 80px;
+        }
+}

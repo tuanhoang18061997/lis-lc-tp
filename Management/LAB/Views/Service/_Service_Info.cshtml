@@ -1,0 +1,111 @@
+﻿@{
+    var service = ViewData["Service"] as Service;
+    var lstCategory = ViewData["lstCategory"] as List<Category>;
+    var lstPrintSample = ViewData["lstPrintSample"] as List<PrintSample>;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã dịch vụ</div>
+    <div class="div-input">
+        <input type="text" id="service-code" class="form-control height-28 valid" value="@service?.Code" onkeyup="Service_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên dịch vụ</div>
+    <div class="div-input">
+        <input type="text" id="service-name" class="form-control height-28 valid" value="@service?.Name" onkeyup="Service_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Danh mục</div>
+    <div class="div-input">
+        <select required id="service-category" name="category" class="form-select height-28 valid" onchange="Service_HideButton(true, false, true, false)">
+            <option value="" disabled selected>-- Chọn --</option>
+            @if (lstCategory != null)
+            {
+                foreach (var item in lstCategory)
+                {
+                    if (service?.CategoryId == item?.Id)
+                    {
+                        <option selected value="@item.Id">@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Mẫu in</div>
+    <div class="div-input">
+        <select required id="service-printsample" name="printsample" class="form-select height-28 valid" onchange="Service_HideButton(true, false, true, false)">
+            <option value="" disabled selected>-- Chọn --</option>
+            @if (lstPrintSample != null)
+            {
+                foreach (var item in lstPrintSample)
+                {
+                    if (service?.PrintSampleId == item?.Id)
+                    {
+                        <option selected value="@item.Id">@item.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Thứ tự in</div>
+    <div class="div-input">
+        <input type="number" id="service-printorder" class="form-control height-28 valid" value="@service?.PrintOrder" onkeyup="Service_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (service != null)
+            {
+                if (service.ProcessType)
+                {
+                    <input class="form-check-input" type="checkbox" id="service-processtype" onclick="Service_HideButton(true, false, true, false)" checked>
+                    <label for="service-processtype">Process type</label>
+                }
+                else
+                {
+                    <input class="form-check-input" type="checkbox" id="service-processtype" onclick="Service_HideButton(true, false, true, false)">
+                    <label for="service-processtype">Process type</label>
+                }
+
+                if (service.Active)
+                {
+                    <input class="form-check-input" type="checkbox" id="service-active" onclick="Service_HideButton(true, false, true, false)" checked>
+                    <label for="service-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input" type="checkbox" id="service-active" onclick="Service_HideButton(true, false, true, false)">
+                    <label for="service-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input" type="checkbox" id="service-processtype" onclick="Service_HideButton(true, false, true, false)">
+                <label for="service-processtype">Process type</label>
+                <input class="form-check-input" type="checkbox" id="service-active" onclick="Service_HideButton(true, false, true, false)">
+                <label for="service-active">Active</label>
+            }
+        }       
+    </div>
+</div>

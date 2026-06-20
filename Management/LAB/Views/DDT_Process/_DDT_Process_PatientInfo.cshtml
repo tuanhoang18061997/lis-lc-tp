@@ -1,0 +1,202 @@
+﻿@using Management.BL
+@{
+    var patientInfo = ViewData["patientInfo"] as Patient;
+    var lstUser = ViewData["lstUser"] as List<User>;
+    var lstBenhAnModel = ViewData["lstBenhAnModel"] as List<BenhAnModel>;
+    var userLoginId = ViewData["userLoginId"] as long?;
+
+    var age = (patientInfo != null && patientInfo.Age != null) ? patientInfo?.Age?.ToString("dd/MM/yyyy") : string.Empty;
+    var getSampleTimeDDT = (patientInfo != null && patientInfo.GetSampleTimeDDT != null) ? patientInfo?.GetSampleTimeDDT?.ToString("dd/MM/yyy HH:mm") : string.Empty;
+    var returnResultTimeDDT = (patientInfo != null && patientInfo.ReturnResultTimeDDT != null) ? patientInfo?.ReturnResultTimeDDT : DateTime.Now;
+}
+<div class="ddt-right-info-title">
+    THÔNG TIN BỆNH NHÂN
+    @* Add small test portal link next to title *@
+    @if (!string.IsNullOrEmpty(patientInfo?.MaBenhAn))
+    {
+        <a href="javascript:void(0)" onclick="DDT_TestPortalLink()"
+           style="font-size: 12px; margin-left: 10px; color: #007bff; text-decoration: none;"
+           title="Test Portal Link - Kiểm tra portal hoạt động">
+            🔗 Test Portal
+        </a>
+    }
+</div>
+<div class="ddt-right-info-div-1">
+    <div class="ddt-right-info-div-combo-4">
+        <div class="ddt-right-info-div-combo-4-label-age-object">
+            <label>Mã bệnh nhân</label>
+        </div>
+        <div class="ddt-right-info-div-combo-4-input">
+            <input type="text" id="ddt_process_id" hidden value="@patientInfo?.Id" />
+            <input type="text" id="ddt_process_patientId" value="@patientInfo?.PatientId" class="form-control height-28 pading-left-5 " disabled />
+        </div>
+        <div class="ddt-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label>Mã BA</label>
+        </div>
+        <div class="ddt-right-info-div-combo-4-input">
+            <input type="text" id="ddt_process_maBenhAn" value="@patientInfo?.MaBenhAn" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Mã bệnh phẩm</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <div class="ddt-right-info-div-combo-2-input-input1">
+                <input type="text" id="ddt_process_seq" value="@patientInfo?.Seq" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+            </div>
+            <div class="ddt-right-info-div-combo-2-input-input2">
+                <input type="text" id="ddt_process_sid" value="@patientInfo?.Sid" class="form-control height-28 pading-left-5 pading-right-5 border-left-none" disabled />
+            </div>
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Tên bệnh nhân</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <input type="text" id="ddt_process_patientName" value="@patientInfo?.PatientName" class="form-control height-28 pading-left-5 pading-right-5 " disabled />
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-4 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-4-label-age-object">
+            <label>Ngày sinh</label>
+        </div>
+        <div class="ddt-right-info-div-combo-4-input">
+            <input type="text" id="ddt_process_age" value="@age" class="form-control height-28 pading-left-5 " disabled />
+        </div>
+        <div class="ddt-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label>Giới tính</label>
+        </div>
+        <div class="ddt-right-info-div-combo-4-input">
+            <input type="text" id="ddt_process_sex" value="@patientInfo?.Sex" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-4 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-4-label-age-object">
+            <label>Đối tượng</label>
+        </div>
+        <div class="ddt-right-info-div-combo-4-input">
+            <input type="text" id="ddt_process_obj" value="@patientInfo?.Object.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+        <div class="ddt-right-info-div-combo-4-label-sex-benhan pading-left-5">
+            <label> Bệnh án</label>
+        </div>
+        <div class="ddt-right-info-div-combo-4-input">
+            @{
+                if (lstBenhAnModel != null)
+                {
+                    var benhan = lstBenhAnModel.Where(p => p.Id == patientInfo?.BenhAn).FirstOrDefault();
+                    if(benhan != null)
+                    {
+                            <input type="text" id="ddt_process_type" value="@benhan.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+                    }
+                    else
+                    {
+                            <input type="text" id="ddt_process_type" value="" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+                    }
+                }
+                else
+                {
+                        <input type="text" id="ddt_process_type" value="" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+                }
+            }
+        </div>
+    </div>
+</div>
+<div class="ddt-right-info-div-2 pading-left-10">
+    <div class="ddt-right-info-div-combo-2">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Nơi chỉ định</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <input type="text" id="ddt_process_location" value="@patientInfo?.Location?.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div>
+@*     <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>BS chỉ định</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <input type="text" id="ddt_process_doctor" value="@patientInfo?.Doctor?.Name" class="form-control height-28 pading-left-5 pading-right-5" disabled />
+        </div>
+    </div> *@
+    <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Giờ thực hiện</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <input type="text" id="ddt_process_getSampleTime" value="@getSampleTimeDDT" class="form-control height-28 pading-left-5" disabled />
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Giờ trả KQ</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <input type="datetime-local" id="ddt_process_returnResultTime" value="@returnResultTimeDDT?.ToString("yyyy-MM-dd HH:mm")" class="form-control height-28 pading-left-5 valid" onchange="Process_HideButton(true, false, true, false, true, true)" data-toggle="tooltip" title="Giờ trả kết quả là bắt buộc" data-placement="top" />
+        </div>
+    </div>
+     <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>BS thực hiện</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <!-- Hidden giữ userLoginId nếu cần auto-select -->
+            <input type="hidden" id="ddt_process_userLoginId" value="@ViewData["userLoginId"]" />
+            <select id="ddt_process_userReturnResultDDT" name="userReturnResultDDT" class="form-select height-28 valid" data-toggle="tooltip" title="Người trả kết quả là bắt buộc" data-placement="top">
+                @if (lstUser != null)
+                {
+                    var isUserReturnResultDDT = false;
+                    foreach (var item in lstUser)
+                    {
+                        if (item.Id == patientInfo?.UserReturnResultDDT)
+                        {
+                            <option selected value="@item.Id">@item.Name</option>
+                            isUserReturnResultDDT = true;
+                        }
+                        else
+                        {
+                            if (isUserReturnResultDDT == false && userLoginId != null && userLoginId == item.Id)
+                            {
+                                <option selected value="@item.Id">@item.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    }
+                }
+            </select>
+            <!-- Khung hiện thông tin bác sĩ khi đổi -->
+            <div id="ddt_process_doctorInfo" class="mt-2 small text-muted"></div>
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>CCCD</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input">
+            <input id="ddt_process_signerCCCD" class="form-control height-28 pading-left-5 valid" />
+        </div>
+    </div>
+</div>
+<div class="ddt-right-info-div-3 pading-left-10">
+    <div class="ddt-right-info-div-combo-2">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Địa chỉ</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input pading-left-10">
+            <textarea id="ddt_process_address" class="form-control height-30 pading-left-5 pading-right-5" disabled>@patientInfo?.Address</textarea>
+        </div>
+    </div>
+    <div class="ddt-right-info-div-combo-2 div-margin-top-5">
+        <div class="ddt-right-info-div-combo-2-label">
+            <label>Chẩn đoán</label>
+        </div>
+        <div class="ddt-right-info-div-combo-2-input pading-left-10">
+            <textarea id="ddt_process_diagnostic" class="form-control height-30 pading-left-5 pading-right-5" disabled>@patientInfo?.Diagnostic</textarea>
+        </div>
+    </div>
+</div>

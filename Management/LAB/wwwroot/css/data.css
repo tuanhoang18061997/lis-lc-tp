@@ -1,0 +1,1092 @@
+﻿html {
+    font-size: 12px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 1rem;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+.table{
+    color: black !important;
+}
+
+/******************************************************* Select Option*/
+select:required:invalid {
+    color: gray;
+}
+
+option[value=""][disabled] {
+    display: none;
+}
+
+option {
+    color: black;
+}
+
+/******************************************************** Select 2 */
+.select2-results__option {
+    height: 28px;
+    font-size: 0.875rem;
+}
+
+.select2-search__field {
+    font-size: 0.875rem !important;
+}
+
+.select2-container--default .select2-selection--single {
+    border-radius: unset !important;
+    border-color: #808080 !important;
+    padding: 0rem 0.3rem 0.1rem 0rem !important;
+}
+
+    .select2-container--default .select2-selection--single:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7 !important;
+    }
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border: unset;
+}
+
+.select2-selection__arrow {
+    right: 11px !important;
+}
+
+.select2-selection__rendered {
+    color: black !important;
+}
+/******************************************************** Thẻ DIV canh giữa => Bỏ phần tử nào vào trong cũng tự động canh giữa*/
+.div-center {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.div-margin-top-5 {
+    margin-top: 0.313rem;
+}
+
+
+/******************************************************** Thẻ Input trong form*/
+.form-control {
+    border-color: #808080;
+    border-radius: unset;
+    color: black;
+}
+
+    .form-control:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7;
+    }
+
+.form-select {
+    border-color: #808080;
+    border-radius: unset;
+    padding: 0.1rem 0.3rem 0.1rem 0.4rem;
+}
+
+    .form-select:focus {
+        box-shadow: 0rem 0rem 0.063rem 0.063rem #337ab7;
+    }
+
+
+
+
+/******************************************************** Margin */
+.margin-right-10 {
+    margin-right: 0.625rem;
+}
+
+.margin-right-5 {
+    margin-right: 0.312rem;
+}
+
+.margin-bottom-10 {
+    margin-bottom: 0.9rem;
+}
+
+.margin-left-100 {
+    margin-left: 100px;
+}
+
+/********************************************************Pading */
+.pading-left-5 {
+    padding-left: 0.312rem;
+}
+
+.pading-right-5 {
+    padding-right: 0.312rem;
+}
+
+.pading-left-10 {
+    padding-left: 0.624rem;
+}
+
+.pading-right-2 {
+    padding-right: 0.125rem;
+}
+
+.pading-unset {
+    padding: unset;
+}
+/******************************************************** Text color*/
+.text-red {
+    color: red;
+}
+
+/******************************************************** Width - Height*/
+.width-20 {
+    width: 7.53rem;
+}
+
+.width-97 {
+    width: 6.01rem;
+}
+
+.width-95 {
+    width: 5.95rem;
+}
+
+.width-100 {
+    width: 100%;
+}
+
+.height-100 {
+    height: 100% !important;
+}
+
+.height-28 {
+    height: 1.75rem;
+}
+
+.height-60 {
+    height: 3.8rem;
+}
+
+.height-2 {
+    height: 2rem;
+}
+
+.height-160 {
+    height: 10rem;
+}
+
+.height-30 {
+    height: 4.85rem;
+}
+
+
+/******************************************************** Border */
+.border-red {
+    border-color: red;
+}
+
+.border-left-none {
+    border-left: unset !important;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+
+/******************************************************** Account */
+.account {
+    font-size: 0.938rem;
+    margin-bottom: 0.234rem;
+    background-image: url("/images/logo/Background.jpg");
+    /*background-color: #ffffff;*/
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+
+/******************************************************** From Login*/
+.login-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-child {
+    background-color: #ffffff;
+    min-width: 25rem;
+    min-height: 16.875rem;
+    padding: 1.25rem 1.25rem 0.313rem 1.25rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0rem 0rem 0.938rem 0.5rem #808080;
+}
+
+
+/********************************************************* Menu ngang*/
+.menu {
+    width: 100%;
+    display: flex;
+    font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+    font-size: 14px;
+}
+
+
+/********************************************************* Menu ngang left*/
+.menu-left {
+    float: left;
+    flex-grow: 100;
+}
+
+.menu-left-height {
+    height: 2.5rem;
+}
+
+.menu-left-color {
+    color: white;
+}
+
+.hover:hover {
+    background-color: white !important;
+    color: black !important;
+}
+
+.badge-success {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+/********************************************************* Menu ngang right*/
+.menu-right {
+    min-height: 2.5rem;
+    min-width: 14.375rem;
+    float: left;
+    background-color: #337ab7;
+    color: white;
+}
+
+.menu-right-bg {
+    background-color: #337ab7;
+    border: none;
+    padding: 0.5rem 0rem 0.5rem 0.5rem;
+}
+
+.menu-right-width {
+    width: 100%;
+    text-align: left;
+}
+
+.menu-right-height-64 {
+    min-height: 4rem;
+}
+
+.menu-right-height-20 {
+    line-height: 1.25rem;
+    padding-left: 0.5rem;
+}
+
+    .menu-right-height-20:hover {
+        background-color: #337ab7;
+        color: white;
+    }
+
+.menu-right-bg:hover {
+    background-color: #1e65a3;
+    box-shadow: none;
+}
+
+.menu-right-bg:focus {
+    background-color: #1e65a3;
+    box-shadow: none;
+}
+
+/********************************************************* Format cho RenderBody */
+.renderBody {
+    font-size: 0.875rem;
+    color: black;
+    font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+}
+
+    .renderBody .form-control {
+        font-size: 0.875rem;
+    }
+
+    .renderBody .form-select {
+        font-size: 0.875rem;
+    }
+
+    .renderBody .btn-blue {
+        font-size: 0.875rem;
+        height: 1.75rem;
+        background-color: #337ab7;
+        line-height: 0.875rem;
+        border-color: #337ab7;
+        border-radius: unset;
+    }
+
+        .renderBody .btn-blue:hover {
+            background-color: #1e65a3;
+        }
+
+        .renderBody .btn-blue:focus {
+            box-shadow: 0rem 0rem 0.063rem 0.063rem #1e65a3;
+        }
+
+    .renderBody .btn-red {
+        font-size: 0.875rem;
+        height: 1.75rem;
+        line-height: 0.875rem;
+        border-radius: unset;
+    }
+
+        .renderBody .btn-red:hover {
+            background-color: #dc3545;
+        }
+
+        .renderBody .btn-red:focus {
+            box-shadow: 0rem 0rem 0.063rem 0.063rem #dc3545;
+        }
+
+/********************************************************* Main */
+.main-bg {
+    background-color: #666;
+}
+
+.main-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-child-settup {
+    min-width: 76rem;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-left: 4rem;
+    margin-top: 3rem;
+}
+
+.main-card-settup {
+    background-color: #666;
+    width: 7rem;
+    float: left;
+    margin: 1.25rem 2.188rem 0rem 2.188rem;
+    border: none;
+}
+
+.main-card-body-settup {
+    color: white;
+    text-align: center;
+}
+
+.main-card-title-settup {
+    font-size: 1rem;
+    font-weight: normal;
+    padding-top: 0.625rem;
+}
+
+.data-container {
+    width: 100%;
+    margin-top: 0.625rem;
+}
+
+/************************************************************** Result standard*/
+/********************************** Left */
+.data-left-data {
+    width: calc(100% - 300px);
+    height: 100%;
+    float: left;
+    padding-right: 0.313rem;
+}
+
+    .data-left-data .data-left-title-search {
+        width: 100%;
+        height: 1.75rem;
+        float: left;
+        margin-bottom: 5px;
+    }
+
+        .data-left-data .data-left-title-search .title {
+            width: 100%;
+            height: 100%;
+            float: left;
+            line-height: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 0.313rem;
+            background-color: #dce0e0;
+            color: black;
+            padding-left: 0.313rem;
+        }
+
+    .data-left-data .data-left-list {
+        width: 100%;
+        height: calc(100vh - 90px);
+        float: left;
+    }
+
+
+        .data-left-data .data-left-list .table-responsive {
+            padding: 0px;
+            height: 100%;
+        }
+
+        .data-left-data .data-left-list .table-responsive td{
+            line-height: 25px;
+        }
+
+        .data-left-data .data-left-list .table-bordered {
+            border-color: #c5c5c5;
+        }
+
+        .data-left-data .data-left-list .tr-title {
+            background-color: #dce0e0;
+            height: 28px;
+            line-height: 28px;
+        }
+
+        .data-left-data .data-left-list .tr-content {
+            background-color: #eef0f0;
+        }
+
+        .data-left-data .data-left-list .th-checkbox {
+            width: 4%;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-seq {
+            width: 7%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-device {
+            width: 12%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-testcode {
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-testcodein {
+            width: 10%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-result {
+            width: 8%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-posneg {
+            width: 8%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-status {
+            width: 8%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .th-inserttime {
+            width: 15%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-data .data-left-list .td-checkbox {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+        }
+
+
+        .data-left-data .data-left-list .td-seq {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+        }
+
+        .data-left-data .data-left-list .td-device {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: left;
+            padding-left: 5px;
+        }
+
+        .data-left-data .data-left-list .td-testcode {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: left;
+            padding-left: 5px;
+        }
+
+        .data-left-data .data-left-list .td-testcodein {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-data .data-left-list .td-result {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-data .data-left-list .td-posneg {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-data .data-left-list .td-status {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-data .data-left-list .td-inserttime {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+
+/********************************** Right */
+.data-right-data {
+    width: 300px;
+    height: 100%;
+    float: left;
+}
+
+    .data-right-data .data-right-title {
+        width: 100%;
+        height: 1.75rem;
+        float: left;
+        line-height: 1.75rem;
+        font-weight: bold;
+        margin-bottom: 0.313rem;
+        background-color: #dce0e0;
+        color: black;
+        padding-left: 0.313rem;
+    }
+
+    .data-right-data .data-right-info {
+        width: 100%;
+        float: left;
+    }
+
+        .data-right-data .data-right-info .div-lable-input {
+            width: 100%;
+            float: left;
+            margin-bottom: 5px;
+        }
+
+        .data-right-data .data-right-info .div-lable {
+            width: 100%;
+            float: left;
+        }
+
+        .data-right-data .data-right-info .div-input {
+            width: 100%;
+            float: left;
+        }
+
+            .data-right-data .data-right-info .div-input .div-input-child {
+                width: 25%;
+                float: left;
+            }
+
+    .data-right-data .data-right-button {
+        width: 100%;
+        float: left;
+        margin-top: 5px;
+        border-top: 1px solid #808080;
+        padding-top: 10px;
+    }
+
+        .data-right-data .data-right-button button {
+            width: 86.7px;
+            padding: unset;
+        }
+
+#div-sample-description textarea.form-control {
+    height: 284px !important;
+}
+
+/************************************************************** Push Result HIS*/
+/********************************** Left */
+.data-left-pushresulthis {
+    width: calc(100% - 300px);
+    height: 100%;
+    float: left;
+    padding-right: 0.313rem;
+}
+
+    .data-left-pushresulthis .data-left-title-search {
+        width: 100%;
+        height: 1.75rem;
+        float: left;
+        margin-bottom: 5px;
+    }
+
+        .data-left-pushresulthis .data-left-title-search .title {
+            width: 100%;
+            height: 100%;
+            float: left;
+            line-height: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 0.313rem;
+            background-color: #dce0e0;
+            color: black;
+            padding-left: 0.313rem;
+        }
+
+    .data-left-pushresulthis .data-left-list {
+        width: 100%;
+        height: calc(100vh - 90px);
+        float: left;
+    }
+
+
+        .data-left-pushresulthis .data-left-list .table-responsive {
+            padding: 0px;
+            height: 100%;
+        }
+
+            .data-left-pushresulthis .data-left-list .table-responsive td {
+                line-height: 25px;
+            }
+
+        .data-left-pushresulthis .data-left-list .table-bordered {
+            border-color: #c5c5c5;
+        }
+
+        .data-left-pushresulthis .data-left-list .tr-title {
+            background-color: #dce0e0;
+            height: 28px;
+            line-height: 28px;
+        }
+
+        .data-left-pushresulthis .data-left-list .tr-content {
+            background-color: #eef0f0;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-seq {
+            width: 5%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-patientid {
+            width: 7%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-patientname {
+            width: 15%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-ticketid {
+            width: 8%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-ticketitemid {
+            width: 10%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-service {
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-key-pdf {
+            width: 10%;
+            text-wrap-mode: wrap;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-inserttime {
+            width: 14%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .th-push {
+            width: 5%;
+            text-align: center;
+            padding: unset;
+        }
+
+        .data-left-pushresulthis .data-left-list .row-pushresulthis.done {
+            background-color: lemonchiffon;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-seq {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-patientid {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-patientname {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: left;
+            padding-left: 5px;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-ticketid {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-ticketitemid {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-service {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: left;
+            padding-left: 5px;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-inserttime {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        .data-left-pushresulthis .data-left-list .td-push {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: center;
+            padding-left: 5px;
+        }
+
+        /* CSS cho PDF link */
+        .data-left-pushresulthis .data-left-list .pdf-link {
+            color: #337ab7;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+            .data-left-pushresulthis .data-left-list .pdf-link:hover {
+                color: #1e65a3;
+                text-decoration: underline;
+            }
+
+            .data-left-pushresulthis .data-left-list .pdf-link:active {
+                color: #0d4f8b;
+            }
+
+
+/********************************** Right */
+.data-right-pushresulthis {
+    width: 300px;
+    height: 100%;
+    float: left;
+}
+
+    .data-right-pushresulthis .data-right-title {
+        width: 100%;
+        height: 1.75rem;
+        float: left;
+        line-height: 1.75rem;
+        font-weight: bold;
+        margin-bottom: 0.313rem;
+        background-color: #dce0e0;
+        color: black;
+        padding-left: 0.313rem;
+    }
+
+    .data-right-pushresulthis .data-right-info {
+        width: 100%;
+        float: left;
+    }
+
+        .data-right-pushresulthis .data-right-info .div-lable-input {
+            width: 100%;
+            float: left;
+            margin-bottom: 5px;
+        }
+
+        .data-right-pushresulthis .data-right-info .div-lable {
+            width: 100%;
+            float: left;
+        }
+
+        .data-right-pushresulthis .data-right-info .div-input {
+            width: 100%;
+            float: left;
+        }
+
+            .data-right-pushresulthis .data-right-info .div-input .div-input-child {
+                width: 25%;
+                float: left;
+            }
+
+    .data-right-pushresulthis .data-right-button {
+        width: 100%;
+        float: left;
+        margin-top: 5px;
+        border-top: 1px solid #808080;
+        padding-top: 10px;
+    }
+
+        .data-right-pushresulthis .data-right-button button {
+            width: 86.7px;
+            padding: unset;
+        }
+
+#div-sample-description textarea.form-control {
+    height: 284px !important;
+}
+
+/* ===== Existing CSS above... keep all existing code ===== */
+
+/************************************************************** RESPONSIVE - MOBILE */
+
+/* ---- Tablet (≤ 992px) ---- */
+@media (max-width: 992px) {
+
+    /* Menu: chuyển sang dọc */
+    .menu {
+        flex-direction: column;
+    }
+
+    .menu-left {
+        width: 100%;
+        float: none;
+    }
+
+    .menu-right {
+        width: 100%;
+        float: none;
+        min-width: unset;
+    }
+
+    .menu-right-bg {
+        padding: 0.4rem 0.5rem;
+    }
+
+    /* Layout 2 cột → 1 cột */
+    .data-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .data-left-data,
+    .data-left-pushresulthis {
+        width: 100%;
+        float: none;
+        padding-right: 0;
+    }
+
+    .data-right-data,
+    .data-right-pushresulthis {
+        width: 100%;
+        float: none;
+        margin-top: 10px;
+    }
+
+    /* Danh sách bảng: giảm chiều cao cố định */
+    .data-left-data .data-left-list,
+    .data-left-pushresulthis .data-left-list {
+        height: auto;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+}
+
+/* ---- Mobile (≤ 768px) ---- */
+@media (max-width: 768px) {
+
+    /* Navbar brand text nhỏ hơn */
+    .navbar-brand span {
+        font-size: 0.8rem;
+    }
+
+    .menu-left-height {
+        height: auto;
+        min-height: 2.5rem;
+    }
+
+    /* Form input panel: full width */
+    .data-right-data .data-right-info .div-lable-input,
+    .data-right-pushresulthis .data-right-info .div-lable-input {
+        width: 100%;
+    }
+
+    /* Buttons: flex wrap, dễ tap trên mobile */
+    .data-right-data .data-right-button,
+    .data-right-pushresulthis .data-right-button {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+        .data-right-data .data-right-button button,
+        .data-right-pushresulthis .data-right-button button {
+            width: auto;
+            min-width: 90px;
+            flex: 1 1 auto;
+            padding: 0.3rem 0.5rem;
+            min-height: 2.2rem;
+        }
+
+    /* Bảng dữ liệu: cho phép cuộn ngang */
+    .data-left-data .data-left-list .table-responsive,
+    .data-left-pushresulthis .data-left-list .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Bảng: min-width để không bị bóp quá nhỏ */
+    .data-left-data .data-left-list .table,
+    .data-left-pushresulthis .data-left-list .table {
+        min-width: 700px;
+    }
+
+    /* Sticky header vẫn hoạt động khi cuộn dọc */
+    .data-left-data .data-left-list .sticky-top,
+    .data-left-pushresulthis .data-left-list .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    /* Danh sách: giảm chiều cao */
+    .data-left-data .data-left-list,
+    .data-left-pushresulthis .data-left-list {
+        height: auto;
+        max-height: 50vh;
+    }
+
+    /* Container bớt padding */
+    .container-fluid {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    /* Title bar */
+    .data-left-data .data-left-title-search .title,
+    .data-right-data .data-right-title,
+    .data-left-pushresulthis .data-left-title-search .title,
+    .data-right-pushresulthis .data-right-title {
+        font-size: 0.8rem;
+    }
+}
+
+/* ---- Small Mobile (≤ 480px) ---- */
+@media (max-width: 480px) {
+
+    html {
+        font-size: 11px;
+    }
+
+    /* Menu dropdown user */
+    .menu-right {
+        min-width: unset;
+    }
+
+    .menu-right-bg {
+        font-size: 0.75rem;
+    }
+
+    /* Input chiều cao lớn hơn để dễ tap */
+    .form-control.height-28,
+    .form-select.height-28 {
+        height: 2.2rem;
+        font-size: 0.85rem;
+    }
+
+    /* Buttons chiếm full width */
+    .data-right-data .data-right-button button,
+    .data-right-pushresulthis .data-right-button button {
+        flex: 1 1 100%;
+        min-height: 2.5rem;
+        font-size: 0.85rem;
+    }
+
+    /* Bảng: min-width nhỏ hơn cho màn rất nhỏ */
+    .data-left-data .data-left-list .table,
+    .data-left-pushresulthis .data-left-list .table {
+        min-width: 600px;
+    }
+
+    /* Checkbox dễ tap hơn */
+    .td-checkbox .form-check-input {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin: 0 auto;
+    }
+
+    /* Row click area lớn hơn */
+    .row-resultstandard td,
+    .row-pushresulthis td {
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+    }
+}

@@ -1,0 +1,36 @@
+﻿@{
+    var lstServiceTest = ViewData["lstServiceTest"] as List<ServiceTest>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-checkbox" scope="col"></th>
+                <th class="th-id" scope="col">Id</th>
+                <th class="th-code" scope="col">Mã</th>
+                <th class="th-name" scope="col">Tên</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstServiceTest != null && lstServiceTest.Count > 0)
+                {
+                    var index = 0;
+                    foreach (var item in lstServiceTest)
+                    {
+                        index++;
+                        <tr class="row-servicetest-testcode" onclick="ServiceTest_TestCode_CheckedBoxOnRow('@item?.TestCode?.Id')">
+                            <td class="td-checkbox">
+                                <input class="form-check-input" type="checkbox" value="@item?.TestCode?.Id" id="flexCheckChecked">
+                            </td>
+                            <td class="td-id">@item?.TestCode?.Id</td>
+                            <td class="td-code">@item?.TestCode?.Code</td>
+                            <td class="td-name">@item?.TestCode?.Name</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

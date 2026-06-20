@@ -1,0 +1,30 @@
+﻿@using Management.BL
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Đang chờ";
+    Layout = "_LayoutDDT";
+}
+
+<div class="ddt-container">
+    <div class="ddt-left">
+        <div class="ddt-left-search">
+            @await Html.PartialAsync("_DDT_GetSample_Search")
+        </div>
+        <div id="listPatient" class="ddt-left-list">
+            @await Html.PartialAsync("_DDT_GetSample_ListPatient")
+        </div>
+    </div>
+    <div class="ddt-right">
+        <div id="patientInfo" class="ddt-right-info">
+            @await Html.PartialAsync("_DDT_GetSample_PatientInfo")
+        </div>
+        <div id="patientService" class="ddt-right-service">
+            <div id="ddt-right-service-group" class="ddt-right-service-group">
+                @await Html.PartialAsync("_DDT_GetSample_GroupButton")
+            </div>
+            <div id="ddt-right-service-gridview" class="ddt-right-service-gridview">
+                @await Html.PartialAsync("_DDT_GetSample_ListService")
+            </div>
+        </div>
+    </div>
+</div>

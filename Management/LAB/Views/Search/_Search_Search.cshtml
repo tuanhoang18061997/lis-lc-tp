@@ -1,0 +1,23 @@
+﻿<div class="search-right-info-title">DANH SÁCH BỆNH NHÂN</div>
+<div>
+    <input type="text" id="search_pidorseq" class="form-control height-28" placeholder="Tìm theo PID | SEQ | Mã Bệnh Án" />
+</div>
+<div class="div-margin-top-5">
+    <input type="date" id="search_timeSearchFrom" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+</div>
+<div class="div-margin-top-5">
+    <input type="date" id="search_timeSearchTo" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+</div>
+<div class="div-margin-top-5">
+    <select id="search_maDotKham" class="form-control">
+        <option value="">-- Tất cả --</option>
+    </select>
+</div>
+<div class="div-margin-top-5">
+    <button id="search_refresh" class="btn btn-success btn-blue width-20" onclick="Search_Refresh()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+    <button id="search_search" class="btn btn-success btn-blue width-20" onclick="Search_Search()">
+        <i class="bi bi-search"></i> Tìm kiếm
+    </button>
+</div>

@@ -1,0 +1,38 @@
+﻿@{
+    Layout = null;
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var _printTime = (_resultCDHA != null) ? _resultCDHA?.Patient?.ReturnResultTimeSA : DateTime.Now;
+    var _printTimeString = "Ngày " + _printTime?.Day.ToString().PadLeft(2, '0') + " tháng " + _printTime?.Month.ToString().PadLeft(2, '0') + " năm " + _printTime?.Year;
+    var _userReturnResult = (_resultCDHA != null) ? _resultCDHA?.Patient?.UserSA?.Name : string.Empty;
+}
+@model Hospital
+<div class="res-sug">
+    <div class="res">
+        <div class="res-title">IV. Kết luận:</div>
+        <div class="res-content">@_resultCDHA?.Result</div>
+    </div>
+    <div class="sug">
+        <div class="sug-title">Đề nghị:</div>
+        <div class="sug-content">@_resultCDHA?.Suggest</div>
+    </div>
+</div>
+<div class="signature-page-sa">
+    <div class="signature">
+        <div class="signature-left">
+        </div>
+        <div class="signature-right">
+            <div class="signature-right-time">
+                @_printTimeString
+            </div>
+            <div class="signature-right-title">
+                Bác sĩ siêu âm
+            </div>
+            <div class="signature-right-user">
+                @_userReturnResult
+            </div>
+        </div>
+    </div>
+    @*<div class="page">
+        Trang 1/1
+    </div>*@
+</div>

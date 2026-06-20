@@ -1,0 +1,36 @@
+﻿@{
+    var lstSetting = ViewData["lstSetting"] as List<Management.Models.Setting>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-checkbox" scope="col"></th>
+                <th class="th-id" scope="col">Id</th>
+                <th class="th-code" scope="col">Mã</th>
+                <th class="th-name" scope="col">Tên</th> 
+                <th class="th-value" scope="col">Giá trị</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstSetting != null && lstSetting.Count > 0)
+                {
+                    foreach (var item in lstSetting)
+                    {
+                        <tr class="row-setting" onclick="Setting_CheckedBoxOnRow('@item.Code')">
+                            <td class="td-checkbox">
+                                <input class="form-check-input" type="checkbox" value="@item.Code" id="flexCheckChecked">
+                            </td>
+                            <td class="td-id">@item.Id</td>
+                            <td class="td-code">@item.Code</td>
+                            <td class="td-name">@item.Name</td>
+                            <td class="td-value">@item.Value</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

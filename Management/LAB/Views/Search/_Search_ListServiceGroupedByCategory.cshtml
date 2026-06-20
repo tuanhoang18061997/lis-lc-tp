@@ -1,0 +1,222 @@
+﻿@{
+    var lstSearchGrouped = ViewData["lstSearchGrouped"] as List<object>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-number" scope="col">STT</th>
+                <th class="th-name" scope="col">TÊN DANH MỤC / DỊCH VỤ</th>
+                <th class="th-status" scope="col">TRẠNG THÁI</th>
+                <th class="th-print" scope="col">THAO TÁC</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service-grouped">
+            @{
+                if (lstSearchGrouped != null && lstSearchGrouped.Count > 0)
+                {
+                    var index = 0;
+                    
+                    // Group all XN services (IsCategory = true) together
+                    var xnServices = lstSearchGrouped.Where(x => ((dynamic)x).IsCategory == true).ToList();
+                    var otherServices = lstSearchGrouped.Where(x => ((dynamic)x).IsCategory != true).ToList();
+                    
+                    // Show "Xét Nghiệm" group first if there are any XN services
+                    if (xnServices.Any())
+                    {
+                        index++;
+                        var totalXnServices = xnServices.Sum(x => ((dynamic)x).ServiceCount);
+                        var allXnChildServices = new List<dynamic>();
+                        foreach (var xnService in xnServices)
+                        {
+                            var childServices = ((dynamic)xnService).ChildServices;
+                            if (childServices != null)
+                            {
+                                allXnChildServices.AddRange(childServices);
+                            }
+                        }
+                        
+                        <!-- XN Category Group Row -->
+                        <tr class="table-info">
+                            <td class="td-number">@index</td>
+                            <td class="td-name">
+                                <strong>
+                                    <i class="bi bi-flask"></i>
+                                    Xét Nghiệm
+                                </strong>
+                                <span class="badge bg-primary ms-2">@totalXnServices dịch vụ</span>
+
+                                @if (allXnChildServices.Any())
+                                {
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#category-xetnghiem"
+                                                aria-expanded="false">
+                                            <i class="bi bi-chevron-down"></i> Xem chi tiết
+                                        </button>
+                                    </div>
+
+                                    <div class="collapse mt-2" id="category-xetnghiem">
+                                        <div class="card card-body bg-light">
+                                            @foreach (var xnService in xnServices)
+                                            {
+                                                var xnItem = (dynamic)xnService;
+                                                <!-- Sub-category header -->
+                                                <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                                                    <div>
+                                                        <span class="fw-bold text-primary">
+                                                            <i class="bi bi-folder2-open"></i> @xnItem.CategoryName
+                                                            <span class="badge bg-secondary ms-2">@xnItem.ServiceCount dịch vụ</span>
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <button type="button"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                onclick="Search_PrintCategory(@xnItem.CategoryId, @xnItem.ChildServices[0].PatientIdTable)"
+                                                                title="In kết quả theo danh mục @xnItem.CategoryName">
+                                                            <i class="bi bi-printer"></i> In danh mục
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                @foreach (var childService in xnItem.ChildServices)
+                                                {
+                                                    <div class="d-flex justify-content-between align-items-center border-bottom py-2 ms-3">
+                                                        <span>
+                                                            <i class="bi bi-flask"></i>
+                                                            @childService.ServiceName
+                                                            <small class="text-muted ms-2">
+                                                                @if (childService.Status == "Valid")
+                                                                {
+                                                                    <span class="badge bg-success">@childService.Status</span>
+                                                                }
+                                                                else if (childService.Status == "Process")
+                                                                {
+                                                                    <span class="badge bg-warning">@childService.Status</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-secondary">@childService.Status</span>
+                                                                }
+                                                            </small>
+                                                        </span>
+                                                        @if (childService.Status == "Valid")
+                                                        {
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    onclick="Search_PrintChildService(@childService.ServiceId, @childService.PatientIdTable)"
+                                                                    title="In kết quả dịch vụ này">
+                                                                <i class="bi bi-printer"></i>
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </td>
+
+                            @{
+                                // Determine overall status for XN group (use first available status)
+                                var xnGroupStatus = xnServices.First();
+                                var groupStatus = ((dynamic)xnGroupStatus).Status;
+                                // Get KeyResultForHis from any XN service for printing
+                                var firstXnService = ((dynamic)xnServices.First());
+                                var keyResultForHis = firstXnService.ChildServices[0].KeyResultForHis;
+                            }
+
+                            @if (groupStatus == "Wait")
+                            {
+                                <td class="td-status">@groupStatus</td>
+                                <td class="td-print">
+                                    <div class="btn-group" role="group">
+                                        <button type="button"
+                                                class="btn btn-outline-success btn-sm"
+                                                onclick="Search_PrintGroupedXN('@keyResultForHis')"
+                                                title="In tất cả kết quả xét nghiệm">
+                                            <i class="bi bi-printer-fill"></i> In tất cả XN
+                                        </button>
+                                    </div>
+                                </td>
+                            }
+                            else if (groupStatus == "Process")
+                            {
+                                <td class="td-status">@groupStatus</td>
+                                <td class="td-print">
+                                    <div class="btn-group" role="group">
+                                        <button type="button"
+                                                class="btn btn-outline-success btn-sm"
+                                                onclick="Search_PrintGroupedXN('@keyResultForHis')"
+                                                title="In tất cả kết quả xét nghiệm">
+                                            <i class="bi bi-printer-fill"></i> In tất cả XN
+                                        </button>
+                                    </div>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="td-status" style="color: #198754">@groupStatus</td>
+                                <td class="td-print">
+                                    <div class="btn-group" role="group">
+                                        <button type="button"
+                                                class="btn btn-outline-success btn-sm"
+                                                onclick="Search_PrintGroupedXN('@keyResultForHis')"
+                                                title="In tất cả kết quả xét nghiệm">
+                                            <i class="bi bi-printer-fill"></i> In tất cả XN
+                                        </button>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+
+                    // Show other services (non-XN services like CDHA)
+                    foreach (dynamic item in otherServices)
+                    {
+                        index++;
+                        <!-- Individual Service Row (for non-XN services like CDHA) -->
+                        <tr>
+                            <td class="td-number">@index</td>
+                            <td class="td-name">
+                                <i class="bi bi-file-medical"></i>
+                                @item.ServiceName
+                                <small class="text-muted">(@item.CategoryName)</small>
+                            </td>
+
+                            @if (item.Status == "Wait")
+                            {
+                                <td class="td-status">@item.Status</td>
+                                <td class="td-print">
+                                    <button type="button" class="btn btn-outline-success btn-sm" value="@item.KeyResultForHis" onclick="Search_Print(this.value)">
+                                        <i class="bi bi-printer"></i> In
+                                    </button>
+                                </td>
+                            }
+                            else if (item.Status == "Process")
+                            {
+                                <td class="td-status">@item.Status</td>
+                                <td class="td-print">
+                                    <button type="button" class="btn btn-outline-success btn-sm" value="@item.KeyResultForHis" onclick="Search_Print(this.value)">
+                                        <i class="bi bi-printer"></i> In
+                                    </button>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="td-status" style="color: #198754">@item.Status</td>
+                                <td class="td-print">
+                                    <button type="button" class="btn btn-outline-success btn-sm" value="@item.KeyResultForHis" onclick="Search_Print(this.value)">
+                                        <i class="bi bi-printer"></i> In
+                                    </button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

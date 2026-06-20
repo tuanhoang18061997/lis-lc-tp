@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Trả kết quả";
+    Layout = "_LayoutXN";   
+}
+
+<div class="xn-container">
+    <div class="xn-left">
+        <div class="xn-left-search">
+            @await Html.PartialAsync("_XN_ReturnResult_Search")
+        </div>
+        <div id="returnresult_listPatient" class="xn-left-list">
+            @await Html.PartialAsync("_XN_ReturnResult_ListPatient")
+        </div>
+    </div>
+    <div class="xn-right">
+        <div id="returnresult_patientInfo" class="xn-right-info">
+            @await Html.PartialAsync("_XN_ReturnResult_PatientInfo")
+        </div>
+        <div id="returnresult_patientService" class="xn-right-service">
+            <div id="returnresult_xn-right-service-group" class="xn-right-service-group">
+                @await Html.PartialAsync("_XN_ReturnResult_GroupButton")
+            </div>
+            <div id="returnresult_xn-right-service-gridview" class="xn-right-service-gridview">
+                @await Html.PartialAsync("_XN_ReturnResult_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

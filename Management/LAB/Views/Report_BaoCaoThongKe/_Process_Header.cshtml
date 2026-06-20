@@ -1,0 +1,35 @@
+﻿@using Management.BL
+@{
+    Layout = "_LayoutExport_Report";
+    var lstReportResult = ViewData["lstReportResult"] as List<ReportProcess>;
+    var time = "";
+    if(lstReportResult != null && lstReportResult.Count > 0)
+    {
+        time = "Từ ngày " + lstReportResult[0].FromDate + " đến ngày " + lstReportResult[0].ToDate;
+    }
+}
+@model Hospital
+<div class="hospital">
+    <div class="hospital-logo">
+        <img class="image" src="~/images/logo/logo.png" />
+    </div>
+    <div class="hospital-info">
+        <div class="hospital-info-name">
+            @Model.Name.ToUpper()
+        </div>
+        <div class="hospital-info-address">
+            @Model.Address
+        </div>
+        <div class="hospital-info-phonemail">
+            @Model.Phone -  @Model.Email -  @Model.Website
+        </div>
+        <div class="hospital-info-title">
+            <div class="hospital-info-title-text">
+                BÁO CÁO THEO CÔNG THỰC HIỆN
+            </div>
+            <div class="hospital-info-title-time">
+                @time
+            </div>
+        </div>
+    </div>
+</div>

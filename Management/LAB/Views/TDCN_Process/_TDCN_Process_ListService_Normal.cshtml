@@ -1,0 +1,46 @@
+<div class="tdcn-card tdcn-normal-result-card">
+    <div class="tdcn-card-title">
+        <i class="bi bi-pencil-square"></i>
+        <span>Nội dung kết quả</span>
+    </div>
+
+    <div class="tdcn-normal-editor-body">
+        <div class="tdcn-editor-block tdcn-description-block">
+            <div class="tdcn-field-title">Mô tả:</div>
+            <textarea id="tdcn_process_description"
+                      class="form-control textarea-desscription pading-left-5 pading-right-5"
+                      placeholder="Mô tả ..."></textarea>
+            <script>
+                (function () {
+                    if (!window.CKEDITOR) return;
+                    try {
+                        if (CKEDITOR.instances['tdcn_process_description']) {
+                            CKEDITOR.instances['tdcn_process_description'].destroy(true);
+                        }
+                    } catch (e) { }
+
+                    CKEDITOR.replace('tdcn_process_description', {
+                        customConfig: '@Url.Content("~/lib/ckeditor/config.js")',
+                        toolbar: 'Full',
+                        extraPlugins: 'image,table,specialchar'
+                    });
+                })();
+            </script>
+        </div>
+
+        <div class="tdcn-result-suggest-grid">
+            <div class="tdcn-editor-block">
+                <div class="tdcn-field-title">Kết luận:</div>
+                <textarea id="tdcn_process_result"
+                          class="form-control textarea-result pading-left-5 pading-right-5"
+                          placeholder="Kết luận ..."></textarea>
+            </div>
+            <div class="tdcn-editor-block">
+                <div class="tdcn-field-title">Đề nghị:</div>
+                <textarea id="tdcn_process_suggest"
+                          class="form-control textarea-suggest pading-left-5 pading-right-5"
+                          placeholder="Đề nghị ..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>

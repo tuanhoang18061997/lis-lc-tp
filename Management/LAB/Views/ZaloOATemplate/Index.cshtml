@@ -1,0 +1,193 @@
+﻿@model List<Management.Models.ZaloOATemplate>
+
+@{
+    ViewBag.ZaloOATab = "template";
+    Layout = "_LayoutSettupDetail";
+    var items = Model ?? new List<Management.Models.ZaloOATemplate>();
+    var zaloConfigs = ViewBag.ZaloOAConfigs as List<Management.Models.ZaloOAConfig> ?? new List<Management.Models.ZaloOAConfig>();
+}
+
+<link rel="stylesheet" href="~/css/zalo-oa.css" />
+<partial name="~/Views/Shared/_ZaloOATabs.cshtml" />
+
+<div class="zalooa-page">
+    <div class="zalooa-page__header">
+        <div>
+            <h2 class="zalooa-page__title">Quản lý template Zalo OA</h2>
+            <p class="zalooa-page__subtitle">Thiết lập template gửi Zalo OA theo bệnh viện</p>
+        </div>
+    </div>
+
+    <div class="zalooa-layout">
+        <section class="zalooa-card zalooa-list">
+            <div class="zalooa-card__header">
+                <h3>Danh sách template</h3>
+                <input type="text" id="txtSearch" class="zalooa-search" placeholder="Tìm theo mã, tên, title..." />
+            </div>
+
+            <div class="zalooa-table-wrap">
+                <table class="zalooa-table">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Mã</th>
+                            <th>Tên</th>
+                            <th>Config</th>
+                            <th>HospitalId</th>
+                            <th>TemplateZaloId</th>
+                            <th>Title</th>
+                            <th>Mặc định</th>
+                            <th>Kích hoạt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templateTableBody">
+                        @if (items.Any())
+                        {
+                            foreach (var item in items)
+                            {
+                                var configName = zaloConfigs.FirstOrDefault(x => x.Id == item.ZaloOAConfigId)?.Name ?? "";
+                                <tr data-search="@($"{item.Code} {item.Name} {item.TemplateZaloId} {item.Title} {configName}".ToLower())">
+                                    <td>@item.Id</td>
+                                    <td>@item.Code</td>
+                                    <td>@item.Name</td>
+                                    <td>@configName</td>
+                                    <td>@item.HospitalId</td>
+                                    <td>@item.TemplateZaloId</td>
+                                    <td>@item.Title</td>
+                                    <td>
+                                        <span class="status-badge @(item.IsDefault ? "is-yes" : "is-no")">
+                                            @(item.IsDefault ? "Có" : "Không")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge @(item.IsActive ? "is-yes" : "is-no")">
+                                            @(item.IsActive ? "Bật" : "Tắt")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn btn--sm btn--info" onclick="editTemplate(@item.Id)">Sửa</button>
+                                            <button type="button" class="btn btn--sm btn--danger" onclick="deleteTemplate(@item.Id)">Xóa</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" style="text-align:center; padding:24px;">Chưa có dữ liệu template</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="zalooa-card zalooa-form-panel">
+            <div class="zalooa-card__header">
+                <h3>Thông tin template</h3>
+            </div>
+
+            <div class="zalooa-form">
+                <input type="hidden" id="Id" />
+
+                <div class="form-group">
+                    <label for="Code">Mã</label>
+                    <input id="Code" class="form-input" maxlength="50" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Name">Tên</label>
+                    <input id="Name" class="form-input" maxlength="255" />
+                </div>
+
+                <div class="form-group">
+                    <label for="ZaloOAConfigId">ZaloOA Config</label>
+                    <select id="ZaloOAConfigId" class="form-input">
+                        <option value="">-- Chọn cấu hình --</option>
+                        @foreach (var config in zaloConfigs)
+                        {
+                            <option value="@config.Id">@config.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="HospitalId">HospitalId</label>
+                    <input id="HospitalId" class="form-input" type="number" />
+                </div>
+
+                <div class="form-group">
+                    <label for="TemplateZaloId">TemplateZaloId</label>
+                    <input id="TemplateZaloId" class="form-input" maxlength="100" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Title">Title</label>
+                    <input id="Title" class="form-input" maxlength="255" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Content">Content</label>
+                    <textarea id="Content" class="form-input form-textarea" rows="5"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="Notes">Ghi chú</label>
+                    <textarea id="Notes" class="form-input form-textarea" rows="3" maxlength="500"></textarea>
+                </div>
+
+                <div class="form-check-row">
+                    <label class="form-check">
+                        <input type="checkbox" id="IsDefault" />
+                        <span>Mặc định</span>
+                    </label>
+
+                    <label class="form-check">
+                        <input type="checkbox" id="IsActive" checked />
+                        <span>Kích hoạt</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btnNewBottom" class="btn btn--ghost">Làm mới</button>
+                    <button type="button" id="btnSaveBottom" class="btn btn--primary">Lưu template</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script src="~/js/zalo-oa-template.js"></script>
+
+<script>
+    (function () {
+        const txtSearch = document.getElementById("txtSearch");
+        const tbody = document.getElementById("templateTableBody");
+
+        if (txtSearch && tbody) {
+            txtSearch.addEventListener("input", function () {
+                const keyword = (this.value || "").trim().toLowerCase();
+                const rows = tbody.querySelectorAll("tr[data-search]");
+
+                rows.forEach(function (row) {
+                    const searchText = row.getAttribute("data-search") || "";
+                    row.style.display = searchText.indexOf(keyword) >= 0 ? "" : "none";
+                });
+            });
+        }
+
+        const isDefault = document.getElementById("IsDefault");
+        const hospitalId = document.getElementById("HospitalId");
+
+        if (isDefault && hospitalId) {
+            isDefault.addEventListener("change", function () {
+                if (this.checked) {
+                    hospitalId.value = "";
+                }
+            });
+        }
+    })();
+</script>

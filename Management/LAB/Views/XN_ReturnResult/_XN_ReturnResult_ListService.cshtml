@@ -1,0 +1,288 @@
+﻿@using Management.Extensions
+@{
+    var lstresultXNs = ViewData["lstResultXNs"] as List<ResultXN>;
+    var note = ViewData["note"] as String;
+
+    var _groupResultByCategory = lstresultXNs?.GroupBy(p => p.Service.CategoryId); // Bật hiển thị xét nghiệm theo nhóm danh mục
+}
+<!-- Modal: Import xét nghiệm ngoài -->
+<div class="modal fade" id="modal-import-external" tabindex="-1" role="dialog" aria-labelledby="importExternalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title" id="importExternalLabel">Import xét nghiệm ngoài (PDF)</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true ">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body pt-2">
+                <form id="form-import-external" onsubmit="return false;">
+                    <!-- patientId lấy từ màn hình xử lý -->
+                    <input type="hidden" id="import_patientId" />
+                    <input type="hidden" id="import_idTablePatient" />
+                    <input type="hidden" id="import_patientName" />
+                    <input type="hidden" id="import_maBenhAn" />
+
+                    <div class="form-row row">
+                        <!-- CỘT TRÁI: các input -->
+                        @* <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tệp PDF kết quả (từ cơ sở ngoài):</label>
+                                <input type="file"
+                                       id="import_pdf_file"
+                                       accept="application/pdf"
+                                       class="form-control"
+                                       onchange="Process_HandlePdfPreview(this)" />
+                                <small class="form-text text-muted">
+                                    Chỉ nhận PDF. Dung lượng lớn vui lòng chờ sau khi nhấn "Import".
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Nhà cung cấp (Vendor):</label>
+                                <select id="import_vendor" class="form-control">
+                                    <option value="TamAnLab">Tâm An Lab</option>
+                                    <!-- Có thể thêm các vendor khác -->
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tùy chọn:</label>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" checked class="custom-control-input" id="import_overwrite">
+                                    <label class="custom-control-label" for="import_overwrite">
+                                        Ghi đè giá trị đang có (nếu trùng mã xét nghiệm)
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-checkbox mt-2">
+                                    <input type="checkbox" checked class="custom-control-input" id="import_mark_valid">
+                                    <label class="custom-control-label" for="import_mark_valid">
+                                        Đặt trạng thái <em>Valid</em> cho các chỉ số import
+                                    </label>
+                                </div>
+                            </div>
+                        </div> *@
+
+                        <!-- CỘT PHẢI: danh sách PDF đã import -->
+                        <div class="col-md-12">
+                            <label>Các tệp đã import gần đây:</label>
+                            <div id="imported_pdf_list"
+                                 class="border rounded"
+                                 style="height: 180px; overflow:auto; background:#fff;">
+                                <div class="text-muted p-2">Chưa tải danh sách…</div>
+                            </div>
+                            <small class="text-muted">Bấm vào tên tệp để xem trước ở khung dưới.</small>
+                        </div>
+                    </div>
+                    <div class="border rounded p-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong>Preview PDF</strong>
+                            <span class="text-muted small">Hiển thị ngay khi bạn chọn file</span>
+                        </div>
+                        <div id="pdfPreview" class="w-100" style="height:70vh; background:#f8f9fa; display:flex; align-items:center; justify-content:center; border:1px dashed #ced4da;">
+                            <em class="text-muted">Chưa có tệp được chọn…</em>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+ @*                <button type="button" class="btn btn-primary" onclick="Process_SubmitExternalImport()">
+                    <i class="fa fa-cloud-upload mr-1"></i> Import
+                </button> *@
+            </div>
+        </div>
+    </div>
+</div>
+<div class="xn-note">
+    <div class="xn-note-label">
+        <label>Ghi chú</label>
+    </div>
+    <div class="xn-note-input">
+        <input type="text" id="xn_process_note" value="@note" class="form-control height-28 pading-left-5" disabled/>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-number" scope="col"></th>
+                <th class="th-name" scope="col">TÊN XÉT NGHIỆM</th>
+                <th class="th-result" scope="col">KẾT QUẢ</th>
+                <th class="th-defaultvalue" scope="col">CHỈ SỐ BÌNH THƯỜNG</th>
+                <th class="th-unit" scope="col">ĐƠN VỊ</th>
+                <th class="th-validPrint" scope="col">VALID & IN</th>
+                <th class="th-kySo" scope="col">Ký Số</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (_groupResultByCategory != null)
+                {
+                    var index = 0;
+                    var idResult = string.Empty;
+                    var result_posneg = string.Empty;
+
+                    foreach (var _group in _groupResultByCategory)
+                    {
+                        var _results = _group.ToList();
+                        if (_results != null && _results.Count > 0)
+                        {
+                            // Hiển thị tên danh mục
+                            <tr class="tr-category">
+                                <td class="td-category" colspan="7">@_results[0].Service?.Category?.Name.ToUpper()</td>
+                            </tr>
+
+                            foreach (var item in _results)
+                            {
+                                index++;
+                                idResult = "result" + index;
+                                if (!string.IsNullOrEmpty(item.Result) && !string.IsNullOrEmpty(item.PosNeg))
+                                {
+                                    result_posneg = item.PosNeg + " (" + item.Result + ")";
+                                }
+                                else if (!string.IsNullOrEmpty(item.Result) && string.IsNullOrEmpty(item.PosNeg))
+                                {
+                                    result_posneg = item.Result;
+                                }
+                                else if (string.IsNullOrEmpty(item.Result) && !string.IsNullOrEmpty(item.PosNeg))
+                                {
+                                    result_posneg = item.PosNeg;
+                                }
+                                else
+                                {
+                                    result_posneg = string.Empty;
+                                }
+
+                                if (index % 2 != 0)
+                                {
+                                    <tr class="tr-content process-row-result">
+                                        <td class="td-id" hidden>@item.Id</td>
+                                        <td class="td-number">@index</td>
+                                        <td class="td-name-process">@item.TestCode.Name</td>
+                                        @{
+                                            if (item?.Status == 0)
+                                            {
+                                                <td style="color:black" class="td-result-returnresult">@result_posneg</td>
+                                            }
+                                            else if (item?.Status == 1)
+                                            {
+                                                <td style="color:blue" class="td-result-returnresult">@result_posneg</td>
+                                            }
+                                            else if (item?.Status == 2)
+                                            {
+                                                <td style="color:red" class="td-result-returnresult">@result_posneg</td>
+                                            }
+                                        }
+                                        @{
+                                            if (item?.Patient?.Sex == "Nam" && !String.IsNullOrEmpty(item.TestCode.NormalRangeM))
+                                            {
+                                                <td class="td-defaultvalue">@item.TestCode.NormalRangeM</td>
+                                            }
+                                            else if (item?.Patient?.Sex == "Nữ" && !String.IsNullOrEmpty(@item.TestCode.NormalRangeF))
+                                            {
+                                                <td class="td-defaultvalue">@item.TestCode.NormalRangeF</td>
+                                            }
+                                            else
+                                            {
+                                                <td class="td-defaultvalue">@item.TestCode.NormalResult</td>
+                                            }
+                                        }
+                                        <td class="td-unit"><unit text="@item.TestCode.Unit"></unit></td>
+                                        <td class="td-validPrint">
+                                            @{
+                                                if (item.ValidPrint)
+                                                {
+                                                    <input class="form-check-input validPrint" type="checkbox" value="@item.ValidPrint" checked id="flexCheckDefault" disabled>
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-check-input validPrint" type="checkbox" value="@item.ValidPrint" id="flexCheckDefault" disabled>
+                                                }
+                                            }
+                                        </td>
+                                        <td class="td-kySo">
+                                            @{
+                                                if (item.SignStoreId != null)
+                                                {
+                                                    <input class="form-check-input kySo" type="checkbox" value="@item.SignStoreId" checked disabled>
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-check-input kySo" type="checkbox" value="@item.SignStoreId" disabled>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr class="process-row-result">
+                                        <td class="td-id" hidden>@item.Id</td>
+                                        <td class="td-number">@index</td>
+                                        <td class="td-name-process">@item.TestCode.Name</td>
+                                        @{
+                                            if (item?.Status == 0)
+                                            {
+                                                <td style="color:black" class="td-result-returnresult">@result_posneg</td>
+                                            }
+                                            else if (item?.Status == 1)
+                                            {
+                                                <td style="color:blue" class="td-result-returnresult">@result_posneg</td>
+                                            }
+                                            else if (item?.Status == 2)
+                                            {
+                                                <td style="color:red" class="td-result-returnresult">@result_posneg</td>
+                                            }
+                                        }
+                                        @{
+                                            if (item?.Patient?.Sex == "Nam" && !String.IsNullOrEmpty(item.TestCode.NormalRangeM))
+                                            {
+                                                <td class="td-defaultvalue">@item.TestCode.NormalRangeM</td>
+                                            }
+                                            else if (item?.Patient?.Sex == "Nữ" && !String.IsNullOrEmpty(@item.TestCode.NormalRangeF))
+                                            {
+                                                <td class="td-defaultvalue">@item.TestCode.NormalRangeF</td>
+                                            }
+                                            else
+                                            {
+                                                <td class="td-defaultvalue">@item.TestCode.NormalResult</td>
+                                            }
+                                        }
+                                        <td class="td-unit"><unit text="@item.TestCode.Unit"></unit></td>
+                                        <td class="td-validPrint">
+                                            @{
+                                                if (item.ValidPrint)
+                                                {
+                                                    <input class="form-check-input validPrint" type="checkbox" value="@item.ValidPrint" checked id="flexCheckDefault" disabled>
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-check-input validPrint" type="checkbox" value="@item.ValidPrint" id="flexCheckDefault" disabled>
+                                                }
+                                            }
+                                        </td>
+                                        <td class="td-kySo">
+                                            @{
+                                                if (item.SignStoreId != null)
+                                                                {
+                                                    <input class="form-check-input kySo" type="checkbox" value="@item.SignStoreId" checked disabled>
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-check-input kySo" type="checkbox" value="@item.SignStoreId" disabled>
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

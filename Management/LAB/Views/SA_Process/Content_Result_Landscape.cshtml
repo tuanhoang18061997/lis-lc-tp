@@ -1,0 +1,23 @@
+﻿@using Management.Services
+@inject IBarcodeService BarcodeService
+
+@{
+    Layout = null; // <-- quan trọng: không dùng layout ở partial export
+    
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var _serviceCDHA = ViewData["ServiceCDHA"] as Service;
+    var age = _resultCDHA?.Patient?.IsYear == false
+        ? _resultCDHA?.Patient?.Age?.ToString("dd/MM/yyyy")
+        : _resultCDHA?.Patient?.Age?.ToString("yyyy");
+    var code = _resultCDHA?.Patient?.MaBenhAn?.ToString();
+    var barcodeUrl = BarcodeService.Code128PngDataUrl(code, height: 30, scale: 3);
+
+}
+@model Hospital
+<div class="description-sa">
+    <div class="title">III. MÔ TẢ KẾT QUẢ</div>
+    <div class="description-detail">
+        <div class="des-title">Mô tả:</div>
+        <div class="des-content">@Html.Raw(@_resultCDHA?.Description)</div>
+    </div>
+</div>

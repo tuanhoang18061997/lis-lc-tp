@@ -1,0 +1,69 @@
+﻿@{
+    var device = ViewData["Device"] as Management.Models.Device;
+}
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã thiết bị</div>
+    <div class="div-input">
+        <input type="text" id="device-code" class="form-control height-28 valid" value="@device?.Code" onkeyup="Device_HideButton(true, false, true, false)" disabled />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Tên thiết bị</div>
+    <div class="div-input">
+        <input type="text" id="device-name" class="form-control height-28 valid" value="@device?.Name" onkeyup="Device_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Phương thức kết nối</div>
+    <div class="div-input">
+        <input type="text" id="device-protocol" class="form-control height-28 valid" value="@device?.Protocol" onkeyup="Device_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">Mã BHYT</div>
+    <div class="div-input">
+        <input type="text" id="device-codebhyt" class="form-control height-28 valid" value="@device?.CodeBHYT" onkeyup="Device_HideButton(true, false, true, false)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
+    <div class="div-lable">
+        @{
+            if (device != null)
+            {
+                if (device.ProcessQc)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="device-processqc" onclick="Device_HideButton(true, false, true, false)" checked>
+                    <label for="device-processqc">QC (Quanlity control)</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="device-processqc" onclick="Device_HideButton(true, false, true, false)">
+                    <label for="device-processqc">QC (Quanlity control)</label>
+                }
+
+                if (device.Active)
+                {
+                    <input class="form-check-input valid" type="checkbox" id="device-active" onclick="Device_HideButton(true, false, true, false)" checked>
+                    <label for="device-active">Active</label>
+                }
+                else
+                {
+                    <input class="form-check-input valid" type="checkbox" id="device-active" onclick="Device_HideButton(true, false, true, false)">
+                    <label for="device-active">Active</label>
+                }              
+            }
+            else
+            {
+                <input class="form-check-input valid" type="checkbox" id="device-processqc" onclick="Device_HideButton(true, false, true, false)">
+                <label for="device-processqc">QC (Quanlity control)</label>
+                <input class="form-check-input valid" type="checkbox" id="device-active" onclick="Device_HideButton(true, false, true, false)">
+                <label for="device-active">Active</label>
+            }
+        }       
+    </div>
+</div>

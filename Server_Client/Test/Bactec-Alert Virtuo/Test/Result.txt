@@ -1,0 +1,1 @@
+mtrsl|idInstrument 1|iiSIMON|is1|itBC|pi!oRPHaN!|pv!oRPHaN!|psU|si|ci1234|c12020/05/12|c215:23:09|ta|rr16295|tiInstrument 1|tjSIMON|t4F|ogO15|ol5|r12020/05/07|r215:18:05|r32020/05/12|r415:23:09|ts|dtBOTTLE|tuBPF+|tpPRT7N0MT|tg0004054252|te2020/08/21|th2020/05/07|tk17:03:45|td2020/05/13|tm09:12:29|tqFSE|tbPRT7N0MT|rd2020/05/12|ru15:23:09|re120.1|rcNeg|zz|b3

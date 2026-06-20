@@ -1,0 +1,22 @@
+﻿@{
+    var timeSearchFromValue = ViewData["timeSearchFrom"]?.ToString() ?? DateTime.Now.ToString("yyyy-MM-dd");
+    var timeSearchToValue = ViewData["timeSearchTo"]?.ToString() ?? DateTime.Now.ToString("yyyy-MM-dd");
+}
+<div class="sa-right-info-title">DANH SÁCH BỆNH NHÂN</div>
+<div>
+    <input type="text" id="sa_process_pidorseq" class="form-control height-28" placeholder="Tìm theo PID | SEQ | Mã Bệnh Án" />
+</div>
+<div class="div-margin-top-5">
+    <input type="date" id="sa_process_timeSearchFrom" class="form-control height-28" value="@timeSearchFromValue" onchange="Process_SaveDateToSession()" />
+</div>
+<div class="div-margin-top-5">
+    <input type="date" id="sa_process_timeSearchTo" class="form-control height-28" value="@timeSearchToValue" onchange="Process_SaveDateToSession()" />
+</div>
+<div class="div-margin-top-5">
+    <button id="sa_process_refresh" class="btn btn-success btn-blue width-20" onclick="Process_Refresh()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+    <button id="sa_process_search" class="btn btn-success btn-blue width-20" onclick="Process_Search()">
+        <i class="bi bi-search"></i> Tìm kiếm
+    </button>
+</div>

@@ -1,0 +1,113 @@
+﻿@using Management.Models
+@{
+    Layout = null;
+}
+@model Hospital
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xem trước</title>
+    <base href="~/" />
+    <link rel="stylesheet" href="~/css/search-export-child-xn.css" />
+    <style>
+        /* Đảm bảo font chữ được áp dụng toàn bộ trang */
+        html, body {
+            font-family: 'Times New Roman', serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        }
+
+        .no-print {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+
+            .no-print .btn {
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                padding: 8px 16px;
+                margin: 0 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background: #f8f9fa;
+                cursor: pointer;
+            }
+
+                .no-print .btn:hover {
+                    background: #e9ecef;
+                }
+
+            .no-print .btn-primary {
+                background: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+
+                .no-print .btn-primary:hover {
+                    background: #0056b3;
+                }
+
+            .no-print .btn-secondary {
+                background: #6c757d;
+                color: white;
+                border-color: #6c757d;
+            }
+
+                .no-print .btn-secondary:hover {
+                    background: #545b62;
+                }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="btn btn-success" onclick="callValidPrint()">Valid & In</button>
+        <button class="btn btn-secondary" onclick="window.close()">Đóng</button>
+    </div>
+
+    @{
+        ViewData["UseNoLayout"] = true;
+    }
+
+    <!-- Header: luôn ở trên, lặp lại mỗi trang khi in -->
+    <div class="print-header">
+        @await Html.PartialAsync("Header", Model)
+    </div>
+
+    <!-- Nội dung + footer phía dưới header -->
+    <div class="print-body">
+        @await Html.PartialAsync("Content", Model)
+        @await Html.PartialAsync("Footer", Model)
+    </div>
+    <script>
+        function callValidPrint() {
+            if (window.opener && window.opener.Process_ValidPrint) {
+                window.opener.Process_ValidPrint(); // gọi hàm từ cửa sổ cha
+                window.close();
+            } else {
+                alert("Không tìm thấy hàm Process_ValidPrint trong cửa sổ chính.");
+            }
+        }
+    </script>
+</body>
+</html>

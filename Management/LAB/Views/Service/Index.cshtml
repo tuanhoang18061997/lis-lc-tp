@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Quản lý dịch vụ";
+    Layout = "_LayoutSettupDetail";
+    var service = ViewData["Service"] as Service;
+}
+
+<div class="settup-container">
+    <div class="settup-left">
+        <div class="settup-left-title-search">
+            <div class="title">
+                DANH SÁCH DỊCH VỤ
+            </div>
+            <div class="search">
+                <input type="text" id="service-search" class="form-control height-28" onkeyup="Service_Search(this.value)" placeholder="Nhập tên cần tìm kiếm ..." />
+            </div>
+        </div>
+        <div id="service-settup-left-list" class="settup-left-list">
+            @await Html.PartialAsync("_Service_List")
+        </div>
+    </div>
+    <div class="settup-right">
+        <div class="settup-right-title">
+            THÔNG TIN DỊCH VỤ
+        </div>
+        <div id="service-settup-right-info" class="settup-right-info">
+            @await Html.PartialAsync("_Service_Info")
+        </div>
+        <div id="service-settup-right-button" class="settup-right-button">
+            <button id="service-new" class="btn btn-success btn-blue" onclick="Service_New()">
+                <i class="bi bi-person-plus"></i> Mới
+            </button>
+            <button id="service-save" class="btn btn-success btn-blue" onclick="Service_Save()">
+                <i class="bi bi-download"></i> Lưu
+            </button>
+            <button id="service-delete" class="btn btn-success btn-blue" onclick="Service_Delete()">
+                <i class="bi bi-person-x"></i> Xoá
+            </button>
+            <button id="service-cancel" class="btn btn-success btn-blue" onclick="Service_Cancel()">
+                <i class="bi bi-arrow-return-left"></i> Bỏ qua
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+﻿@{
+    Layout = ViewData["UseNoLayout"] != null ? null : "_LayoutExport";
+    var _lstResultXN = ViewData["ListResultXN"] as List<ResultXN>;
+    var _groupResultByCategory = _lstResultXN.GroupBy(p => p.Service.CategoryId);
+    var _printTime = (_lstResultXN != null && _lstResultXN.Count > 0) ? _lstResultXN[0]?.Patient?.ReturnResultTimeXN : DateTime.Now;
+    var _printTimeString = _printTime?.Hour.ToString().PadLeft(2, '0') + ":" + _printTime?.Minute.ToString().PadLeft(2, '0') + ", Ngày " + _printTime?.Day.ToString().PadLeft(2, '0') + " tháng " + _printTime?.Month.ToString().PadLeft(2, '0') + " năm " + _printTime?.Year; 
+    var _userReturnResult = (_lstResultXN != null && _lstResultXN.Count > 0) ? _lstResultXN[0]?.Patient?.UserXN?.Name : string.Empty;
+    var _returnReadResultWithCKS = ViewData["ReturnUser"] as User;
+
+}
+@model Hospital
+<div class="signature-page-xn">
+    <div class="signature">
+        <div class="signature-left">
+        </div>
+        <div class="signature-right">
+            <div class="signature-right-user-check">
+                <label>Người kiểm tra: </label>
+                <span style="text-transform: uppercase">
+                    @(_returnReadResultWithCKS != null ? _returnReadResultWithCKS.Name : _userReturnResult)
+                </span>
+            </div>
+            <div class="signature-right-time">
+                @_printTimeString
+            </div>
+            <div class="signature-right-title">
+                PHÒNG XÉT NGHIỆM
+            </div>
+            <div class="signature-right-cks">
+                @if (_returnReadResultWithCKS != null && !string.IsNullOrEmpty(_returnReadResultWithCKS.Cks))
+                {
+                    <img class="cks-img" src="~/images/cks/@_returnReadResultWithCKS.Cks" />
+                }
+            </div>
+            <div class="signature-right-user">
+                @(_returnReadResultWithCKS != null ? _returnReadResultWithCKS.Name : _userReturnResult)
+            </div>
+        </div>
+    </div>
+    @*<div class="page">
+        Trang 1/1
+    </div>*@
+</div>

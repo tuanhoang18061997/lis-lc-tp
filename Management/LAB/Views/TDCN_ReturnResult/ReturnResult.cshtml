@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Đã xong";
+    Layout = "_LayoutTDCN";
+}
+
+<div class="tdcn-container">
+    <div class="tdcn-left">
+        <div class="tdcn-left-search">
+            @await Html.PartialAsync("_TDCN_ReturnResult_Search")
+        </div>
+        <div id="returnresult_listPatient" class="tdcn-left-list">
+            @await Html.PartialAsync("_TDCN_ReturnResult_ListPatient")
+        </div>
+    </div>
+    <div class="tdcn-right">
+        <div id="returnresult_patientInfo" class="tdcn-right-info">
+            @await Html.PartialAsync("_TDCN_ReturnResult_PatientInfo")
+        </div>
+        <div id="returnresult_patientService" class="tdcn-right-service">
+            <div id="returnresult_tdcn-right-service-group" class="tdcn-right-service-group">
+                @await Html.PartialAsync("_TDCN_ReturnResult_GroupButton")
+            </div>
+            <div id="returnresult_tdcn-right-service-gridview" class="tdcn-right-service-gridview">
+                @await Html.PartialAsync("_TDCN_ReturnResult_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

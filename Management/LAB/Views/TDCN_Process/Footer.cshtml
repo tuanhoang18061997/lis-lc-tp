@@ -1,0 +1,35 @@
+@{
+    Layout = "_LayoutExport";
+    var _resultCDHA = ViewData["ResultCDHA"] as ResultCDHA;
+    var _printTime = (_resultCDHA != null) ? _resultCDHA?.Patient?.ReturnResultTimeTDCN : DateTime.Now;
+    var _printTimeString = "Ngày " + _printTime?.Day.ToString().PadLeft(2, '0') + " tháng " + _printTime?.Month.ToString().PadLeft(2, '0') + " năm " + _printTime?.Year;
+    var _userReturnResult = (_resultCDHA != null) ? _resultCDHA?.Patient?.UserTDCN?.Name : string.Empty;
+    var _returnReadResultWithCKS = ViewData["ReturnUser"] as User;
+}
+@model Hospital
+<div class="signature-page-tdcn">
+    <div class="signature">
+        <div class="signature-left">
+        </div>
+        <div class="signature-right">
+            <div class="signature-right-time">
+                @_printTimeString
+            </div>
+            <div class="signature-right-title">
+                BÁC SĨ TRẢ KẾT QUẢ
+            </div>
+            <div class="signature-right-cks">
+                @if (_returnReadResultWithCKS != null && !string.IsNullOrEmpty(_returnReadResultWithCKS.Cks))
+                {
+                    <img class="cks-img" src="~/images/cks/@_returnReadResultWithCKS.Cks" />
+                }
+            </div>
+            <div class="signature-right-user">
+                @(_returnReadResultWithCKS != null ? _returnReadResultWithCKS.Name : _userReturnResult)
+            </div>
+        </div>
+    </div>
+    @*<div class="page">
+        Trang 1/1
+    </div>*@
+</div>

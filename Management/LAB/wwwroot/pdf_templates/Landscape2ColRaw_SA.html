@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <!-- CSS gốc hiện có -->
+    <!--<link rel="stylesheet" href="{{BASE_URL}}/css/sa.css" />-->
+    <!-- CSS in ngang + 2 cột + chống ngắt trang (mới) -->
+    <link rel="stylesheet" href="{{BASE_URL}}/css/sa.print.landscape.css" />
+</head>
+<body class="pdf-landscape">
+    <!-- Nội dung bạn đã render sẵn -->
+    <div class="pdf-container">
+        <div class="sa-left">
+            {{HEADER}}
+            {{CONTENT_RESULT}}
+        </div>
+        <div class="sa-right">
+            {{CONTENT_IMAGE}}
+            {{FOOTER}}
+        </div>
+    </div>
+
+
+
+    <!-- Clear float để đảm bảo tính toán chiều cao đúng -->
+    <div class="clearfix"></div>
+</body>
+</html>

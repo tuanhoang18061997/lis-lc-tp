@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Đã xong";
+    Layout = "_LayoutNS";   
+}
+
+<div class="ns-container">
+    <div class="ns-left">
+        <div class="ns-left-search">
+            @await Html.PartialAsync("_NS_ReturnResult_Search")
+        </div>
+        <div id="returnresult_listPatient" class="ns-left-list">
+            @await Html.PartialAsync("_NS_ReturnResult_ListPatient")
+        </div>
+    </div>
+    <div class="ns-right">
+        <div id="returnresult_patientInfo" class="ns-right-info">
+            @await Html.PartialAsync("_NS_ReturnResult_PatientInfo")
+        </div>
+        <div id="returnresult_patientService" class="ns-right-service">
+            <div id="returnresult_ns-right-service-group" class="ns-right-service-group">
+                @await Html.PartialAsync("_NS_ReturnResult_GroupButton")
+            </div>
+            <div id="returnresult_ns-right-service-gridview" class="ns-right-service-gridview">
+                @await Html.PartialAsync("_NS_ReturnResult_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("_Loading")

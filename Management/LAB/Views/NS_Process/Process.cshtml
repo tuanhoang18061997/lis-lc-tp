@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Đang thực hiện";
+    Layout = "_LayoutNS";   
+    var lstDevice = ViewData["lstDevice"] as List<Device>;
+}
+
+<div class="ns-container">
+    <div class="ns-left">
+        <div class="ns-left-search">
+            @await Html.PartialAsync("_NS_Process_Search")
+        </div>
+        <div id="process_listPatient" class="ns-left-list">
+            @await Html.PartialAsync("_NS_Process_ListPatient")
+        </div>
+    </div>
+    <div class="ns-right">
+        <div id="process_patientInfo" class="ns-right-info">
+            @await Html.PartialAsync("_NS_Process_PatientInfo")
+        </div>
+        <div id="process_patientService" class="ns-right-service">
+            <div id="process_ns-right-service-group" class="ns-right-service-group">
+                @await Html.PartialAsync("_NS_Process_GroupButton")
+            </div>
+            <div id="process_ns-right-service-gridview" class="ns-right-service-gridview">
+                @await Html.PartialAsync("_NS_Process_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Loading")
+
+<!-- From chọn Device -->
+<div class="modal" id="addDeviceForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="ns-right-select-device-title">
+                <div class="title">CHỌN THIẾT BỊ</div>
+            </div>
+            <div class="ns-right-select-device">
+                <div class="title">Thiết bị</div>
+                <div class="content">
+                    <select id="ns_getsample_select_device_select" name="ns_getsample_select_device_select" class="form-select height-28">
+                        <option value=""></option>
+                        @if (lstDevice != null)
+                        {
+                            foreach (var item in lstDevice)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="ns-right-select-device-button">
+                <button id="ns_getsample_select_device_button" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="Process_SelectDevice()">
+                    <i class="bi bi-download"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- From chọn Device -->

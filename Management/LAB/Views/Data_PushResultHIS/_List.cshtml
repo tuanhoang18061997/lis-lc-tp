@@ -1,0 +1,54 @@
+﻿@{
+    var lstValue = ViewData["lstPushResultHIS"] as List<Management.BL.PushResultHIS>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover pushresulthis">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-seq" scope="col">Seq / Sid</th>
+                <th class="th-patientid" scope="col">Mã BN</th>
+                <th class="th-patientname" scope="col">Tên BN</th>    
+                <th class="th-ticketid" scope="col">Ticket Id</th>
+                <th class="th-ticketitemid" scope="col">Ticket Item Id</th>
+                <th class="th-service" scope="col">Dịch vụ</th>
+                <th class="th-key-pdf" scope="col">Mã PDF</th>
+                <th class="th-inserttime" scope="col">Ngày chỉ định</th>
+                <th class="th-push" scope="col">Type</th>
+                <th class="th-statusValid" scope="col">Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstValue != null && lstValue.Count > 0)
+                {
+                    foreach (var item in lstValue)
+                    {
+                        <tr class="row-pushresulthis @(item?.Push == "1" ? "done" : "")">
+                            <td class="td-seq">
+                                <span>@item?.Seq</span>
+                                <span style="font-style: italic">@item?.Sid</span>
+                            </td>
+                            <td class="td-patientid">@item?.PatientId</td>
+                            <td class="td-patientname">@item?.PatientName</td>
+                            <td class="td-ticketid">@item?.TicketId</td>
+                            <td class="td-ticketitemid">@item?.TicketItemId</td>
+                            <td class="td-service">@item?.ServiceCode -  @item?.Service</td>
+                            <td class="td-pdf">
+                                @if (!string.IsNullOrEmpty(item?.KeyResultForHis))
+                                {
+                                    <a href="javascript:void(0);" class="pdf-link" onclick="PushResultHIS_OpenPdf('@item.KeyResultForHis')" title="Click để xem PDF">
+                                        @item.KeyResultForHis
+                                    </a>
+                                }
+                            </td>
+                            <td class="td-inserttime">@item?.InsertTime</td>
+                            <td class="td-push">@item?.Push</td>
+                            <td class="td-statusValid">@(item?.Push == "1" ? "✔ Đã Valid" : "✖ Chưa Valid")</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

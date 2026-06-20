@@ -1,0 +1,69 @@
+﻿@using Management.BL
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Đang chờ";
+    Layout = "_LayoutSAT";   
+    var lstDevice = ViewData["lstDevice"] as List<Device>;
+    var deviceId = HttpContextAccessor.HttpContext.Request.Cookies[SessionKeyModel._sessionDeviceSA];
+}
+
+<div class="sat-container">
+    <div class="sat-left">
+        <div class="sat-left-search">
+            @await Html.PartialAsync("_SA_TIM_GetSample_Search")
+        </div>
+        <div id="listPatient" class="sat-left-list">
+            @await Html.PartialAsync("_SA_TIM_GetSample_ListPatient")
+        </div>
+    </div>
+    <div class="sat-right">
+        <div id="patientInfo" class="sat-right-info">
+            @await Html.PartialAsync("_SA_TIM_GetSample_PatientInfo")
+        </div>
+        <div id="patientService" class="sat-right-service">
+            <div id="sat-right-service-group" class="sat-right-service-group">
+                @await Html.PartialAsync("_SA_TIM_GetSample_GroupButton")
+            </div>
+            <div id="sat-right-service-gridview" class="sat-right-service-gridview">
+                @await Html.PartialAsync("_SA_TIM_GetSample_ListService")
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    if (lstDevice != null && string.IsNullOrEmpty(deviceId))
+    {
+        <!-- From chọn Device -->
+        <div class="modal" id="addDeviceForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="sat-right-select-device-title">
+                        <div class="title">CHỌN THIẾT BỊ</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="sat-right-select-device">
+                        <div class="title">Thiết bị</div>
+                        <div class="content">
+                            <select id="sat_getsample_select_device_select" name="sat_getsample_select_device_select" class="form-select height-28">
+                                @if (lstDevice != null)
+                                {
+                                    foreach (var item in lstDevice)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sat-right-select-device-button">
+                        <button id="sat_getsample_select_device_button" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="GetSample_SelectDevice()">
+                            <i class="bi bi-download"></i> Lưu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- From chọn Device -->
+    }
+}

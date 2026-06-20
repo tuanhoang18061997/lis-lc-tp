@@ -1,0 +1,67 @@
+﻿@{
+    var lstresultCDHAs = ViewData["lstresultCDHAs"] as List<ResultCDHA>;
+    var lstService = ViewData["lstService"] as List<Service>;
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="sticky-top">
+            <tr class="tr-title">
+                <th class="th-number" scope="col">STT</th>
+                <th class="th-name" scope="col">TÊN DỊCH VỤ</th>
+                <th class="th-delete" scope="col"></th>
+            </tr>
+        </thead>
+        <tbody id="tbody-gridview-service">
+            @{
+                if (lstresultCDHAs != null && lstresultCDHAs.Count > 0)
+                {
+                    var index = 0;
+                    foreach (var item in lstresultCDHAs)
+                    {
+                        index++;
+                        <tr>
+                            <td class="td-number">@index</td>
+                            <td class="td-name">@item.Service.Name</td>
+                            <td class="td-delete">
+                                <button type="button" class="btn btn-outline-danger btn-red-in-gridview" value="@item.Id" onclick="GetSample_DeleteServiceForPatient(this.value)">x</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Form thêm dịch vụ cho bệnh nhân -->
+<div class="modal" id="addServiceForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="nsctc-right-add-service-for-patient-title">
+                <div class="title">THÊM DỊCH VỤ</div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="nsctc-right-add-service-for-patient-service">
+                <div class="title">Dịch vụ</div>
+                <div class="content">
+                    <select id="nsctc_getsample_service" name="service" class="form-select height-28">
+                        @if (lstService != null)
+                        {
+                            foreach (var item in lstService)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="nsctc-right-add-service-for-patient-button">
+                <button id="nsctc-getsample_addserviceforpatient" class="btn btn-success btn-blue" data-bs-dismiss="modal" onclick="GetSample_AddServiceForPatient()">
+                    <i class="bi bi-download"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Form thêm dịch vụ cho bệnh nhân -->
