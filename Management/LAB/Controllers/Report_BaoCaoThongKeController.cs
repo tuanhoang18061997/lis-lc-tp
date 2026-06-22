@@ -84,7 +84,7 @@ namespace Management.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> LC_Search(DateTime from, DateTime to, string type, string location, long userid)
+        public async Task<IActionResult> LC_Search(DateTime from, DateTime to, string type, string location, long userid, string categoryCode = null)
         {
             var fromtime = new DateTime(from.Year, from.Month, from.Day, 23, 59, 59).AddDays(-1);
             var totime = new DateTime(to.Year, to.Month, to.Day, 23, 59, 59);
@@ -92,8 +92,7 @@ namespace Management.Controllers
 
             if (type == "1")
             {
-                var list = await _reportBL.LC_GetReportByService(fromtime, totime, location, user.Name);
-                ViewData["lstReportResult"] = await _reportBL.LC_GetReportByService(fromtime, totime, location, user.Name);
+                ViewData["lstReportResult"] = await _reportBL.LC_GetReportByService(fromtime, totime, location, user.Name, categoryCode);
                 return PartialView("_ReportByService");
             }
             else if (type == "2")
@@ -336,6 +335,25 @@ namespace Management.Controllers
             return File(fileBytes,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 fileName);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetXNReportCategories()
+        {
+            try
+            {
+                var categories = await _reportBL.GetXNReportCategories();
+
+                return Json(categories);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
     }
 }

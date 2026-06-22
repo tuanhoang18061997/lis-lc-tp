@@ -679,4 +679,11 @@ namespace Management.BL
         public string MaBenhAn { get; set; }
         public DateTime? InsertTime { get; set; }
     }
+
+    public class ReportCategoryFilterModel
+    {
+        public string Code { get; set; }
+
+        public string Name { get; set; }
+    }
 }

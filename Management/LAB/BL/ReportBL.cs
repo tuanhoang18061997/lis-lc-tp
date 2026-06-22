@@ -313,7 +313,7 @@ namespace Management.BL
             }
         }
 
-        public async Task<List<TotalReportService>> LC_GetReportByService(DateTime fromtime, DateTime totime, string location, string user)
+        public async Task<List<TotalReportService>> LC_GetReportByService(DateTime fromtime, DateTime totime, string location, string user, string categoryCode = null)
         {
             try
             {
@@ -321,38 +321,65 @@ namespace Management.BL
                 var start = fromtime.Date;
                 var endExclusive = totime.Date.AddDays(1);
 
+                categoryCode = string.IsNullOrWhiteSpace(categoryCode)
+                    ? null
+                    : categoryCode.Trim().ToUpperInvariant();
+
                 var fromTimeString = start.ToString("dd/MM/yyyy");
                 var toTimeString = totime.Date.ToString("dd/MM/yyyy");
                 var dateNow = DateTime.Now.ToString("dd/MM/yyyy");
+
 
                 var lstTotalReportService = new List<TotalReportService>();
                 var lstReportService = new List<ReportService>();
 
                 if (location == "XN")
                 {
-                    lstReportService = (from patient in _db.Patients
-                                        join result in _db.ResultXNs on patient.Id equals result.PatientId
-                                        where patient.InsertTime > fromtime && patient.InsertTime <= totime && (patient.ValidXN == true || patient.ProcessXN == true) && result.Active == true && patient.Active == true
-                                        select new ReportService
-                                        {
-                                            SID = result.Patient.Sid,
-                                            ServiceID = result.ServiceId.ToString(),
-                                            ServiceName = result.Service.Name,
-                                            BenhAn = patient.BenhAn, // in => Nội trú, out => Ngoại trú
-                                            //ObjectCode = patient.Object.Code // 01 => Thu phí, 02 => BHYT, 03 => BHBL, 04 => DV
-                                        }).Distinct().ToList();
+                    lstReportService = (
+                        from patient in _db.Patients
+                        join result in _db.ResultXNs
+                            on patient.Id equals result.PatientId
+                        join service in _db.Services
+                            on result.ServiceId equals service.Id
+                        where patient.InsertTime >= start
+                              && patient.InsertTime < endExclusive
+                              && (patient.ValidXN == true || patient.ProcessXN == true)
+                              && result.Active == true
+                              && patient.Active == true
 
+                              // Không chọn danh mục thì lấy tất cả.
+                              // Có chọn thì lọc theo Service.Category.Code.
+                              && (
+                                    categoryCode == null
+                                    || service.Category.Code == categoryCode
+                                 )
+                        select new ReportService
+                        {
+                            SID = patient.Sid,
+                            ServiceID = result.ServiceId.ToString(),
+                            ServiceName = service.Name,
+                            BenhAn = patient.BenhAn
+                        })
+                        .Distinct()
+                        .ToList();
 
-                    lstReportService = (from item in lstReportService
-                                        group item by new { item.ServiceID, item.ServiceName, item.BenhAn } into p
-                                        select new ReportService
-                                        {
-                                            ServiceID = p.Key.ServiceID,
-                                            ServiceName = p.Key.ServiceName,
-                                            BenhAn = p.Key.BenhAn,
-                                            //ObjectCode = p.Key.ObjectCode,
-                                            Count = p.Count()
-                                        }).ToList();
+                    lstReportService = (
+                        from item in lstReportService
+                        group item by new
+                        {
+                            item.ServiceID,
+                            item.ServiceName,
+                            item.BenhAn
+                        }
+                        into p
+                        select new ReportService
+                        {
+                            ServiceID = p.Key.ServiceID,
+                            ServiceName = p.Key.ServiceName,
+                            BenhAn = p.Key.BenhAn,
+                            Count = p.Count()
+                        })
+                        .ToList();
                 }
                 else if (location == "SA")
                 {
@@ -2358,6 +2385,34 @@ namespace Management.BL
             }
         }
 
+        public async Task<List<ReportCategoryFilterModel>> GetXNReportCategories()
+        {
+            var categories = await (
+                from result in _db.ResultXNs.AsNoTracking()
+                join service in _db.Services.AsNoTracking()
+                    on result.ServiceId equals service.Id
+                where result.Active == true
+                      && service.Category != null
+                      && service.Category.Code != null
+                      && service.Category.Code != ""
+                      && service.Category.GroupId == 1
+                select new
+                {
+                    Code = service.Category.Code,
+                    Name = service.Category.Name
+                })
+                .Distinct()
+                .OrderBy(x => x.Name)
+                .ToListAsync();
+
+            return categories
+                .Select(x => new ReportCategoryFilterModel
+                {
+                    Code = x.Code,
+                    Name = x.Name
+                })
+                .ToList();
+        }
 
     }
 }

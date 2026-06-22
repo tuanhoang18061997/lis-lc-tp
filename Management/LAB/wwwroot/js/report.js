@@ -27,6 +27,105 @@ function toggleServiceNameInput() {
     }
 }
 
+// Load danh mục xét nghiệm từ database
+function Report_LoadXNCategories(forceReload) {
+    var $categorySelect = $("#report-category-code");
+
+    if ($categorySelect.length === 0) {
+        return;
+    }
+
+    // Không gọi lại API nếu danh mục đã được load
+    if (!forceReload && $categorySelect.data("loaded") === true) {
+        $categorySelect.prop("disabled", false);
+        return;
+    }
+
+    $categorySelect
+        .prop("disabled", true)
+        .empty()
+        .append(new Option("-- Đang tải danh mục --", ""));
+
+    $.ajax({
+        url: "/Report_BaoCaoThongKe/GetXNReportCategories",
+        type: "GET",
+        dataType: "json",
+        cache: false,
+        success: function (response) {
+            $categorySelect.empty();
+
+            $categorySelect.append(
+                new Option("-- Tất cả danh mục --", "")
+            );
+
+            if (Array.isArray(response) && response.length > 0) {
+                response.forEach(function (item) {
+                    // Hỗ trợ cả camelCase và PascalCase
+                    var code = item.code || item.Code || "";
+                    var name = item.name || item.Name || code;
+
+                    if (code) {
+                        $categorySelect.append(
+                            new Option(name, code)
+                        );
+                    }
+                });
+
+                $categorySelect.data("loaded", true);
+                $categorySelect.prop("disabled", false);
+            } else {
+                $categorySelect.append(
+                    new Option("-- Không có dữ liệu danh mục --", "")
+                );
+
+                $categorySelect.prop("disabled", true);
+            }
+        },
+        error: function (xhr) {
+            console.error(
+                "Không tải được danh mục xét nghiệm:",
+                xhr.responseText
+            );
+
+            $categorySelect
+                .empty()
+                .append(
+                    new Option("-- Không tải được danh mục --", "")
+                )
+                .prop("disabled", true);
+
+            SwalHelper.Toast.error(
+                "Không tải được danh mục xét nghiệm!"
+            );
+        }
+    });
+}
+// Chỉ hiển thị bộ lọc danh mục khi chọn khoa Xét nghiệm
+function toggleReportCategoryFilter() {
+    var location = ($("#report-location").val() || "")
+        .toString()
+        .trim()
+        .toUpperCase();
+
+    var isXN = location === "XN";
+    var $categoryWrapper = $("#report-category-wrapper");
+    var $categorySelect = $("#report-category-code");
+
+    if (isXN) {
+        $categoryWrapper.show();
+
+        // Load danh mục từ database
+        Report_LoadXNCategories(false);
+    } else {
+        $categoryWrapper.hide();
+
+        // Reset danh mục khi chuyển sang khoa khác
+        $categorySelect
+            .val("")
+            .prop("disabled", true);
+    }
+}
+
 // Filter table rows based on service name input
 function filterServiceByName() {
     var filterValue = $("#report-service-name").val().toLowerCase().trim();
@@ -47,13 +146,16 @@ function filterServiceByName() {
 
 // Initialize on document ready
 $(document).ready(function () {
-    // Initial state - disable input if no data
     toggleServiceNameInput();
+    toggleReportCategoryFilter();
 
-    // Bind filter event to input
     $("#report-service-name").on("keyup", function () {
         filterServiceByName();
     });
+});
+
+$(document).on("change", "#report-location", function () {
+    toggleReportCategoryFilter();
 });
 
 function ValidateInput(id) {
@@ -100,44 +202,76 @@ function Report_Search() {
 
 function Report_Search_New() {
     var validate = ValidateInput('report-option-search');
-    if (validate) {
-        var from = $("#report-time-from").val();
-        var to = $("#report-time-to").val();
-        var type = $("#report-type").val();
-        var location = $("#report-location").val();
-        //var userid = $("#report-user").val();
-        //var hospitalId = $("#report-hospital").val();
-        var userid = 20;
-        var hospitalId = null;
 
-        console.log(from);
-        console.log(to);
-        console.log(type);
-        $.ajax({
-            url: "/Report_BaoCaoThongKe/LC_Search",
-            type: "GET",
-            data: {
-                from: from,
-                to: to,
-                type: type,
-                location: location,
-                userid: userid
-            },
-            dataType: "html",
-            cache: false,
-            success: function (result) {
-                $('#showWaitting').modal('hide');
-                $("#report-result").html(result);
-                toggleServiceNameInput();
-            },
-            error: function () {
-                $('#showWaitting').modal('hide');
-                $("#report-result").empty();
-                toggleServiceNameInput();
-                SwalHelper.Toast.error("Không tải được dữ liệu báo cáo!");
-            }
-        });
+    if (!validate) {
+        return;
     }
+
+    var from = $("#report-time-from").val();
+    var to = $("#report-time-to").val();
+    var type = $("#report-type").val();
+
+    var location = ($("#report-location").val() || "")
+        .toString()
+        .trim()
+        .toUpperCase();
+
+    // Chỉ lấy Category.Code khi khoa đang chọn là Xét nghiệm
+    var categoryCode = "";
+
+    if (location === "XN") {
+        categoryCode = ($("#report-category-code").val() || "")
+            .toString()
+            .trim()
+            .toUpperCase();
+    }
+
+    var userid = 20;
+
+    console.log("Bộ lọc báo cáo:", {
+        from: from,
+        to: to,
+        type: type,
+        location: location,
+        categoryCode: categoryCode,
+        userid: userid
+    });
+
+    $.ajax({
+        url: "/Report_BaoCaoThongKe/LC_Search",
+        type: "GET",
+        data: {
+            from: from,
+            to: to,
+            type: type,
+            location: location,
+            userid: userid,
+            categoryCode: categoryCode
+        },
+        dataType: "html",
+        cache: false,
+        success: function (result) {
+            $('#showWaitting').modal('hide');
+            $("#report-result").html(result);
+
+            toggleServiceNameInput();
+        },
+        error: function (xhr) {
+            $('#showWaitting').modal('hide');
+            $("#report-result").empty();
+
+            toggleServiceNameInput();
+
+            console.error(
+                "Không tải được dữ liệu báo cáo:",
+                xhr.responseText
+            );
+
+            SwalHelper.Toast.error(
+                "Không tải được dữ liệu báo cáo!"
+            );
+        }
+    });
 }
 
 // Hàm gọi khi user click 1 dòng dịch vụ trong bảng báo cáo
