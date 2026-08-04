@@ -1,4 +1,4 @@
-﻿@{
+﻿@* @{
     Layout = ViewData["UseNoLayout"] != null ? null : "_LayoutExport";
     var _lstResultXN = ViewData["ListResultXN"] as List<ResultXN>;
     var _groupResultByCategory = _lstResultXN.GroupBy(p => p.Service.CategoryId);
@@ -37,7 +37,14 @@
             </div>
         </div>
     </div>
-    @*<div class="page">
-        Trang 1/1
-    </div>*@
-</div>
+</div> *@
+
+@{
+    Layout = ViewData["UseNoLayout"] != null
+        ? null
+        : "_LayoutExport";
+}
+
+@model Hospital
+
+@await Html.PartialAsync("_SignatureXN", Model)

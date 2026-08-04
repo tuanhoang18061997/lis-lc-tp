@@ -9,6 +9,10 @@
     // Khi render riêng nước tiểu, không dùng <thead>
     // để tránh SelectPdf tự kéo header table lên cuối trang trước.
     var _disableThead = ViewData["DisableThead"] != null && Convert.ToBoolean(ViewData["DisableThead"]);
+
+    var _showSignature =
+        ViewData["ShowSignature"] != null
+        && Convert.ToBoolean(ViewData["ShowSignature"]);
 }
 @model Hospital
 <div class="result-xn">
@@ -109,4 +113,8 @@
             <span>@_note</span>
         </div>
     </div>
+}
+@if (_showSignature)
+{
+    @await Html.PartialAsync("_SignatureXN", Model)
 }

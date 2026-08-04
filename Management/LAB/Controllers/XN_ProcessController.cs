@@ -383,54 +383,83 @@ namespace Management.Controllers
                                 var contentParts = new List<string>();
 
                                 var pdfHardFixStyle = @"
-<style>
-    .xn-print-section {
-        width: 100% !important;
-        clear: both !important;
-        display: block !important;
-        float: none !important;
-        overflow: visible !important;
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-    }
-    .xn-print-section .result-xn {
-        float: none !important;
-        clear: both !important;
-        display: block !important;
-        height: auto !important;
-        min-height: 0 !important;
-        max-height: none !important;
-        overflow: visible !important;
-    }
-    .xn-print-section .table-result {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-    }
-    .xn-print-section .table-result tr,
-    .xn-print-section .table-result .tr-category,
-    .xn-print-section .table-result .tr-content,
-    .xn-print-section .table-result .tr-title-body {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-    }
-    .xn-force-new-page {
-        page-break-before: always !important;
-        break-before: page !important;
-        clear: both !important;
-        display: block !important;
-        float: none !important;
-    }
-    .xn-clear-float {
-        clear: both !important;
-        display: block !important;
-        height: 0 !important;
-        line-height: 0 !important;
-        font-size: 0 !important;
-        overflow: hidden !important;
-    }
-</style>";
+                                    <style>
+                                        .xn-print-section {
+                                            width: 100% !important;
+                                            clear: both !important;
+                                            display: block !important;
+                                            float: none !important;
+                                            overflow: visible !important;
+                                            page-break-inside: auto !important;
+                                            break-inside: auto !important;
+                                        }
+                                        .xn-print-section .result-xn {
+                                            float: none !important;
+                                            clear: both !important;
+                                            display: block !important;
+                                            height: auto !important;
+                                            min-height: 0 !important;
+                                            max-height: none !important;
+                                            overflow: visible !important;
+                                        }
+                                        .xn-print-section .table-result {
+                                            width: 100% !important;
+                                            border-collapse: collapse !important;
+                                            page-break-inside: auto !important;
+                                            break-inside: auto !important;
+                                        }
+                                        .xn-print-section .table-result tr,
+                                        .xn-print-section .table-result .tr-category,
+                                        .xn-print-section .table-result .tr-content,
+                                        .xn-print-section .table-result .tr-title-body {
+                                            page-break-inside: avoid !important;
+                                            break-inside: avoid !important;
+                                        }
+                                        .xn-force-new-page {
+                                            page-break-before: always !important;
+                                            break-before: page !important;
+                                            clear: both !important;
+                                            display: block !important;
+                                            float: none !important;
+                                        }
+                                        .xn-clear-float {
+                                            clear: both !important;
+                                            display: block !important;
+                                            height: 0 !important;
+                                            line-height: 0 !important;
+                                            font-size: 0 !important;
+                                            overflow: hidden !important;
+                                        }
+                                        .xn-print-section .signature-inline-xn {
+                                            position: static !important;
+                                            top: auto !important;
+                                            right: auto !important;
+                                            bottom: auto !important;
+                                            left: auto !important;
+
+                                            clear: both !important;
+                                            display: block !important;
+
+                                            width: 100% !important;
+                                            height: auto !important;
+                                            min-height: 0 !important;
+                                            max-height: none !important;
+
+                                            margin-top: 18px !important;
+
+                                            page-break-inside: avoid !important;
+                                            break-inside: avoid !important;
+                                        }
+
+                                        .xn-print-section .signature-inline-xn .signature {
+                                            position: static !important;
+                                            clear: both !important;
+                                            width: 100% !important;
+
+                                            page-break-inside: avoid !important;
+                                            break-inside: avoid !important;
+                                        }
+                                    </style>";
 
                                 // Có nước tiểu hay không
                                 var hasUrineResult = lstUrineResult.Any();
@@ -438,24 +467,30 @@ namespace Management.Controllers
                                 if (lstNormalResult.Any())
                                 {
                                     ViewData["ListResultXN"] = lstNormalResult;
-                                    ViewData["ShowNote"] = !hasUrineResult;
+
+                                    // Nếu không có trang nước tiểu thì đây là phần cuối cùng.
+                                    var isFinalNormalSection = !hasUrineResult;
+
+                                    ViewData["ShowNote"] = isFinalNormalSection;
+                                    ViewData["ShowSignature"] = isFinalNormalSection;
                                     ViewData["DisableThead"] = false;
 
                                     var normalContent = await this.RenderViewAsync("Content", _hospital);
                                     contentParts.Add($@"
-<div class='xn-print-section' style='width:100%; clear:both; display:block; float:none; overflow:visible;'>
-    {normalContent}
-    <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
-</div>");
+                                        <div class='xn-print-section' style='width:100%; clear:both; display:block; float:none; overflow:visible;'>
+                                            {normalContent}
+                                            <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
+                                        </div>");
                                 }
 
                                 // 2. Render nhóm nước tiểu ở trang riêng
                                 if (lstUrineResult.Any())
                                 {
                                     ViewData["ListResultXN"] = lstUrineResult;
-                                    ViewData["ShowNote"] = true;
 
-                                    // Quan trọng: nước tiểu không dùng <thead>
+                                    // Nước tiểu luôn là phần cuối cùng nếu tồn tại.
+                                    ViewData["ShowNote"] = true;
+                                    ViewData["ShowSignature"] = true;
                                     ViewData["DisableThead"] = true;
 
                                     var urineContent = await this.RenderViewAsync("Content", _hospital);
@@ -463,25 +498,25 @@ namespace Management.Controllers
                                     if (contentParts.Any())
                                     {
                                         contentParts.Add($@"
-<div class='xn-print-section xn-urine-page xn-force-new-page' style='page-break-before:always; break-before:page; width:100%; clear:both; display:block; float:none; overflow:visible;'>
-    {urineContent}
-    <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
-</div>");
+                                            <div class='xn-print-section xn-urine-page xn-force-new-page' style='page-break-before:always; break-before:page; width:100%; clear:both; display:block; float:none; overflow:visible;'>
+                                                {urineContent}
+                                                <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
+                                            </div>");
                                     }
                                     else
                                     {
                                         contentParts.Add($@"
-<div class='xn-print-section xn-urine-page' style='width:100%; clear:both; display:block; float:none; overflow:visible;'>
-    {urineContent}
-    <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
-</div>");
+                                            <div class='xn-print-section xn-urine-page' style='width:100%; clear:both; display:block; float:none; overflow:visible;'>
+                                                {urineContent}
+                                                <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
+                                            </div>");
                                     }
                                 }
 
                                 var content = pdfHardFixStyle + string.Join("", contentParts);
 
                                 var header = await this.RenderViewAsync("Header", _hospital);
-                                var footer = await this.RenderViewAsync("Footer", _hospital);
+                                var footer = string.Empty;
 
                                 var _folder = Path.Combine(_environment.WebRootPath, "pdf", "xn");
                                 var _file = Path.Combine(_folder, _lstResult[0]?.KeyResultForHis + ".pdf");

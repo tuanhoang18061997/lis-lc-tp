@@ -1,0 +1,63 @@
+﻿@{
+    Layout = null;
+
+    var lstResultXN = ViewData["ListResultXN"] as List<ResultXN>;
+    var firstResult = lstResultXN?.FirstOrDefault();
+
+    var printTime =
+        firstResult?.Patient?.ReturnResultTimeXN
+        ?? DateTime.Now;
+
+    var printTimeString =
+        $"{printTime:HH:mm}, Ngày {printTime:dd} tháng {printTime:MM} năm {printTime:yyyy}";
+
+    var userReturnResult =
+        firstResult?.Patient?.UserXN?.Name
+        ?? string.Empty;
+
+    var returnUserWithCKS = ViewData["ReturnUser"] as User;
+
+    var returnUserName =
+        returnUserWithCKS != null
+            ? returnUserWithCKS.Name
+            : userReturnResult;
+}
+
+@model Hospital
+
+<div class="signature-page-xn signature-inline-xn">
+    <div class="signature">
+        <div class="signature-left"></div>
+
+        <div class="signature-right">
+            <div class="signature-right-user-check">
+                <label>Người kiểm tra: </label>
+
+                <span style="text-transform: uppercase">
+                    @returnUserName
+                </span>
+            </div>
+
+            <div class="signature-right-time">
+                @printTimeString
+            </div>
+
+            <div class="signature-right-title">
+                PHÒNG XÉT NGHIỆM
+            </div>
+
+            <div class="signature-right-cks">
+                @if (returnUserWithCKS != null &&
+                                !string.IsNullOrEmpty(returnUserWithCKS.Cks))
+                {
+                    <img class="cks-img"
+                         src="~/images/cks/@returnUserWithCKS.Cks" />
+                }
+            </div>
+
+            <div class="signature-right-user">
+                @returnUserName
+            </div>
+        </div>
+    </div>
+</div>

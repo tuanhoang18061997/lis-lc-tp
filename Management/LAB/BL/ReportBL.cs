@@ -1650,67 +1650,94 @@ namespace Management.BL
                 .ToListAsync();
 
             // Lấy kết quả "mới nhất" cho mỗi (Patient, TestCode)
-            var latestResults = await baseQuery
-                .Where(x => x.ResultXN.TestCodeId != null)
-                .GroupBy(x => new { x.Patient.Id, x.ResultXN.TestCodeId })
-                .Select(g => g
-                    .OrderByDescending(x => x.ResultXN.ValidTime ?? x.ResultXN.InsertTime)
-                    .ThenByDescending(x => x.ResultXN.Id)
-                    .FirstOrDefault())
-                .ToListAsync();
-
-            // Gom theo Patient để build từng dòng
-            var rows = latestResults
-                .GroupBy(x => x.Patient.Id)
-                .Select((g, index) =>
-                {
-                    var first = g.First().Patient;
-
-                    var row = new ServicePatientResultRow
-                    {
-                        STT = index + 1,
-                        PatientId = first.Id,
-                        PatientName = first.PatientName,
-                        Gender = first.Sex,
-                        Age = first?.Age,
-                        MaDotKham = first.MaDotKham,
-                        MaBenhAn = first.MaBenhAn,
-                        Seq = first.Seq,
-                        Sid = first.Sid,
-                        DateSearch = first.InsertTime,
-                    };
-
-                    // Map result theo từng TestCode
-                    foreach (var tc in testCodes)
-                    {
-                        var r = g.FirstOrDefault(x => x.ResultXN.TestCodeId == tc.Id);
-                        // item có thể null, nên check an toàn
-                        var value = r?.ResultXN?.Result;   // Result (entity).Result (string kết quả)
-                        row.ResultsByTestCode[tc.Id] = value;
-                    }
-
-                    return row;
-                })
-                .OrderBy(r => r.STT)
-                .ToList();
-
-            // Lấy tên dịch vụ (nếu cần hiển thị)
-            var serviceName = await _db.Services
-                .Where(s => s.Id == serviceId)
-                .Select(s => s.Name)
-                .FirstOrDefaultAsync();
-
-            var model = new ServicePatientResultReport
+            try
             {
-                ServiceId = serviceId,
-                ServiceName = serviceName,
-                FromDate = start,
-                ToDate = totime,
-                TestCodes = testCodes,
-                Rows = rows
-            };
+                // Truy vấn dữ liệu từ SQL trước
+                var resultCandidates = await baseQuery
+                    .Where(x => x.ResultXN.TestCodeId != null)
+                    .ToListAsync();
 
-            return model;
+                // Sau khi dữ liệu đã nằm trong bộ nhớ mới thực hiện GroupBy
+                var latestResults = resultCandidates
+                    .GroupBy(x => new
+                    {
+                        PatientId = x.Patient.Id,
+                        TestCodeId = x.ResultXN.TestCodeId.Value
+                    })
+                    .Select(g => g
+                        .OrderByDescending(x =>
+                            x.ResultXN.ValidTime ?? x.ResultXN.InsertTime)
+                        .ThenByDescending(x => x.ResultXN.Id)
+                        .First())
+                    .ToList();
+                // Gom theo Patient để build từng dòng
+                var rows = latestResults
+                    .GroupBy(x => x.Patient.Id)
+                    .Select(g =>
+                    {
+                        var first = g.First().Patient;
+
+                        var row = new ServicePatientResultRow
+                        {
+                            PatientId = first.Id,
+                            PatientName = first.PatientName,
+                            Gender = first.Sex,
+                            Age = first.Age,
+                            MaDotKham = first.MaDotKham,
+                            MaBenhAn = first.MaBenhAn,
+                            Seq = first.Seq,
+                            Sid = first.Sid,
+                            DateSearch = first.InsertTime
+                        };
+
+                        foreach (var tc in testCodes)
+                        {
+                            var result = g.FirstOrDefault(
+                                x => x.ResultXN.TestCodeId == tc.Id);
+
+                            row.ResultsByTestCode[tc.Id] = result?.ResultXN?.Result;
+                        }
+
+                        return row;
+                    })
+                    .OrderBy(x => x.DateSearch)
+                    .ThenBy(x => x.PatientId)
+                    .Select((row, index) =>
+                    {
+                        row.STT = index + 1;
+                        return row;
+                    })
+                    .ToList();
+
+                // Lấy tên dịch vụ (nếu cần hiển thị)
+                var serviceName = await _db.Services
+                    .Where(s => s.Id == serviceId)
+                    .Select(s => s.Name)
+                    .FirstOrDefaultAsync();
+
+                var model = new ServicePatientResultReport
+                {
+                    ServiceId = serviceId,
+                    ServiceName = serviceName,
+                    FromDate = start,
+                    ToDate = totime,
+                    TestCodes = testCodes,
+                    Rows = rows
+                };
+
+                return model;
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = ex.GetBaseException().Message;
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"LC_GetPatientResultByServiceXN lỗi: {errorMessage}");
+
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+
+                throw;
+            }
         }
 
         public async Task<ServicePatientCDHAResultReport> LC_GetPatientResultByServiceCDHA(
