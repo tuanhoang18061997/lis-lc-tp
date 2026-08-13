@@ -1161,5 +1161,31 @@ namespace Management.BL
 
             return Math.Round(egfr, 2);
         }
+
+        public async Task UpdateUrineHeadValidPrint(
+            long patientId,
+            long urineServiceId)
+        {
+            var urineHeadResults = await _db.ResultXNs
+                .Where(x =>
+                    x.PatientId == patientId &&
+                    x.ServiceId == urineServiceId &&
+                    x.TestCode != null &&
+                    x.TestCode.IsTestHead == true)
+                .ToListAsync();
+
+            if (!urineHeadResults.Any())
+            {
+                return;
+            }
+
+            foreach (var resultXN in urineHeadResults)
+            {
+                // false tương ứng với giá trị 0 trong SQL Server.
+                resultXN.ValidPrint = false;
+            }
+
+            await _db.SaveChangesAsync();
+        }
     }
 }

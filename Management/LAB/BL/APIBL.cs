@@ -1327,6 +1327,10 @@ namespace Management.BL
                                             objResult.PosNeg = posneg;
                                             objResult.Result = null;
                                             objResult.Status = 0;
+                                            if (posneg == "Positive")
+                                            {
+                                                objResult.Status = 2;
+                                            }
                                         }
                                     }
                                 }
@@ -1601,8 +1605,23 @@ namespace Management.BL
                                                               (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
                                                               (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
                                                               (p.Patient.ValidNSCTC == true && p.Service.Category.Code == "NSCTC") ||
-                                                              (p.Patient.ValidDDT == true && p.Service.Category.Code == "DDT") ||
-                                                              (p.Patient.ValidTDCN == true && p.Service.Category.Code == "TDCN"))).ToListAsync();
+                                                              (p.Patient.ValidDDT == true && p.Service.Category.Code == "DDT"))).ToListAsync();
+                    // 2. Lấy riêng kết quả TDCN
+                    // TDCN không bắt buộc phải có Result
+                    var lstResultTDCN = await context.ResultCDHAs
+                        .Where(p =>
+                            p.Active == true &&
+                            p.PushBHYT == false &&
+                            p.Patient.InsertTime > from &&
+                            p.Patient.InsertTime < to &&
+                            p.Patient.ValidTDCN == true &&
+                            p.Service.Category.Code == "TDCN")
+                        .ToListAsync();
+                    // 3. Gộp TDCN vào danh sách chung
+                    if (lstResultTDCN.Count > 0)
+                    {
+                        lstResultImage.AddRange(lstResultTDCN);
+                    }
                     var lstResult_BHYT = new List<Result_BHYT>();
                     var lstStatusTicketItemId = new List<StatusTicketItemId>();
                     if (lstResultImage != null)

@@ -312,225 +312,343 @@ namespace Management.Controllers
             if (lstResult != null && lstResult.Count > 0)
             {
                 var _userLogin = this.GetUserLogin();
+
                 if (await _resultXNBL.Update(lstResult, true, _userLogin.Value))
                 {
                     var _notFullResultXN = false;
-                    var _fullResultXN = await _resultXNBL.FullResultXN(lstResult[0].patientId);
+                    var _fullResultXN = await _resultXNBL.FullResultXN(
+                        lstResult[0].patientId);
+
                     if (_fullResultXN == false)
                     {
                         _notFullResultXN = true;
                     }
-                    if (await _patientBL.Update(lstResult[0].patientId, lstResult[0].returnResultTime, lstResult[0].userReturnResult, false, false, true, _userLogin.Value, _fullResultXN, _notFullResultXN))
+
+                    if (await _patientBL.Update(
+                        lstResult[0].patientId,
+                        lstResult[0].returnResultTime,
+                        lstResult[0].userReturnResult,
+                        false,
+                        false,
+                        true,
+                        _userLogin.Value,
+                        _fullResultXN,
+                        _notFullResultXN))
                     {
-                        var _lstResult = await _resultXNBL.GetListResultXNByPatientId_ForValidPrint(lstResult[0].patientId);
+                        var _lstResult =
+                            await _resultXNBL
+                                .GetListResultXNByPatientId_ForValidPrint(
+                                    lstResult[0].patientId);
 
-                        var urineServiceId = 12425;
-
-                        var lstNormal = _lstResult.Where(x => x.ServiceId != urineServiceId).ToList(); // các xn # nước tiểu
-
-                        var lstUrine = _lstResult.Where(x => x.ServiceId == urineServiceId).ToList(); // xn nước tiểu
-
-                        if (_lstResult != null)
+                        if (_lstResult == null || !_lstResult.Any())
                         {
-                            //try
-                            //{
-                            //    // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
-                            //    if (lstResult[0].userReturnResult > 0)   // vì userReturnResult là kiểu int/long
-                            //    {
-                            //        var returnUser = await _userBL.GetUser(lstResult[0].userReturnResult);
-                            //        if (returnUser != null)
-                            //        {
-                            //            ViewData["ReturnUser"] = returnUser; // để Content/Header/Footer dùng khi in
-                            //        }
-                            //    }
+                            return Content(string.Empty);
+                        }
 
-                            //    ViewData["ListResultXN"] = _lstResult;
-                            //    ViewData["Note"] = _lstResult[0].Note;
-                            //    var _hospital = await _hospitalBL.GetHospital();
-                            //    var content = await this.RenderViewAsync("Content", _hospital);
-                            //    var header = await this.RenderViewAsync("Header", _hospital);
-                            //    var footer = await this.RenderViewAsync("Footer", _hospital);
-                            //    var _folder = Path.Combine(_environment.WebRootPath, "pdf", "xn");
-                            //    var _file = Path.Combine(_folder, _lstResult[0]?.KeyResultForHis + ".pdf");
-                            //    var fileBase64 = await _toolBL.ExportPdf_Result(_folder, _file, header, content, footer);
-                            //    return Content(fileBase64);
-                            //}
-                            //catch { }
-                            try
+                        try
+                        {
+                            const long urineServiceId = 12425;
+
+                            // Lấy thông tin bác sĩ thực hiện.
+                            if (lstResult[0].userReturnResult > 0)
                             {
-                                // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
-                                if (lstResult[0].userReturnResult > 0)
+                                var returnUser =
+                                    await _userBL.GetUser(
+                                        lstResult[0].userReturnResult);
+
+                                if (returnUser != null)
                                 {
-                                    var returnUser = await _userBL.GetUser(lstResult[0].userReturnResult);
-                                    if (returnUser != null)
-                                    {
-                                        ViewData["ReturnUser"] = returnUser;
-                                    }
+                                    ViewData["ReturnUser"] = returnUser;
                                 }
+                            }
 
-                                ViewData["Note"] = _lstResult[0].Note;
+                            ViewData["Note"] = _lstResult[0].Note;
 
-                                var _hospital = await _hospitalBL.GetHospital();
+                            var _hospital = await _hospitalBL.GetHospital();
 
-                                var lstNormalResult = _lstResult
-                                    .Where(x => x.ServiceId != urineServiceId)
-                                    .ToList();
+                            // Danh sách xét nghiệm không thuộc nhóm nước tiểu.
+                            var lstNormalResult = _lstResult
+                                .Where(x => x.ServiceId != urineServiceId)
+                                .ToList();
 
-                                var lstUrineResult = _lstResult
-                                    .Where(x => x.ServiceId == urineServiceId)
-                                    .ToList();
+                            // Danh sách xét nghiệm thuộc nhóm nước tiểu.
+                            var lstUrineResult = _lstResult
+                                .Where(x => x.ServiceId == urineServiceId)
+                                .ToList();
 
-                                var contentParts = new List<string>();
+                            /*
+                             * Nhóm nước tiểu chỉ được in khi có ít nhất một mã:
+                             * - Không phải mã xét nghiệm cha.
+                             * - Result khác null, rỗng hoặc chỉ chứa khoảng trắng.
+                             */
+                            var hasUrineChildResult = lstUrineResult.Any(x =>
+                                x.TestCode != null &&
+                                x.TestCode.IsTestHead != true &&
+                                !string.IsNullOrWhiteSpace(
+                                    Convert.ToString(x.Result)));
 
-                                var pdfHardFixStyle = @"
-                                    <style>
-                                        .xn-print-section {
-                                            width: 100% !important;
-                                            clear: both !important;
-                                            display: block !important;
-                                            float: none !important;
-                                            overflow: visible !important;
-                                            page-break-inside: auto !important;
-                                            break-inside: auto !important;
-                                        }
-                                        .xn-print-section .result-xn {
-                                            float: none !important;
-                                            clear: both !important;
-                                            display: block !important;
-                                            height: auto !important;
-                                            min-height: 0 !important;
-                                            max-height: none !important;
-                                            overflow: visible !important;
-                                        }
-                                        .xn-print-section .table-result {
-                                            width: 100% !important;
-                                            border-collapse: collapse !important;
-                                            page-break-inside: auto !important;
-                                            break-inside: auto !important;
-                                        }
-                                        .xn-print-section .table-result tr,
-                                        .xn-print-section .table-result .tr-category,
-                                        .xn-print-section .table-result .tr-content,
-                                        .xn-print-section .table-result .tr-title-body {
-                                            page-break-inside: avoid !important;
-                                            break-inside: avoid !important;
-                                        }
-                                        .xn-force-new-page {
-                                            page-break-before: always !important;
-                                            break-before: page !important;
-                                            clear: both !important;
-                                            display: block !important;
-                                            float: none !important;
-                                        }
-                                        .xn-clear-float {
-                                            clear: both !important;
-                                            display: block !important;
-                                            height: 0 !important;
-                                            line-height: 0 !important;
-                                            font-size: 0 !important;
-                                            overflow: hidden !important;
-                                        }
-                                        .xn-print-section .signature-inline-xn {
-                                            position: static !important;
-                                            top: auto !important;
-                                            right: auto !important;
-                                            bottom: auto !important;
-                                            left: auto !important;
+                            /*
+                             * Có nhóm nước tiểu nhưng không có mã con nào có kết quả:
+                             * cập nhật ValidPrint của mã cha về false (SQL = 0).
+                             */
+                            if (lstUrineResult.Any() && !hasUrineChildResult)
+                            {
+                                await _resultXNBL.UpdateUrineHeadValidPrint(
+                                    lstResult[0].patientId,
+                                    urineServiceId);
+                            }
 
-                                            clear: both !important;
-                                            display: block !important;
+                            var contentParts = new List<string>();
 
-                                            width: 100% !important;
-                                            height: auto !important;
-                                            min-height: 0 !important;
-                                            max-height: none !important;
+                            var pdfHardFixStyle = @"
+                        <style>
+                            .xn-print-section {
+                                width: 100% !important;
+                                clear: both !important;
+                                display: block !important;
+                                float: none !important;
+                                overflow: visible !important;
+                                page-break-inside: auto !important;
+                                break-inside: auto !important;
+                            }
 
-                                            margin-top: 18px !important;
+                            .xn-print-section .result-xn {
+                                float: none !important;
+                                clear: both !important;
+                                display: block !important;
+                                height: auto !important;
+                                min-height: 0 !important;
+                                max-height: none !important;
+                                overflow: visible !important;
+                            }
 
-                                            page-break-inside: avoid !important;
-                                            break-inside: avoid !important;
-                                        }
+                            .xn-print-section .table-result {
+                                width: 100% !important;
+                                border-collapse: collapse !important;
+                                page-break-inside: auto !important;
+                                break-inside: auto !important;
+                            }
 
-                                        .xn-print-section .signature-inline-xn .signature {
-                                            position: static !important;
-                                            clear: both !important;
-                                            width: 100% !important;
+                            .xn-print-section .table-result tr,
+                            .xn-print-section .table-result .tr-category,
+                            .xn-print-section .table-result .tr-content,
+                            .xn-print-section .table-result .tr-title-body {
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
+                            }
 
-                                            page-break-inside: avoid !important;
-                                            break-inside: avoid !important;
-                                        }
-                                    </style>";
+                            .xn-force-new-page {
+                                page-break-before: always !important;
+                                break-before: page !important;
+                                clear: both !important;
+                                display: block !important;
+                                float: none !important;
+                            }
 
-                                // Có nước tiểu hay không
-                                var hasUrineResult = lstUrineResult.Any();
+                            .xn-clear-float {
+                                clear: both !important;
+                                display: block !important;
+                                height: 0 !important;
+                                line-height: 0 !important;
+                                font-size: 0 !important;
+                                overflow: hidden !important;
+                            }
 
-                                if (lstNormalResult.Any())
+                            .xn-print-section .signature-inline-xn {
+                                position: static !important;
+                                top: auto !important;
+                                right: auto !important;
+                                bottom: auto !important;
+                                left: auto !important;
+
+                                clear: both !important;
+                                display: block !important;
+
+                                width: 100% !important;
+                                height: auto !important;
+                                min-height: 0 !important;
+                                max-height: none !important;
+
+                                margin-top: 18px !important;
+
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
+                            }
+
+                            .xn-print-section
+                            .signature-inline-xn
+                            .signature {
+                                position: static !important;
+                                clear: both !important;
+                                width: 100% !important;
+
+                                page-break-inside: avoid !important;
+                                break-inside: avoid !important;
+                            }
+                        </style>";
+
+                            // Render các xét nghiệm bình thường.
+                            if (lstNormalResult.Any())
+                            {
+                                ViewData["ListResultXN"] = lstNormalResult;
+
+                                /*
+                                 * Nếu nước tiểu không có kết quả con thì phần xét nghiệm
+                                 * bình thường trở thành phần cuối cùng của PDF.
+                                 */
+                                var isFinalNormalSection =
+                                    !hasUrineChildResult;
+
+                                ViewData["ShowNote"] =
+                                    isFinalNormalSection;
+
+                                ViewData["ShowSignature"] =
+                                    isFinalNormalSection;
+
+                                ViewData["DisableThead"] = false;
+
+                                var normalContent =
+                                    await this.RenderViewAsync(
+                                        "Content",
+                                        _hospital);
+
+                                contentParts.Add($@"
+                                    <div class='xn-print-section'
+                                         style='width:100%;
+                                                clear:both;
+                                                display:block;
+                                                float:none;
+                                                overflow:visible;'>
+                                {normalContent}
+
+                                    <div class='xn-clear-float'
+                                         style='clear:both;
+                                                display:block;
+                                                height:0;
+                                                line-height:0;
+                                                font-size:0;
+                                                overflow:hidden;'>
+                                    </div>
+                                </div>");
+                            }
+
+                            /*
+                             * Chỉ render nhóm nước tiểu khi có ít nhất
+                             * một xét nghiệm con có Result.
+                             */
+                            if (hasUrineChildResult)
+                            {
+                                ViewData["ListResultXN"] =
+                                    lstUrineResult;
+
+                                // Nước tiểu là phần cuối cùng của PDF.
+                                ViewData["ShowNote"] = true;
+                                ViewData["ShowSignature"] = true;
+                                ViewData["DisableThead"] = true;
+
+                                var urineContent =
+                                    await this.RenderViewAsync(
+                                        "Content",
+                                        _hospital);
+
+                                // Có xét nghiệm thường thì nước tiểu sang trang mới.
+                                if (contentParts.Any())
                                 {
-                                    ViewData["ListResultXN"] = lstNormalResult;
-
-                                    // Nếu không có trang nước tiểu thì đây là phần cuối cùng.
-                                    var isFinalNormalSection = !hasUrineResult;
-
-                                    ViewData["ShowNote"] = isFinalNormalSection;
-                                    ViewData["ShowSignature"] = isFinalNormalSection;
-                                    ViewData["DisableThead"] = false;
-
-                                    var normalContent = await this.RenderViewAsync("Content", _hospital);
                                     contentParts.Add($@"
-                                        <div class='xn-print-section' style='width:100%; clear:both; display:block; float:none; overflow:visible;'>
-                                            {normalContent}
-                                            <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
-                                        </div>");
-                                }
+                                <div class='xn-print-section
+                                            xn-urine-page
+                                            xn-force-new-page'
+                                     style='page-break-before:always;
+                                            break-before:page;
+                                            width:100%;
+                                            clear:both;
+                                            display:block;
+                                            float:none;
+                                            overflow:visible;'>
+                                    {urineContent}
 
-                                // 2. Render nhóm nước tiểu ở trang riêng
-                                if (lstUrineResult.Any())
+                                    <div class='xn-clear-float'
+                                         style='clear:both;
+                                                display:block;
+                                                height:0;
+                                                line-height:0;
+                                                font-size:0;
+                                                overflow:hidden;'>
+                                    </div>
+                                </div>");
+                                }
+                                else
                                 {
-                                    ViewData["ListResultXN"] = lstUrineResult;
+                                    // Chỉ có xét nghiệm nước tiểu.
+                                    contentParts.Add($@"
+                                <div class='xn-print-section
+                                            xn-urine-page'
+                                     style='width:100%;
+                                            clear:both;
+                                            display:block;
+                                            float:none;
+                                            overflow:visible;'>
+                                    {urineContent}
 
-                                    // Nước tiểu luôn là phần cuối cùng nếu tồn tại.
-                                    ViewData["ShowNote"] = true;
-                                    ViewData["ShowSignature"] = true;
-                                    ViewData["DisableThead"] = true;
-
-                                    var urineContent = await this.RenderViewAsync("Content", _hospital);
-
-                                    if (contentParts.Any())
-                                    {
-                                        contentParts.Add($@"
-                                            <div class='xn-print-section xn-urine-page xn-force-new-page' style='page-break-before:always; break-before:page; width:100%; clear:both; display:block; float:none; overflow:visible;'>
-                                                {urineContent}
-                                                <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
-                                            </div>");
-                                    }
-                                    else
-                                    {
-                                        contentParts.Add($@"
-                                            <div class='xn-print-section xn-urine-page' style='width:100%; clear:both; display:block; float:none; overflow:visible;'>
-                                                {urineContent}
-                                                <div class='xn-clear-float' style='clear:both; display:block; height:0; line-height:0; font-size:0; overflow:hidden;'></div>
-                                            </div>");
-                                    }
+                                    <div class='xn-clear-float'
+                                         style='clear:both;
+                                                display:block;
+                                                height:0;
+                                                line-height:0;
+                                                font-size:0;
+                                                overflow:hidden;'>
+                                    </div>
+                                </div>");
                                 }
-
-                                var content = pdfHardFixStyle + string.Join("", contentParts);
-
-                                var header = await this.RenderViewAsync("Header", _hospital);
-                                var footer = string.Empty;
-
-                                var _folder = Path.Combine(_environment.WebRootPath, "pdf", "xn");
-                                var _file = Path.Combine(_folder, _lstResult[0]?.KeyResultForHis + ".pdf");
-
-                                var fileBase64 = await _toolBL.ExportPdf_Result_XN(_folder, _file, header, content, footer);
-                                return Content(fileBase64);
                             }
-                            catch
+
+                            /*
+                             * Bệnh nhân chỉ có nhóm nước tiểu nhưng chưa có kết quả con:
+                             * không tạo một file PDF rỗng.
+                             */
+                            if (!contentParts.Any())
                             {
+                                return Content(string.Empty);
                             }
+
+                            var content =
+                                pdfHardFixStyle +
+                                string.Join("", contentParts);
+
+                            var header =
+                                await this.RenderViewAsync(
+                                    "Header",
+                                    _hospital);
+
+                            var footer = string.Empty;
+
+                            var _folder = Path.Combine(
+                                _environment.WebRootPath,
+                                "pdf",
+                                "xn");
+
+                            var _file = Path.Combine(
+                                _folder,
+                                _lstResult[0]?.KeyResultForHis + ".pdf");
+
+                            var fileBase64 =
+                                await _toolBL.ExportPdf_Result_XN(
+                                    _folder,
+                                    _file,
+                                    header,
+                                    content,
+                                    footer);
+
+                            return Content(fileBase64);
+                        }
+                        catch
+                        {
+                            // Giữ nguyên cách xử lý lỗi của hàm cũ.
                         }
                     }
                 }
             }
+
             return Content(string.Empty);
         }
 
