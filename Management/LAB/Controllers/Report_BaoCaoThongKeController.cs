@@ -121,6 +121,8 @@ namespace Management.Controllers
                                 p.Sid,
                                 p.Seq,
                                 p.MaBenhAn,
+                                p.MaDotKham,
+                                p.Address,
                                 InsertTimeText = p.InsertTime.HasValue
                                     ? p.InsertTime.Value.ToString("dd/MM/yyyy HH:mm")
                                     : ""

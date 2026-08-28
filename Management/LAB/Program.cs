@@ -71,6 +71,8 @@ builder.Services.AddTransient<ResultXNBL>();
 builder.Services.AddTransient<ServiceTestBL>();
 builder.Services.AddTransient<SettingBL>();
 builder.Services.AddTransient<ToolBL>();
+builder.Services.AddTransient<ResultEditUnlockBL>();
+builder.Services.AddTransient<ResultInvalidBL>();
 builder.Services.AddTransient<ResultCDHABL>();
 builder.Services.AddTransient<PatientCDHABL>();
 builder.Services.AddTransient<SampleBL>();

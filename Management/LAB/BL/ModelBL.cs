@@ -453,6 +453,8 @@ namespace Management.BL
         public string BenhAn { get; set; } // pakage, out, in
         public string ObjectCode { get; set; }
         public DateTime? InsertTime { get; set; }
+        public string MaDotKham { get; set; }
+        public string Address { get; set; }
     }
 
     public class ReportProcess
@@ -677,6 +679,8 @@ namespace Management.BL
         public string Sid { get; set; }
         public string Seq { get; set; }
         public string MaBenhAn { get; set; }
+        public string MaDotKham { get; set; }
+        public string Address { get; set; }
         public DateTime? InsertTime { get; set; }
     }
 

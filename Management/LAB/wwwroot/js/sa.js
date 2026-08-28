@@ -2879,21 +2879,19 @@ function ReturnResult_Invalid() {
         return;
     }
     // Lấy tất cả checkbox được chọn và KeyResultForHis tương ứng
-    const selectedKeys = [];
+    const selectedResultIds = [];
 
     $('.sa-returnresult-chk-service:checked').each(function () {
-        var keyResult = $(this).data('key-result');
-        if (keyResult) {
-            selectedKeys.push(keyResult);
-        }
+        var resultId = parseInt($(this).val(), 10);
+        if (resultId > 0) selectedResultIds.push(resultId);
     });
 
-    if (selectedKeys.length === 0) {
+    if (selectedResultIds.length === 0) {
         SwalHelper.Toast.warning('Vui lòng chọn ít nhất một dịch vụ!');
         return;
     }
 
-    console.log("KeyResultForHis được chọn:", selectedKeys);
+    console.log("ResultCDHA.Id được chọn:", selectedResultIds);
     if (confirm('Bạn muốn InValid kết quả của bệnh nhân ?')) {
         $.ajax({
             url: "/SA_ReturnResult/Invalid",
@@ -2902,8 +2900,7 @@ function ReturnResult_Invalid() {
             dataType: 'text',
             data: JSON.stringify({
                 patientId: parseInt(id),
-                keyResultList: selectedKeys,
-                categoryCode: 'SA'
+                resultIds: selectedResultIds
             }),
             success: function (result) {
                 if (result === 'True') {
@@ -2915,8 +2912,8 @@ function ReturnResult_Invalid() {
                     SwalHelper.Alert.error('Lỗi', 'Không thể Invalid. Vui lòng kiểm tra lại!');
                 }
             },
-            error: function () {
-                SwalHelper.Alert.error('Lỗi', 'Không thể Invalid. Vui lòng kiểm tra lại!');
+            error: function (xhr) {
+                SwalHelper.Alert.error('Lỗi', xhr.responseText || 'Không thể Invalid. Vui lòng kiểm tra lại!');
             }
         });
     }
@@ -2929,13 +2926,13 @@ function ReturnResult_Invalid_RemoveDigitalSign() {
     }
     // Lấy ServiceId
     var resultCDHAId = "";
-    var selectedKeys = [];
+    var selectedResultIds = [];
     $(".row-service").each(function () {
         $(this).find(".form-check-input").each(function () {
             if ($(this).is(':checked')) {
                 resultCDHAId = $(this).val();
-                var keyResult = $(this).data('key-result');
-                if (keyResult) selectedKeys.push(keyResult);
+                var selectedId = parseInt($(this).val(), 10);
+                if (selectedId > 0) selectedResultIds.push(selectedId);
             }
         });
     });
@@ -2952,8 +2949,7 @@ function ReturnResult_Invalid_RemoveDigitalSign() {
             dataType: 'text',
             data: JSON.stringify({
                 patientId: parseInt(id),
-                keyResultList: selectedKeys,
-                categoryCode: 'SA'
+                resultIds: selectedResultIds
             }),
             success: function (result) {
                 if (result === 'True') {
@@ -2966,8 +2962,8 @@ function ReturnResult_Invalid_RemoveDigitalSign() {
                     SwalHelper.Alert.error("Không thể Invalid. Vui lòng kiểm tra lại!");
                 }
             },
-            error: function () {
-                SwalHelper.Alert.error("Không thể Invalid. Vui lòng kiểm tra lại!");
+            error: function (xhr) {
+                SwalHelper.Alert.error(xhr.responseText || "Không thể Invalid. Vui lòng kiểm tra lại!");
             }
         });
     }

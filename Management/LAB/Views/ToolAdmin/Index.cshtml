@@ -1,0 +1,104 @@
+@{
+    Layout = "_LayoutToolAdmin";
+    ViewData["Title"] = "Tool Admin - Mở/Khóa kết quả";
+    var fromDate = ViewData["FromDate"];
+    var toDate = ViewData["ToDate"];
+}
+
+@Html.AntiForgeryToken()
+
+<section class="tool-title">
+    <div>
+        <h1><i class="bi bi-gear-wide-connected"></i> Tools Admin</h1>
+        <p>Mở quyền Invalid và chỉnh sửa kết quả đã khóa theo ngày.</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-controller="Main" asp-action="Index">
+        <i class="bi bi-house-door"></i> Trang chính
+    </a>
+</section>
+
+<section class="search-card">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-3">
+            <label class="form-label">Mã BN / Mã BA / SID / Tên BN</label>
+            <input id="tool-keyword" class="form-control" placeholder="Nhập thông tin cần tìm..." />
+        </div>
+        <div class="col-12 col-md-4 col-lg-2">
+            <label class="form-label">Module</label>
+            <select id="tool-module" class="form-select">
+                <option value="ALL">Tất cả</option>
+                <option value="XN">Xét nghiệm</option>
+                <option value="XQ">X-Quang</option>
+                <option value="SA">Siêu âm</option>
+                <option value="SAT">Siêu âm tim</option>
+                <option value="DDT">Đo điện tim</option>
+                <option value="NS">Nội soi</option>
+                <option value="NSCTC">Nội soi CTC</option>
+                <option value="TDCN">Thăm dò chức năng</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label class="form-label">Từ ngày trả KQ</label>
+            <input id="tool-from-date" type="date" class="form-control" value="@fromDate" />
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label class="form-label">Đến ngày trả KQ</label>
+            <input id="tool-to-date" type="date" class="form-control" value="@toDate" />
+        </div>
+        <div class="col-12 col-lg-3 d-flex gap-2">
+            <button id="tool-search" class="btn btn-primary flex-fill">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+            <button id="tool-refresh" class="btn btn-outline-primary" title="Tải lại">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<section class="result-card">
+    <div class="result-heading">
+        <h2><i class="bi bi-list-check"></i> Danh sách kết quả</h2>
+        <span id="tool-count">0 kết quả</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tool-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Trạng thái</th>
+                    <th>Bệnh nhân</th>
+                    <th>Dịch vụ</th>
+                    <th>Module</th>
+                    <th>Thời gian trả KQ</th>
+                    <th>Hết hạn mở</th>
+                    <th>Thao tác</th>
+                </tr>
+                <tr class="column-filters">
+                    <th></th>
+                    <th><input data-column="1" placeholder="Lọc trạng thái" /></th>
+                    <th>
+                        <input type="text"
+                               class="form-control"
+                               data-column="2"
+                               placeholder="Lọc mã BN / mã BA / tên BN">
+                    </th>
+                    <th><input data-column="3" placeholder="Lọc dịch vụ" /></th>
+                    <th><input data-column="4" placeholder="Lọc module" /></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div id="tool-empty" class="empty-state d-none">
+        <i class="bi bi-inbox"></i>
+        <p>Không tìm thấy kết quả phù hợp.</p>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/tool-admin.js" asp-append-version="true"></script>
+}

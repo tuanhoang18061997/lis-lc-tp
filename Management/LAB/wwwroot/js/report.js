@@ -560,6 +560,7 @@ function Report_BuildPatientDetailRowHtml(patients, colSpan) {
                 <td>${i + 1}</td>
                 <td>${p.PatientID || ""}</td>
                 <td>${p.PatientName || ""}</td>
+                <td>${p.MaDotKham || ""}</td>
                 <td>${p.Sid || ""}</td>
                 <td>${p.Seq || ""}</td>
                 <td>${p.MaBenhAn || ""}</td>
@@ -575,7 +576,8 @@ function Report_BuildPatientDetailRowHtml(patients, colSpan) {
                     <tr>
                         <th style="width: 50px;">STT</th>
                         <th style="width: 120px;">Mã BN</th>
-                        <th>Họ tên</th>
+                        <th style="width: 300px;">Họ tên</th>
+                        <th>Mã Đợt khám</th>
                         <th style="width: 150px;">SID</th>
                         <th style="width: 80px;">SEQ</th>
                         <th style="width: 120px;">Mã bệnh án</th>
@@ -609,7 +611,7 @@ function Report_FindServiceFromCache(doctorId, serviceId) {
     return service || null;
 }
 // --------------- Report theo công thực hiện --------------------
-// Hàm toggle hiển thị danh sách bệnh nhân theo dịch vụ trong báo cáo theo người thực hiện
+// Hàm toggle hiển thị danh sách bệnh nhân theo dịch vụ trong báo cáo theo Công thực hiện
 function Report_TogglePatientsByService(
     doctorId,
     serviceId,

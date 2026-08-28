@@ -1,0 +1,614 @@
+﻿:root {
+    --tool-navy: #143f5c;
+    --tool-blue: #0799c9;
+    --tool-bg: #f3f7fa;
+    --tool-border: #dce6ed;
+}
+
+body {
+    margin: 0;
+    background: var(--tool-bg);
+    color: #29404f;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.tool-header {
+    min-height: 72px;
+    padding: 0 3.2%;
+    background: var(--tool-navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .16);
+}
+
+.tool-brand {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.05rem;
+    letter-spacing: .03em;
+}
+
+    .tool-brand strong {
+        color: #45c1ea;
+    }
+
+.tool-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+    .tool-user i {
+        font-size: 1.8rem;
+        color: #39bce8;
+    }
+
+.tool-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+    .tool-title h1 {
+        margin: 0;
+        font-size: 1.65rem;
+        color: var(--tool-navy);
+        font-weight: 700;
+    }
+
+    .tool-title p {
+        margin: 4px 0 0;
+        color: #6a7e8b;
+    }
+
+.search-card,
+.result-card {
+    background: #fff;
+    border: 1px solid var(--tool-border);
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(33, 74, 99, .07);
+}
+
+.search-card {
+    padding: 20px;
+    margin-bottom: 22px;
+}
+
+.form-label {
+    font-size: .82rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #526a78;
+}
+
+.form-control, .form-select {
+    min-height: 44px;
+    border-color: #d4e0e7;
+}
+
+.btn-primary {
+    background: #078fc0;
+    border-color: #078fc0;
+}
+
+.result-heading {
+    min-height: 66px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--tool-border);
+}
+
+    .result-heading h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--tool-navy);
+    }
+
+    .result-heading span {
+        font-weight: 700;
+        color: #087eab;
+    }
+
+.table {
+    margin-bottom: 0;
+    min-width: 1280px;
+    table-layout: auto;
+}
+
+    .table thead th {
+        background: #eaf3f9;
+        color: #385666;
+        border-bottom-color: #d3e1e9;
+        white-space: nowrap;
+        font-size: .85rem;
+    }
+
+    .table tbody td {
+        padding: 13px 10px;
+        vertical-align: middle;
+        font-size: .9rem;
+    }
+
+.column-filters th {
+    padding: 7px !important;
+    background: #f8fbfd !important;
+}
+
+.column-filters input {
+    width: 100%;
+    min-width: 105px;
+    padding: 7px 8px;
+    border: 1px solid #d7e2e9;
+    border-radius: 6px;
+    font-size: .78rem;
+    font-weight: 400;
+}
+
+/* =========================================================
+   TABLE CELLS
+   ========================================================= */
+
+.stt-cell,
+.module-cell,
+.return-time-cell,
+.expire-time-cell,
+.action-cell {
+    white-space: nowrap;
+}
+
+.status-cell {
+    min-width: 145px;
+}
+
+.status-badge,
+.module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-locked {
+    color: #a9323d;
+    background: #ffeaed;
+}
+
+.status-open {
+    color: #08784a;
+    background: #ddf7e9;
+}
+
+.status-editing {
+    color: #895b00;
+    background: #fff0c8;
+}
+
+.status-today {
+    color: #516773;
+    background: #eaf0f3;
+}
+
+.module-badge {
+    color: #23627f;
+    background: #e7f3f9;
+}
+
+.unlock-note {
+    margin-top: 5px;
+    max-width: 230px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #758692;
+    font-size: .72rem;
+}
+
+.btn-unlock {
+    color: #fff;
+    background: #e49813;
+    border-color: #e49813;
+    white-space: nowrap;
+}
+
+.btn-lock {
+    color: #a3333d;
+    background: #fff0f1;
+    border-color: #f1c9cd;
+    white-space: nowrap;
+}
+
+.empty-state {
+    padding: 55px;
+    text-align: center;
+    color: #8ba0ad;
+}
+
+    .empty-state i {
+        font-size: 2.4rem;
+    }
+
+    .empty-state p {
+        margin: 8px 0 0;
+    }
+
+/* =========================================================
+   PATIENT INFO - GỘP MÃ BN + BA/SID + TÊN BN
+   ========================================================= */
+
+.patient-info-cell {
+    width: 270px;
+    min-width: 250px;
+    max-width: 320px;
+    vertical-align: middle !important;
+}
+
+.patient-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.patient-name {
+    max-width: 100%;
+    color: #172b3a;
+    font-size: .94rem;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.patient-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    color: #6b7f8d;
+    font-size: .76rem;
+    line-height: 1.25;
+}
+
+.patient-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+}
+
+.patient-meta-label {
+    color: #7d8e99;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.patient-code-value,
+.patient-record-value {
+    color: #28708f;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.patient-meta-separator {
+    color: #b3c0c8;
+}
+
+/* =========================================================
+   SERVICE GRID - 4 CỘT DESKTOP, 3 CỘT MÀN HÌNH VỪA
+   ========================================================= */
+
+.service-cell {
+    width: 100%;
+    min-width: 760px;
+    vertical-align: top !important;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+}
+
+.service-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 34px;
+    padding: 5px 8px;
+    background: #f4f8fc;
+    border: 1px solid #d9e5ef;
+    border-radius: 7px;
+    color: #334e68;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+    .service-badge:hover {
+        background: #edf5fb;
+        border-color: #b8d2e5;
+    }
+
+.service-badge-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #dcecf7;
+    color: #2f6f98;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.service-badge-name {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   UNLOCK POPUP
+   ========================================================= */
+
+.swal-form-summary {
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #f2f7fa;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.swal-form-label {
+    display: block;
+    margin: 10px 2.5em -8px;
+    text-align: left;
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+.swal-patient-info {
+    margin-bottom: 10px;
+    color: #334155;
+    line-height: 1.35;
+}
+
+    .swal-patient-info > strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+.swal-patient-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+    .swal-patient-meta b {
+        color: #355d73;
+    }
+
+.swal-module-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.swal-service-count {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.swal-service-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    max-height: 270px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.swal-service-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 34px;
+    padding: 5px 8px;
+    border: 1px solid #d9e5ef;
+    border-radius: 7px;
+    background: #fff;
+    color: #334155;
+    text-align: left;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.swal-service-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e0eff9;
+    color: #25658c;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.swal-service-name {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swal-service-grid::-webkit-scrollbar {
+    width: 5px;
+}
+
+.swal-service-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1650px) {
+    .service-cell {
+        min-width: 660px;
+    }
+
+    .service-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .patient-info-cell {
+        min-width: 220px;
+    }
+
+    .service-cell {
+        min-width: 540px;
+    }
+
+    .service-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .service-cell {
+        min-width: 430px;
+    }
+
+    .service-grid,
+    .swal-service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .tool-header {
+        padding: 0 16px;
+    }
+
+    .tool-brand span {
+        font-size: .82rem;
+    }
+
+    .tool-user {
+        font-size: 0;
+    }
+
+    .tool-title {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+        .tool-title h1 {
+            font-size: 1.35rem;
+        }
+
+        .tool-title p {
+            font-size: .85rem;
+        }
+
+    .patient-info-cell {
+        min-width: 210px;
+    }
+
+    .service-cell {
+        min-width: 330px;
+    }
+
+    .service-grid,
+    .swal-service-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+   TABLE STICKY HEADER
+   Giữ toàn bộ THEAD (tiêu đề + dòng filter) khi cuộn bảng
+   ========================================================= */
+
+.result-card .table-responsive {
+    position: relative;
+    /* Tạo vùng cuộn riêng cho danh sách để sticky hoạt động ổn định
+       dù Bootstrap .table-responsive đang quản lý overflow. */
+    max-height: calc(100vh - 180px);
+    overflow: auto;
+    /* Cuộn mượt hơn trên thiết bị cảm ứng. */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+#tool-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    /* Bắt buộc có background để nội dung tbody không xuyên qua header. */
+    background: #eaf3f9;
+    /* Tách header khỏi dữ liệu khi cuộn. */
+    box-shadow: 0 2px 6px rgba(20, 63, 92, .12);
+}
+
+    #tool-table thead > tr:first-child > th {
+        background: #eaf3f9;
+    }
+
+    #tool-table thead > .column-filters > th {
+        background: #f8fbfd !important;
+    }
+
+    /* Tránh input/filter bị chìm dưới cell khi header đang sticky. */
+    #tool-table thead input,
+    #tool-table thead select {
+        position: relative;
+        z-index: 31;
+    }
+
+/* Màn hình thấp: dành thêm không gian cho phần search/header phía trên. */
+@media (max-height: 760px) {
+    .result-card .table-responsive {
+        max-height: calc(100vh - 130px);
+    }
+}

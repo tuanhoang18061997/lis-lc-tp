@@ -12,9 +12,11 @@ namespace Management.BL
     public class PatientCDHABL
     {
         private readonly LABContext _db;
-        public PatientCDHABL(LABContext db)
+        private readonly ResultEditUnlockBL _resultEditUnlockBL;
+        public PatientCDHABL(LABContext db, ResultEditUnlockBL resultEditUnlockBL)
         {
             _db = db;
+            _resultEditUnlockBL = resultEditUnlockBL;
         }
         public async Task<List<Patient>> Get_ListPatient(DateTime fromDate, DateTime toDate, bool wait, bool process, bool valid, string categoryCode)
         {
@@ -575,6 +577,15 @@ namespace Management.BL
                     }
                     _patient.UserUpdateId = userInsertOrUpdate;
                     await _db.SaveChangesAsync();
+
+                    if (valid && userInsertOrUpdate.HasValue)
+                    {
+                        await _resultEditUnlockBL.RevokeAfterValidAsync(
+                            id,
+                            group,
+                            userInsertOrUpdate.Value,
+                            ToolBL.Get_DateNow());
+                    }
                     return true;
                 }
                 return false;
@@ -858,6 +869,15 @@ namespace Management.BL
                     }
                     _patient.UserUpdateId = userInsertOrUpdate;
                     await _db.SaveChangesAsync();
+
+                    if (valid && userInsertOrUpdate.HasValue)
+                    {
+                        await _resultEditUnlockBL.RevokeAfterValidAsync(
+                            id,
+                            group,
+                            userInsertOrUpdate.Value,
+                            ToolBL.Get_DateNow());
+                    }
                     return true;
                 }
             }

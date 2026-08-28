@@ -22,10 +22,12 @@ namespace Management.Controllers
         private readonly ToolBL _toolBL;
         private readonly HospitalBL _hospitalBL;
         private readonly IWebHostEnvironment _environment;
+        private readonly ResultInvalidBL _resultInvalidBL;
 
         public XN_ReturnResultController(ILogger<XN_ReturnResultController> logger, PatientXNBL patientBL, ObjectBL objectBL, LocationBL locationBL,
                             DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultXNBL resultXNBL, SettingBL settingBL, 
-                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL)
+                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL,
+                            ResultInvalidBL resultInvalidBL)
         {
             _logger = logger;
             _patientBL = patientBL;
@@ -41,6 +43,7 @@ namespace Management.Controllers
             _environment = environment;
             _toolBL = toolBL;
             _hospitalBL = hospitalBL;
+            _resultInvalidBL = resultInvalidBL;
         }
 
         [HttpGet]
@@ -204,11 +207,14 @@ namespace Management.Controllers
         public async Task<IActionResult> Invalid(long id)
         {
             var _userLogin = this.GetUserLogin();
-            var dateTimeNow = ToolBL.Get_DateNow();
-            var from = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59).AddDays(-1);
-            var to = new DateTime(dateTimeNow.Year, dateTimeNow.Month, dateTimeNow.Day, 23, 59, 59);
-            var _process = await _patientBL.GetSample_ProcessResult_ReturnResult(id, false, true, false, _userLogin.Value);
-            return Content(_process.ToString());
+            if (!_userLogin.HasValue)
+                return Unauthorized();
+
+            var result = await _resultInvalidBL.InvalidXNAsync(id, _userLogin.Value);
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Content("True");
         }
 
         [HttpGet]

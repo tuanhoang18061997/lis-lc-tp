@@ -39,6 +39,7 @@ namespace Management.Models
         public virtual DbSet<WorkOrder> WorkOrders { get; set; }
         public virtual DbSet<ResultXN> ResultXNs { get; set; }
         public virtual DbSet<ResultCDHA> ResultCDHAs { get; set; }
+        public virtual DbSet<ResultEditUnlock> ResultEditUnlocks { get; set; }
         public virtual DbSet<ImageCDHA> ImageCDHAs { get; set; }
         public virtual DbSet<DigitalSign> DigitalSigns { get; set; }
         public virtual DbSet<ZaloOAConfig> ZaloOAConfigs { get; set; }

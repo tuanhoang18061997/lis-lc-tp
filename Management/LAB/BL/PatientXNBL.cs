@@ -11,9 +11,11 @@ namespace Management.BL
     public class PatientXNBL
     {
         private readonly LABContext _db;
-        public PatientXNBL(LABContext db)
+        private readonly ResultEditUnlockBL _resultEditUnlockBL;
+        public PatientXNBL(LABContext db, ResultEditUnlockBL resultEditUnlockBL)
         {
             _db = db;
+            _resultEditUnlockBL = resultEditUnlockBL;
         }
         public async Task<List<Patient>> Get_ListPatient(DateTime fromDate, DateTime toDate, bool waitXN, bool processXN, bool validXN)
         {
@@ -238,6 +240,15 @@ namespace Management.BL
                     _patient.FullResultXN = fullResultXN;
                     _patient.NotFullResultXN = notFullResultXN;
                     await _db.SaveChangesAsync();
+
+                    if (validXN && userInsertOrUpdate.HasValue)
+                    {
+                        await _resultEditUnlockBL.RevokeAfterValidAsync(
+                            id,
+                            "XN",
+                            userInsertOrUpdate.Value,
+                            ToolBL.Get_DateNow());
+                    }
                     return true;
                 }
             }

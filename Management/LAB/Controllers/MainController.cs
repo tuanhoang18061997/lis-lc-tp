@@ -111,6 +111,13 @@ namespace Management.Controllers
             return LocalRedirect(Url.Action("Index", "Settup"));
         }
 
+        [HttpGet]
+        [Authorize]
+        public IActionResult ToToolAdmin()
+        {
+            return LocalRedirect(Url.Action("Index", "ToolAdmin"));
+        }
+
         public long? GetUserLogin()
         {
             long? userId = null;

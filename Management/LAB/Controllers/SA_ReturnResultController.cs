@@ -22,11 +22,13 @@ namespace Management.Controllers
         private readonly ToolBL _toolBL;
         private readonly HospitalBL _hospitalBL;
         private readonly IWebHostEnvironment _environment;
+        private readonly ResultInvalidBL _resultInvalidBL;
         public readonly string _SA = "SA";
 
         public SA_ReturnResultController(ILogger<SA_ReturnResultController> logger, PatientCDHABL patientBL, ObjectBL objectBL, LocationBL locationBL,
                             DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL, 
-                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL)
+                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL,
+                            ResultInvalidBL resultInvalidBL)
         {
             _logger = logger;
             _patientCDHABL = patientBL;
@@ -42,6 +44,7 @@ namespace Management.Controllers
             _environment = environment;
             _toolBL = toolBL;
             _hospitalBL = hospitalBL;
+            _resultInvalidBL = resultInvalidBL;
         }
 
         [HttpGet]
@@ -256,44 +259,16 @@ namespace Management.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Invalid([FromBody] InvalidRequestModel request)
+        public async Task<IActionResult> Invalid([FromBody] InvalidCDHARequest request)
         {
             try
             {
-                if (request == null || request.PatientId <= 0)
-                {
-                    return BadRequest("Thông tin không hợp lệ.");
-                }
-
                 var _userLogin = this.GetUserLogin();
-                if (!_userLogin.HasValue)
-                {
-                    return Unauthorized("Không xác định được người dùng.");
-                }
+                if (!_userLogin.HasValue) return Unauthorized();
 
-                // 1. Cập nhật trạng thái bệnh nhân (Invalid)
-                var _process = await _patientCDHABL.GetSample_ProcessResult_ReturnResult(
-                    request.PatientId,
-                    false,  // wait
-                    true,   // process
-                    false,  // valid
-                    _userLogin.Value,
-                    _SA
-                );
-
-                if (!_process)
-                {
-                    return Content("False");
-                }
-
-                // 2. Xóa các file PDF tương ứng (nếu có danh sách KeyResultForHis)
-                if (request.KeyResultList != null && request.KeyResultList.Any())
-                {
-                    var categoryCode = request.CategoryCode ?? _SA;
-                    var pdfRemoved = _patientCDHABL.Remove_Result_PDF(request.KeyResultList, categoryCode);
-
-                    _logger.LogInformation($"Removed PDF files: {pdfRemoved} for keys: {string.Join(", ", request.KeyResultList)}");
-                }
+                var result = await _resultInvalidBL.InvalidCDHAAsync(
+                    request.PatientId, request.ResultIds, _SA, _userLogin.Value);
+                if (!result.Success) return BadRequest(result.Message);
 
                 return Content("True");
             }
@@ -303,15 +278,6 @@ namespace Management.Controllers
                 return Content("False");
             }
         }
-
-        // Model để nhận request từ client
-        public class InvalidRequestModel
-        {
-            public long PatientId { get; set; }
-            public List<string> KeyResultList { get; set; }
-            public string CategoryCode { get; set; }
-        }
-
 
         [HttpGet]
         [Authorize]

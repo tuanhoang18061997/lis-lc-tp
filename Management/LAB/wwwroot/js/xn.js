@@ -2145,7 +2145,7 @@ function ReturnResult_Invalid() {
     else {
         if (confirm('Bạn muốn InValid kết quả của bệnh nhân ?')) {
             $.ajax({
-                url: "/XN_ReturnResult/Invalid?id= " + id,
+                url: "/XN_ReturnResult/Invalid?id=" + encodeURIComponent(id),
                 type: 'POST',
                 dataType: 'text',
                 success: function (result) {
@@ -2158,8 +2158,8 @@ function ReturnResult_Invalid() {
                         SwalHelper.Toast.error("Không thể Invalid. Vui lòng kiểm tra lại!");
                     }
                 },
-                error: function () {
-                    SwalHelper.Toast.error("Không thể Invalid. Vui lòng kiểm tra lại!");
+                error: function (xhr) {
+                    SwalHelper.Toast.error(xhr.responseText || "Không thể Invalid. Vui lòng kiểm tra lại!");
                 }
             });
         }

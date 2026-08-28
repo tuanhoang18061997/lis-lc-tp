@@ -56,6 +56,10 @@
                 var imageSearch = "Search.png";
                 var titleSearch = "TÌM KẾT QUẢ";
 
+                var actionToolAdmin = "ToToolAdmin";
+                var imageToolAdmin = "ToolAdmin.svg";
+                var titleToolAdmin = "TOOLS ADMIN";
+
                 foreach (var item in _lstUserFunction)
                 {
                     if (item.Function.Code == "XN")
@@ -176,6 +180,17 @@
                             </a>
                             <div class="main-card-body">
                                 <h5 class="main-card-title">@titleSettup</h5>
+                            </div>
+                        </div>
+                    }
+                    else if (item.Function.Code == "ToolAdmin")
+                    {
+                        <div class="main-card">
+                            <a asp-controller="Main" asp-action="@actionToolAdmin">
+                                <img class="card-img-top" src="~/images/logo/@imageToolAdmin" alt="Tools Admin">
+                            </a>
+                            <div class="main-card-body">
+                                <h5 class="main-card-title">@titleToolAdmin</h5>
                             </div>
                         </div>
                     }

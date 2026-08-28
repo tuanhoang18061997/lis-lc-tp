@@ -221,6 +221,42 @@ namespace Management.BL
                                             Count = p.Count()
                                         }).ToList();
                 }
+                else if (location == "TDCN")
+                {
+                    lstReportService = (from patient in _db.Patients
+                                        join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                        join service in _db.Services on result.ServiceId equals service.Id
+                                        where patient.InsertTime > fromtime
+                                              && patient.InsertTime <= totime
+                                              && result.Active == true
+                                              && service.Category.Code == "TDCN"
+                                              && patient.ValidTDCN == true
+                                        select new ReportService
+                                        {
+                                            SID = result.Patient.Sid,
+                                            ServiceID = result.ServiceId.ToString(),
+                                            ServiceName = result.Service.Name,
+                                            BenhAn = patient.BenhAn,
+                                            ObjectCode = patient.Object.Code
+                                        }).Distinct().ToList();
+
+                    lstReportService = (from item in lstReportService
+                                        group item by new
+                                        {
+                                            item.ServiceID,
+                                            item.ServiceName,
+                                            item.BenhAn,
+                                            item.ObjectCode
+                                        } into p
+                                        select new ReportService
+                                        {
+                                            ServiceID = p.Key.ServiceID,
+                                            ServiceName = p.Key.ServiceName,
+                                            BenhAn = p.Key.BenhAn,
+                                            ObjectCode = p.Key.ObjectCode,
+                                            Count = p.Count()
+                                        }).ToList();
+                }
                 else if (location == "NS")
                 {
                     lstReportService = (from patient in _db.Patients
@@ -459,6 +495,40 @@ namespace Management.BL
                                             Count = p.Count()
                                         }).ToList();
                 }
+                else if (location == "TDCN")
+                {
+                    lstReportService = (from patient in _db.Patients
+                                        join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                        join service in _db.Services on result.ServiceId equals service.Id
+                                        where patient.InsertTime > fromtime
+                                              && patient.InsertTime <= totime
+                                              && result.Active == true
+                                              && patient.Active == true
+                                              && service.Category.Code == "TDCN"
+                                              && patient.ValidTDCN == true
+                                        select new ReportService
+                                        {
+                                            SID = result.Patient.Sid,
+                                            ServiceID = result.ServiceId.ToString(),
+                                            ServiceName = result.Service.Name,
+                                            BenhAn = patient.BenhAn
+                                        }).Distinct().ToList();
+
+                    lstReportService = (from item in lstReportService
+                                        group item by new
+                                        {
+                                            item.ServiceID,
+                                            item.ServiceName,
+                                            item.BenhAn
+                                        } into p
+                                        select new ReportService
+                                        {
+                                            ServiceID = p.Key.ServiceID,
+                                            ServiceName = p.Key.ServiceName,
+                                            BenhAn = p.Key.BenhAn,
+                                            Count = p.Count()
+                                        }).ToList();
+                }
                 else if (location == "NS")
                 {
                     lstReportService = (from patient in _db.Patients
@@ -601,6 +671,30 @@ namespace Management.BL
                                             ObjectCode = p.Key.ObjectCode, // 01 => Thu phí, 02 => BHYT, 03 => BHBL, 04 => DV
                                         }).ToList();
                 }
+                else if (location == "TDCN")
+                {
+                    lstReportPatient = (from patient in _db.Patients
+                                        join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                        join service in _db.Services on result.ServiceId equals service.Id
+                                        where patient.InsertTime > fromTime
+                                              && patient.InsertTime <= toTime
+                                              && service.Category.Code == "TDCN"
+                                              && patient.ValidTDCN == true
+                                        group patient by new
+                                        {
+                                            patient.PatientId,
+                                            DayInSID = patient.Sid.Substring(0, 6),
+                                            ObjectCode = patient.Object.Code,
+                                            patient.BenhAn
+                                        } into p
+                                        select new ReportPatient
+                                        {
+                                            PatientID = p.Key.PatientId,
+                                            DayInSID = p.Key.DayInSID,
+                                            BenhAn = p.Key.BenhAn,
+                                            ObjectCode = p.Key.ObjectCode
+                                        }).ToList();
+                }
                 else if (location == "NS")
                 {
                     lstReportPatient = (from patient in _db.Patients
@@ -673,96 +767,99 @@ namespace Management.BL
                 if (location == "XN")
                 {
                     lstPatientDetails = (from patient in _db.Patients
-                                        join result in _db.ResultXNs on patient.Id equals result.PatientId
-                                        where patient.InsertTime > fromTime && patient.InsertTime <= toTime
-                                              && (patient.ValidXN == true || patient.ProcessXN == true)
-                                              && result.Active == true
-                                              && patient.Active == true
-                                        group patient by new {
-                                            patient.PatientId,
-                                            patient.PatientName,
-                                            patient.Sid,
-                                            patient.Seq,
-                                            patient.MaBenhAn,
-                                            patient.BenhAn,
-                                            ObjectCode = patient.Object.Code,
-                                            patient.InsertTime
-                                        } into p
-                                        select new ReportPatientDetail
-                                        {
-                                            PatientID = p.Key.PatientId,
-                                            PatientName = p.Key.PatientName,
-                                            Sid = p.Key.Sid,
-                                            Seq = p.Key.Seq,
-                                            MaBenhAn = p.Key.MaBenhAn,
-                                            BenhAn = p.Key.BenhAn,
-                                            ObjectCode = p.Key.ObjectCode,
-                                            InsertTime = p.Key.InsertTime
-                                        }).ToList();
+                                         join result in _db.ResultXNs on patient.Id equals result.PatientId
+                                         where patient.InsertTime > fromTime && patient.InsertTime <= toTime
+                                               && (patient.ValidXN == true || patient.ProcessXN == true)
+                                               && result.Active == true
+                                               && patient.Active == true
+                                         group patient by new
+                                         {
+                                             patient.PatientId,
+                                             patient.PatientName,
+                                             patient.Sid,
+                                             patient.Seq,
+                                             patient.MaBenhAn,
+                                             patient.BenhAn,
+                                             ObjectCode = patient.Object.Code,
+                                             patient.InsertTime
+                                         } into p
+                                         select new ReportPatientDetail
+                                         {
+                                             PatientID = p.Key.PatientId,
+                                             PatientName = p.Key.PatientName,
+                                             Sid = p.Key.Sid,
+                                             Seq = p.Key.Seq,
+                                             MaBenhAn = p.Key.MaBenhAn,
+                                             BenhAn = p.Key.BenhAn,
+                                             ObjectCode = p.Key.ObjectCode,
+                                             InsertTime = p.Key.InsertTime
+                                         }).ToList();
                 }
                 else if (location == "SA")
                 {
                     lstPatientDetails = (from patient in _db.Patients
-                                        join result in _db.ResultCDHAs on patient.Id equals result.PatientId
-                                        join service in _db.Services on result.ServiceId equals service.Id
-                                        where patient.InsertTime > fromTime && patient.InsertTime <= toTime
-                                              && ((service.Category.Code == "SA" && patient.ValidSA == true) 
-                                                  || (service.Category.Code == "SAT" && patient.ValidSAT == true))
-                                              && result.Active == true
-                                              && patient.Active == true
-                                        group patient by new {
-                                            patient.PatientId,
-                                            patient.PatientName,
-                                            patient.Sid,
-                                            patient.Seq,
-                                            patient.MaBenhAn,
-                                            patient.BenhAn,
-                                            ObjectCode = patient.Object.Code,
-                                            patient.InsertTime
-                                        } into p
-                                        select new ReportPatientDetail
-                                        {
-                                            PatientID = p.Key.PatientId,
-                                            PatientName = p.Key.PatientName,
-                                            Sid = p.Key.Sid,
-                                            Seq = p.Key.Seq,
-                                            MaBenhAn = p.Key.MaBenhAn,
-                                            BenhAn = p.Key.BenhAn,
-                                            ObjectCode = p.Key.ObjectCode,
-                                            InsertTime = p.Key.InsertTime
-                                        }).ToList();
+                                         join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                         join service in _db.Services on result.ServiceId equals service.Id
+                                         where patient.InsertTime > fromTime && patient.InsertTime <= toTime
+                                               && ((service.Category.Code == "SA" && patient.ValidSA == true)
+                                                   || (service.Category.Code == "SAT" && patient.ValidSAT == true))
+                                               && result.Active == true
+                                               && patient.Active == true
+                                         group patient by new
+                                         {
+                                             patient.PatientId,
+                                             patient.PatientName,
+                                             patient.Sid,
+                                             patient.Seq,
+                                             patient.MaBenhAn,
+                                             patient.BenhAn,
+                                             ObjectCode = patient.Object.Code,
+                                             patient.InsertTime
+                                         } into p
+                                         select new ReportPatientDetail
+                                         {
+                                             PatientID = p.Key.PatientId,
+                                             PatientName = p.Key.PatientName,
+                                             Sid = p.Key.Sid,
+                                             Seq = p.Key.Seq,
+                                             MaBenhAn = p.Key.MaBenhAn,
+                                             BenhAn = p.Key.BenhAn,
+                                             ObjectCode = p.Key.ObjectCode,
+                                             InsertTime = p.Key.InsertTime
+                                         }).ToList();
                 }
                 else if (location == "XQ")
                 {
                     lstPatientDetails = (from patient in _db.Patients
-                                        join result in _db.ResultCDHAs on patient.Id equals result.PatientId
-                                        join service in _db.Services on result.ServiceId equals service.Id
-                                        where patient.InsertTime > fromTime && patient.InsertTime <= toTime
-                                              && service.Category.Code == "XQ"
-                                              && patient.ValidXQ == true
-                                              && result.Active == true
-                                              && patient.Active == true
-                                        group patient by new {
-                                            patient.PatientId,
-                                            patient.PatientName,
-                                            patient.Sid,
-                                            patient.Seq,
-                                            patient.MaBenhAn,
-                                            patient.BenhAn,
-                                            ObjectCode = patient.Object.Code,
-                                            patient.InsertTime
-                                        } into p
-                                        select new ReportPatientDetail
-                                        {
-                                            PatientID = p.Key.PatientId,
-                                            PatientName = p.Key.PatientName,
-                                            Sid = p.Key.Sid,
-                                            Seq = p.Key.Seq,
-                                            MaBenhAn = p.Key.MaBenhAn,
-                                            BenhAn = p.Key.BenhAn,
-                                            ObjectCode = p.Key.ObjectCode,
-                                            InsertTime = p.Key.InsertTime
-                                        }).ToList();
+                                         join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                         join service in _db.Services on result.ServiceId equals service.Id
+                                         where patient.InsertTime > fromTime && patient.InsertTime <= toTime
+                                               && service.Category.Code == "XQ"
+                                               && patient.ValidXQ == true
+                                               && result.Active == true
+                                               && patient.Active == true
+                                         group patient by new
+                                         {
+                                             patient.PatientId,
+                                             patient.PatientName,
+                                             patient.Sid,
+                                             patient.Seq,
+                                             patient.MaBenhAn,
+                                             patient.BenhAn,
+                                             ObjectCode = patient.Object.Code,
+                                             patient.InsertTime
+                                         } into p
+                                         select new ReportPatientDetail
+                                         {
+                                             PatientID = p.Key.PatientId,
+                                             PatientName = p.Key.PatientName,
+                                             Sid = p.Key.Sid,
+                                             Seq = p.Key.Seq,
+                                             MaBenhAn = p.Key.MaBenhAn,
+                                             BenhAn = p.Key.BenhAn,
+                                             ObjectCode = p.Key.ObjectCode,
+                                             InsertTime = p.Key.InsertTime
+                                         }).ToList();
                 }
                 else if (location == "DDT")
                 {
@@ -771,7 +868,41 @@ namespace Management.BL
                                          join service in _db.Services on result.ServiceId equals service.Id
                                          where patient.InsertTime > fromTime && patient.InsertTime <= toTime
                                                && service.Category.Code == "DDT"
-                                               && patient.ValidXQ == true
+                                               && patient.ValidDDT == true
+                                               && result.Active == true
+                                               && patient.Active == true
+                                         group patient by new
+                                         {
+                                             patient.PatientId,
+                                             patient.PatientName,
+                                             patient.Sid,
+                                             patient.Seq,
+                                             patient.MaBenhAn,
+                                             patient.BenhAn,
+                                             ObjectCode = patient.Object.Code,
+                                             patient.InsertTime
+                                         } into p
+                                         select new ReportPatientDetail
+                                         {
+                                             PatientID = p.Key.PatientId,
+                                             PatientName = p.Key.PatientName,
+                                             Sid = p.Key.Sid,
+                                             Seq = p.Key.Seq,
+                                             MaBenhAn = p.Key.MaBenhAn,
+                                             BenhAn = p.Key.BenhAn,
+                                             ObjectCode = p.Key.ObjectCode,
+                                             InsertTime = p.Key.InsertTime
+                                         }).ToList();
+                }
+                else if (location == "TDCN")
+                {
+                    lstPatientDetails = (from patient in _db.Patients
+                                         join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                         join service in _db.Services on result.ServiceId equals service.Id
+                                         where patient.InsertTime > fromTime
+                                               && patient.InsertTime <= toTime
+                                               && service.Category.Code == "TDCN"
+                                               && patient.ValidTDCN == true
                                                && result.Active == true
                                                && patient.Active == true
                                          group patient by new
@@ -800,34 +931,35 @@ namespace Management.BL
                 else if (location == "NS")
                 {
                     lstPatientDetails = (from patient in _db.Patients
-                                        join result in _db.ResultCDHAs on patient.Id equals result.PatientId
-                                        join service in _db.Services on result.ServiceId equals service.Id
-                                        where patient.InsertTime > fromTime && patient.InsertTime <= toTime
-                                              && service.Category.Code == "NS"
-                                              && patient.ValidNS == true
-                                              && result.Active == true
-                                              && patient.Active == true
-                                        group patient by new {
-                                            patient.PatientId,
-                                            patient.PatientName,
-                                            patient.Sid,
-                                            patient.Seq,
-                                            patient.MaBenhAn,
-                                            patient.BenhAn,
-                                            ObjectCode = patient.Object.Code,
-                                            patient.InsertTime
-                                        } into p
-                                        select new ReportPatientDetail
-                                        {
-                                            PatientID = p.Key.PatientId,
-                                            PatientName = p.Key.PatientName,
-                                            Sid = p.Key.Sid,
-                                            Seq = p.Key.Seq,
-                                            MaBenhAn = p.Key.MaBenhAn,
-                                            BenhAn = p.Key.BenhAn,
-                                            ObjectCode = p.Key.ObjectCode,
-                                            InsertTime = p.Key.InsertTime
-                                        }).ToList();
+                                         join result in _db.ResultCDHAs on patient.Id equals result.PatientId
+                                         join service in _db.Services on result.ServiceId equals service.Id
+                                         where patient.InsertTime > fromTime && patient.InsertTime <= toTime
+                                               && service.Category.Code == "NS"
+                                               && patient.ValidNS == true
+                                               && result.Active == true
+                                               && patient.Active == true
+                                         group patient by new
+                                         {
+                                             patient.PatientId,
+                                             patient.PatientName,
+                                             patient.Sid,
+                                             patient.Seq,
+                                             patient.MaBenhAn,
+                                             patient.BenhAn,
+                                             ObjectCode = patient.Object.Code,
+                                             patient.InsertTime
+                                         } into p
+                                         select new ReportPatientDetail
+                                         {
+                                             PatientID = p.Key.PatientId,
+                                             PatientName = p.Key.PatientName,
+                                             Sid = p.Key.Sid,
+                                             Seq = p.Key.Seq,
+                                             MaBenhAn = p.Key.MaBenhAn,
+                                             BenhAn = p.Key.BenhAn,
+                                             ObjectCode = p.Key.ObjectCode,
+                                             InsertTime = p.Key.InsertTime
+                                         }).ToList();
                 }
 
                 if (lstPatientDetails != null && lstPatientDetails.Count > 0)
@@ -839,7 +971,7 @@ namespace Management.BL
                     item.User = user;
                     item.Total = lstPatientDetails.Count;
                     item.PatientDetails = lstPatientDetails;
-                    
+
                     lstTotalReportPatient.Add(item);
                 }
 
@@ -969,6 +1101,37 @@ namespace Management.BL
                                  join service in _db.Services on resultImage.ServiceId equals service.Id
                                  where resultImage.InsertTime > fromTime && resultImage.InsertTime <= toTime && resultImage.Active == true && service.Category.Code == "XQ" && patient.ValidXQ == true
                                  group resultImage by new { ServiceId = resultImage.ServiceId, ServiceName = resultImage.Service.Name, UserId = us.Id, UserName = us.Name } into p
+                                 select new ReportProcess
+                                 {
+                                     DoctorID = p.Key.UserId.ToString(),
+                                     DoctorName = p.Key.UserName,
+                                     ServiceID = p.Key.ServiceId.ToString(),
+                                     ServiceName = p.Key.ServiceName,
+                                     FromDate = fromTimeString,
+                                     ToDate = toTimeString,
+                                     DateNow = dateNow,
+                                     User = user,
+                                     Count = p.Count()
+                                 }).ToList();
+                }
+                else if (location == "TDCN")
+                {
+                    lstResult = (from resultImage in _db.ResultCDHAs
+                                 join patient in _db.Patients on resultImage.PatientId equals patient.Id
+                                 join us in _db.Users on patient.UserReturnResultTDCN equals us.Id
+                                 join service in _db.Services on resultImage.ServiceId equals service.Id
+                                 where resultImage.InsertTime > fromTime
+                                       && resultImage.InsertTime <= toTime
+                                       && resultImage.Active == true
+                                       && service.Category.Code == "TDCN"
+                                       && patient.ValidTDCN == true
+                                 group resultImage by new
+                                 {
+                                     ServiceId = resultImage.ServiceId,
+                                     ServiceName = resultImage.Service.Name,
+                                     UserId = us.Id,
+                                     UserName = us.Name
+                                 } into p
                                  select new ReportProcess
                                  {
                                      DoctorID = p.Key.UserId.ToString(),
@@ -1124,6 +1287,37 @@ namespace Management.BL
                                      Count = p.Count()
                                  }).ToList();
                 }
+                else if (location == "TDCN")
+                {
+                    lstResult = (from resultImage in _db.ResultCDHAs
+                                 join patient in _db.Patients on resultImage.PatientId equals patient.Id
+                                 join us in _db.Users on patient.UserReturnResultTDCN equals us.Id
+                                 join service in _db.Services on resultImage.ServiceId equals service.Id
+                                 where resultImage.InsertTime > fromTime
+                                       && resultImage.InsertTime <= toTime
+                                       && resultImage.Active == true
+                                       && service.Category.Code == "TDCN"
+                                       && patient.ValidTDCN == true
+                                 group resultImage by new
+                                 {
+                                     ServiceId = resultImage.ServiceId,
+                                     ServiceName = resultImage.Service.Name,
+                                     UserId = us.Id,
+                                     UserName = us.Name
+                                 } into p
+                                 select new ReportProcess
+                                 {
+                                     DoctorID = p.Key.UserId.ToString(),
+                                     DoctorName = p.Key.UserName,
+                                     ServiceID = p.Key.ServiceId.ToString(),
+                                     ServiceName = p.Key.ServiceName,
+                                     FromDate = fromTimeString,
+                                     ToDate = toTimeString,
+                                     DateNow = dateNow,
+                                     User = user,
+                                     Count = p.Count()
+                                 }).ToList();
+                }
                 else if (location == "NS")
                 {
                     lstResult = (from resultImage in _db.ResultCDHAs
@@ -1155,10 +1349,10 @@ namespace Management.BL
         }
 
         public async Task<List<ReportProcessPatientGroup>> LC_GetReportByProcessWithPatients(
-            DateTime fromTime,
-            DateTime toTime,
-            string location,
-            string user)
+    DateTime fromTime,
+    DateTime toTime,
+    string location,
+    string user)
         {
             try
             {
@@ -1169,70 +1363,53 @@ namespace Management.BL
                 var toTimeString = toTime.Date.ToString("dd/MM/yyyy");
                 var dateNow = DateTime.Now.ToString("dd/MM/yyyy");
 
+                location = location?.Trim().ToUpperInvariant();
+
+                var supportedLocations = new[]
+                {
+            "XN",
+            "SA",
+            "XQ",
+            "DDT",
+            "NS",
+            "TDCN"
+        };
+
+                if (string.IsNullOrWhiteSpace(location)
+                    || !supportedLocations.Contains(location))
+                {
+                    return new List<ReportProcessPatientGroup>();
+                }
+
                 var flatRows = new List<ReportProcessFlatRow>();
 
+                // XN dùng bảng ResultXNs nên giữ một query riêng.
                 if (location == "XN")
                 {
                     flatRows = await (
-                        from r in _db.ResultXNs
-                        join patient in _db.Patients on r.PatientId equals patient.Id
-                        join us in _db.Users on patient.UserReturnResultXN equals us.Id
-                        join service in _db.Services on r.ServiceId equals service.Id
-                        where r.InsertTime >= start
-                              && r.InsertTime < end
+                        from resultXN in _db.ResultXNs
+                        join patient in _db.Patients
+                            on resultXN.PatientId equals patient.Id
+                        join returnUser in _db.Users
+                            on patient.UserReturnResultXN equals returnUser.Id
+                        join service in _db.Services
+                            on resultXN.ServiceId equals service.Id
+                        where patient.ReturnResultTimeXN >= start
+                              && patient.ReturnResultTimeXN < end
                               && patient.UserReturnResultXN != null
                               && patient.ValidXN == true
-                              && r.Active == true
+                              && resultXN.Active == true
                               && patient.Active == true
-                        group new { patient, us, service } by new
+                        group new
                         {
-                            DoctorID = us.Id,
-                            DoctorName = us.Name,
-                            ServiceID = service.Id,
-                            ServiceName = service.Name,
-                            patient.PatientId,
-                            patient.PatientName,
-                            patient.Sid,
-                            patient.Seq,
-                            patient.MaBenhAn,
-                            patient.InsertTime
-                        } into g
-                        select new ReportProcessFlatRow
-                        {
-                            DoctorID = g.Key.DoctorID.ToString(),
-                            DoctorName = g.Key.DoctorName,
-                            ServiceID = g.Key.ServiceID.ToString(),
-                            ServiceName = g.Key.ServiceName,
-                            PatientID = g.Key.PatientId,
-                            PatientName = g.Key.PatientName,
-                            Sid = g.Key.Sid,
-                            Seq = g.Key.Seq,
-                            MaBenhAn = g.Key.MaBenhAn,
-                            InsertTime = g.Key.InsertTime
+                            patient,
+                            ReturnUser = returnUser,
+                            service
                         }
-                    )
-                    .OrderBy(x => x.DoctorName)
-                    .ThenBy(x => x.ServiceName)
-                    .ThenBy(x => x.Seq)
-                    .ToListAsync();
-                }
-                else if (location == "SA")
-                {
-                    var saRows = await (
-                        from resultImage in _db.ResultCDHAs
-                        join patient in _db.Patients on resultImage.PatientId equals patient.Id
-                        join us in _db.Users on patient.UserReturnResultSA equals us.Id
-                        join service in _db.Services on resultImage.ServiceId equals service.Id
-                        where resultImage.InsertTime >= start
-                              && resultImage.InsertTime < end
-                              && resultImage.Active == true
-                              && patient.Active == true
-                              && service.Category.Code == "SA"
-                              && patient.ValidSA == true
-                        group new { patient, us, service } by new
+                        by new
                         {
-                            DoctorID = us.Id,
-                            DoctorName = us.Name,
+                            DoctorID = returnUser.Id,
+                            DoctorName = returnUser.Name,
                             ServiceID = service.Id,
                             ServiceName = service.Name,
                             patient.PatientId,
@@ -1240,38 +1417,91 @@ namespace Management.BL
                             patient.Sid,
                             patient.Seq,
                             patient.MaBenhAn,
-                            patient.InsertTime
-                        } into g
+                            patient.InsertTime,
+                            patient.Address,
+                            patient.MaDotKham
+                        }
+                        into resultGroup
                         select new ReportProcessFlatRow
                         {
-                            DoctorID = g.Key.DoctorID.ToString(),
-                            DoctorName = g.Key.DoctorName,
-                            ServiceID = g.Key.ServiceID.ToString(),
-                            ServiceName = g.Key.ServiceName,
-                            PatientID = g.Key.PatientId,
-                            PatientName = g.Key.PatientName,
-                            Sid = g.Key.Sid,
-                            Seq = g.Key.Seq,
-                            MaBenhAn = g.Key.MaBenhAn,
-                            InsertTime = g.Key.InsertTime
+                            DoctorID = resultGroup.Key.DoctorID.ToString(),
+                            DoctorName = resultGroup.Key.DoctorName,
+                            ServiceID = resultGroup.Key.ServiceID.ToString(),
+                            ServiceName = resultGroup.Key.ServiceName,
+                            PatientID = resultGroup.Key.PatientId,
+                            PatientName = resultGroup.Key.PatientName,
+                            Sid = resultGroup.Key.Sid,
+                            Seq = resultGroup.Key.Seq,
+                            MaBenhAn = resultGroup.Key.MaBenhAn,
+                            InsertTime = resultGroup.Key.InsertTime,
+                            MaDotKham = resultGroup.Key.MaDotKham,
+                            Address = resultGroup.Key.Address
                         }
                     ).ToListAsync();
+                }
+                else
+                {
+                    // Trên UI, location = SA bao gồm cả Siêu âm thường (SA)
+                    // và Siêu âm tim (SAT). Các module còn lại chỉ có một mã.
+                    var categoryCodes = location == "SA"
+                        ? new[] { "SA", "SAT" }
+                        : new[] { location };
 
-                    var satRows = await (
+                    flatRows = await (
                         from resultImage in _db.ResultCDHAs
-                        join patient in _db.Patients on resultImage.PatientId equals patient.Id
-                        join us in _db.Users on patient.UserReturnResultSAT equals us.Id
-                        join service in _db.Services on resultImage.ServiceId equals service.Id
-                        where resultImage.InsertTime >= start
-                              && resultImage.InsertTime < end
+                        join patient in _db.Patients
+                            on resultImage.PatientId equals patient.Id
+                        join service in _db.Services
+                            on resultImage.ServiceId equals service.Id
+
+                        let moduleCode = service.Category.Code
+
+                        // Các biểu thức điều kiện dưới đây được EF Core dịch thành CASE.
+                        // Không dùng reflection trong LINQ vì reflection không dịch được sang SQL.
+                        let returnResultTime =
+                            moduleCode == "SA" ? patient.ReturnResultTimeSA :
+                            moduleCode == "SAT" ? patient.ReturnResultTimeSAT :
+                            moduleCode == "XQ" ? patient.ReturnResultTimeXQ :
+                            moduleCode == "DDT" ? patient.ReturnResultTimeDDT :
+                            moduleCode == "NS" ? patient.ReturnResultTimeNS :
+                            patient.ReturnResultTimeTDCN
+
+                        let returnUserId =
+                            moduleCode == "SA" ? patient.UserReturnResultSA :
+                            moduleCode == "SAT" ? patient.UserReturnResultSAT :
+                            moduleCode == "XQ" ? patient.UserReturnResultXQ :
+                            moduleCode == "DDT" ? patient.UserReturnResultDDT :
+                            moduleCode == "NS" ? patient.UserReturnResultNS :
+                            patient.UserReturnResultTDCN
+
+                        let isValid =
+                            moduleCode == "SA" ? patient.ValidSA == true :
+                            moduleCode == "SAT" ? patient.ValidSAT == true :
+                            moduleCode == "XQ" ? patient.ValidXQ == true :
+                            moduleCode == "DDT" ? patient.ValidDDT == true :
+                            moduleCode == "NS" ? patient.ValidNS == true :
+                            patient.ValidTDCN == true
+
+                        join returnUser in _db.Users
+                            on returnUserId equals returnUser.Id
+
+                        where categoryCodes.Contains(moduleCode)
+                              && returnResultTime >= start
+                              && returnResultTime < end
+                              && isValid
                               && resultImage.Active == true
                               && patient.Active == true
-                              && service.Category.Code == "SAT"
-                              && patient.ValidSAT == true
-                        group new { patient, us, service } by new
+
+                        group new
                         {
-                            DoctorID = us.Id,
-                            DoctorName = us.Name,
+                            patient,
+                            ReturnUser = returnUser,
+                            service
+                        }
+                        by new
+                        {
+                            DoctorID = returnUser.Id,
+                            DoctorName = returnUser.Name,
                             ServiceID = service.Id,
                             ServiceName = service.Name,
                             patient.PatientId,
@@ -1279,183 +1509,60 @@ namespace Management.BL
                             patient.Sid,
                             patient.Seq,
                             patient.MaBenhAn,
-                            patient.InsertTime
-                        } into g
+                            patient.InsertTime,
+                            patient.Address,
+                            patient.MaDotKham
+                        }
+                        into resultGroup
                         select new ReportProcessFlatRow
                         {
-                            DoctorID = g.Key.DoctorID.ToString(),
-                            DoctorName = g.Key.DoctorName,
-                            ServiceID = g.Key.ServiceID.ToString(),
-                            ServiceName = g.Key.ServiceName,
-                            PatientID = g.Key.PatientId,
-                            PatientName = g.Key.PatientName,
-                            Sid = g.Key.Sid,
-                            Seq = g.Key.Seq,
-                            MaBenhAn = g.Key.MaBenhAn,
-                            InsertTime = g.Key.InsertTime
+                            DoctorID = resultGroup.Key.DoctorID.ToString(),
+                            DoctorName = resultGroup.Key.DoctorName,
+                            ServiceID = resultGroup.Key.ServiceID.ToString(),
+                            ServiceName = resultGroup.Key.ServiceName,
+                            PatientID = resultGroup.Key.PatientId,
+                            PatientName = resultGroup.Key.PatientName,
+                            Sid = resultGroup.Key.Sid,
+                            Seq = resultGroup.Key.Seq,
+                            MaBenhAn = resultGroup.Key.MaBenhAn,
+                            InsertTime = resultGroup.Key.InsertTime,
+                            MaDotKham = resultGroup.Key.MaDotKham,
+                            Address = resultGroup.Key.Address
                         }
                     ).ToListAsync();
-
-                    flatRows = saRows
-                        .Concat(satRows)
-                        .OrderBy(x => x.DoctorName)
-                        .ThenBy(x => x.ServiceName)
-                        .ThenBy(x => x.Seq)
-                        .ToList();
-                }
-                else if (location == "XQ")
-                {
-                    flatRows = await (
-                        from resultImage in _db.ResultCDHAs
-                        join patient in _db.Patients on resultImage.PatientId equals patient.Id
-                        join us in _db.Users on patient.UserReturnResultXQ equals us.Id
-                        join service in _db.Services on resultImage.ServiceId equals service.Id
-                        where resultImage.InsertTime >= start
-                              && resultImage.InsertTime < end
-                              && resultImage.Active == true
-                              && patient.Active == true
-                              && service.Category.Code == "XQ"
-                              && patient.ValidXQ == true
-                        group new { patient, us, service } by new
-                        {
-                            DoctorID = us.Id,
-                            DoctorName = us.Name,
-                            ServiceID = service.Id,
-                            ServiceName = service.Name,
-                            patient.PatientId,
-                            patient.PatientName,
-                            patient.Sid,
-                            patient.Seq,
-                            patient.MaBenhAn,
-                            patient.InsertTime
-                        } into g
-                        select new ReportProcessFlatRow
-                        {
-                            DoctorID = g.Key.DoctorID.ToString(),
-                            DoctorName = g.Key.DoctorName,
-                            ServiceID = g.Key.ServiceID.ToString(),
-                            ServiceName = g.Key.ServiceName,
-                            PatientID = g.Key.PatientId,
-                            PatientName = g.Key.PatientName,
-                            Sid = g.Key.Sid,
-                            Seq = g.Key.Seq,
-                            MaBenhAn = g.Key.MaBenhAn,
-                            InsertTime = g.Key.InsertTime
-                        }
-                    )
-                    .OrderBy(x => x.DoctorName)
-                    .ThenBy(x => x.ServiceName)
-                    .ThenBy(x => x.Seq)
-                    .ToListAsync();
-                }
-                else if (location == "DDT")
-                {
-                    flatRows = await (
-                        from resultImage in _db.ResultCDHAs
-                        join patient in _db.Patients on resultImage.PatientId equals patient.Id
-                        join us in _db.Users on patient.UserReturnResultDDT equals us.Id
-                        join service in _db.Services on resultImage.ServiceId equals service.Id
-                        where resultImage.InsertTime >= start
-                              && resultImage.InsertTime < end
-                              && resultImage.Active == true
-                              && patient.Active == true
-                              && service.Category.Code == "DDT"
-                              && patient.ValidDDT == true
-                        group new { patient, us, service } by new
-                        {
-                            DoctorID = us.Id,
-                            DoctorName = us.Name,
-                            ServiceID = service.Id,
-                            ServiceName = service.Name,
-                            patient.PatientId,
-                            patient.PatientName,
-                            patient.Sid,
-                            patient.Seq,
-                            patient.MaBenhAn,
-                            patient.InsertTime
-                        } into g
-                        select new ReportProcessFlatRow
-                        {
-                            DoctorID = g.Key.DoctorID.ToString(),
-                            DoctorName = g.Key.DoctorName,
-                            ServiceID = g.Key.ServiceID.ToString(),
-                            ServiceName = g.Key.ServiceName,
-                            PatientID = g.Key.PatientId,
-                            PatientName = g.Key.PatientName,
-                            Sid = g.Key.Sid,
-                            Seq = g.Key.Seq,
-                            MaBenhAn = g.Key.MaBenhAn,
-                            InsertTime = g.Key.InsertTime
-                        }
-                    )
-                    .OrderBy(x => x.DoctorName)
-                    .ThenBy(x => x.ServiceName)
-                    .ThenBy(x => x.Seq)
-                    .ToListAsync();
-                }
-                else if (location == "NS")
-                {
-                    flatRows = await (
-                        from resultImage in _db.ResultCDHAs
-                        join patient in _db.Patients on resultImage.PatientId equals patient.Id
-                        join us in _db.Users on patient.UserReturnResultNS equals us.Id
-                        join service in _db.Services on resultImage.ServiceId equals service.Id
-                        where resultImage.InsertTime >= start
-                              && resultImage.InsertTime < end
-                              && resultImage.Active == true
-                              && patient.Active == true
-                              && service.Category.Code == "NS"
-                              && patient.ValidNS == true
-                        group new { patient, us, service } by new
-                        {
-                            DoctorID = us.Id,
-                            DoctorName = us.Name,
-                            ServiceID = service.Id,
-                            ServiceName = service.Name,
-                            patient.PatientId,
-                            patient.PatientName,
-                            patient.Sid,
-                            patient.Seq,
-                            patient.MaBenhAn,
-                            patient.InsertTime
-                        } into g
-                        select new ReportProcessFlatRow
-                        {
-                            DoctorID = g.Key.DoctorID.ToString(),
-                            DoctorName = g.Key.DoctorName,
-                            ServiceID = g.Key.ServiceID.ToString(),
-                            ServiceName = g.Key.ServiceName,
-                            PatientID = g.Key.PatientId,
-                            PatientName = g.Key.PatientName,
-                            Sid = g.Key.Sid,
-                            Seq = g.Key.Seq,
-                            MaBenhAn = g.Key.MaBenhAn,
-                            InsertTime = g.Key.InsertTime
-                        }
-                    )
-                    .OrderBy(x => x.DoctorName)
-                    .ThenBy(x => x.ServiceName)
-                    .ThenBy(x => x.Seq)
-                    .ToListAsync();
                 }
 
-                var result = flatRows
-                    .GroupBy(x => new { x.DoctorID, x.DoctorName })
-                    .Select(gDoctor => new ReportProcessPatientGroup
+                flatRows = flatRows
+                    .OrderBy(x => x.DoctorName)
+                    .ThenBy(x => x.ServiceName)
+                    .ThenBy(x => x.Seq)
+                    .ToList();
+
+                return flatRows
+                    .GroupBy(x => new
                     {
-                        DoctorID = gDoctor.Key.DoctorID,
-                        DoctorName = gDoctor.Key.DoctorName,
+                        x.DoctorID,
+                        x.DoctorName
+                    })
+                    .Select(doctorGroup => new ReportProcessPatientGroup
+                    {
+                        DoctorID = doctorGroup.Key.DoctorID,
+                        DoctorName = doctorGroup.Key.DoctorName,
                         FromDate = fromTimeString,
                         ToDate = toTimeString,
                         DateNow = dateNow,
                         User = user,
-                        Services = gDoctor
-                            .GroupBy(x => new { x.ServiceID, x.ServiceName })
-                            .Select(gService => new ReportProcessServiceDetail
+                        Services = doctorGroup
+                            .GroupBy(x => new
                             {
-                                ServiceID = gService.Key.ServiceID,
-                                ServiceName = gService.Key.ServiceName,
-                                Patients = gService
+                                x.ServiceID,
+                                x.ServiceName
+                            })
+                            .Select(serviceGroup => new ReportProcessServiceDetail
+                            {
+                                ServiceID = serviceGroup.Key.ServiceID,
+                                ServiceName = serviceGroup.Key.ServiceName,
+                                Patients = serviceGroup
                                     .OrderBy(x => x.Seq)
                                     .Select(x => new ReportPatientDetail
                                     {
@@ -1464,7 +1571,9 @@ namespace Management.BL
                                         Sid = x.Sid,
                                         Seq = x.Seq,
                                         MaBenhAn = x.MaBenhAn,
-                                        InsertTime = x.InsertTime
+                                        InsertTime = x.InsertTime,
+                                        MaDotKham = x.MaDotKham,
+                                        Address = x.Address
                                     })
                                     .ToList()
                             })
@@ -1473,8 +1582,6 @@ namespace Management.BL
                     })
                     .OrderBy(x => x.DoctorName)
                     .ToList();
-
-                return result;
             }
             catch
             {
@@ -1774,6 +1881,7 @@ namespace Management.BL
                        (location == "SA" && ((x.Service.Category.Code == "SA" && x.Patient.ValidSA == true) || (x.Service.Category.Code == "SAT" && x.Patient.ValidSAT == true)))
                     || (location == "XQ" && x.Service.Category.Code == "XQ" && (x.Patient.ValidXQ == true))
                     || (location == "DDT" && x.Service.Category.Code == "DDT" && (x.Patient.ValidDDT == true))
+                    || (location == "TDCN" && x.Service.Category.Code == "TDCN" && (x.Patient.ValidTDCN == true))
                     || (location == "NS" && x.Service.Category.Code == "NS" && (x.Patient.ValidNS == true)));
             }
 
@@ -2278,7 +2386,7 @@ namespace Management.BL
 
                 // 2. Lấy các (Patient, Service) từ CĐHA
                 // Rule: ResultCDHA.Result khác null, khác rỗng
-                // Chỉ lấy các dịch vụ thuộc nhóm CDHA (SA, SAT, XQ, NS, DDT)
+                // Chỉ lấy các dịch vụ thuộc nhóm CDHA (SA, SAT, XQ, NS, DDT, TDCN)
                 var cdhaUsage = await (
                     from patient in _db.Patients
                     join result in _db.ResultCDHAs on patient.Id equals result.PatientId
@@ -2293,6 +2401,7 @@ namespace Management.BL
                                 || service.Category.Code == "XQ"
                                 || service.Category.Code == "NS"
                                 || service.Category.Code == "DDT"
+                                || service.Category.Code == "TDCN"
                              )
                     select new
                     {
@@ -2397,13 +2506,13 @@ namespace Management.BL
                 }
 
                 report.Rows = rows;
-                
+
                 // 8. Tính tổng số bệnh nhân cho mỗi dịch vụ
                 foreach (var svc in report.Services)
                 {
                     svc.TotalPatients = rows.Count(r => r.ServiceMarks.ContainsKey(svc.ServiceId) && r.ServiceMarks[svc.ServiceId] == "X");
                 }
-                
+
                 return report;
             }
             catch (Exception)

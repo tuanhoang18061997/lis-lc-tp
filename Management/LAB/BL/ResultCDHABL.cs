@@ -13,10 +13,15 @@ namespace Management.BL
     {
         private readonly LABContext _db;
         private readonly ServiceTestBL _serviceTestBL;
-        public ResultCDHABL(LABContext db, ServiceTestBL serviceTestBL)
+        private readonly ResultEditUnlockBL _resultEditUnlockBL;
+        public ResultCDHABL(
+            LABContext db,
+            ServiceTestBL serviceTestBL,
+            ResultEditUnlockBL resultEditUnlockBL)
         {
             _db = db;
             _serviceTestBL = serviceTestBL;
+            _resultEditUnlockBL = resultEditUnlockBL;
         }
 
         public async Task<bool> DeleteByPatientId(long patientId, long? userInsertOrUpdate)
@@ -90,6 +95,14 @@ namespace Management.BL
         {
             try
             {
+                // Nếu kết quả đã từng Valid, chỉ đúng ResultCDHA.Id đã được Invalid mới được sửa.
+                if (!await _resultEditUnlockBL.CanEditCDHAAsync(
+                    resultCDHA.resultCDHAId,
+                    ToolBL.Get_DateNow()))
+                {
+                    return false;
+                }
+
                 var _resultCDHA = await _db.ResultCDHAs.Where(p => p.Active == true && p.Id == resultCDHA.resultCDHAId).FirstOrDefaultAsync();
                 if (_resultCDHA == null) return false;
                 _resultCDHA.UserUpdateId = userInsertIdOrUpdateId;

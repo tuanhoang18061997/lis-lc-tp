@@ -17,10 +17,15 @@ namespace Management.BL
     {
         private readonly LABContext _db;
         private readonly ServiceTestBL _serviceTestBL;
-        public ResultXNBL(LABContext db, ServiceTestBL serviceTestBL)
+        private readonly ResultEditUnlockBL _resultEditUnlockBL;
+        public ResultXNBL(
+            LABContext db,
+            ServiceTestBL serviceTestBL,
+            ResultEditUnlockBL resultEditUnlockBL)
         {
             _db = db;
             _serviceTestBL = serviceTestBL;
+            _resultEditUnlockBL = resultEditUnlockBL;
         }
 
         public async Task<ResultXN> GetResultXN(long id)
@@ -225,7 +230,9 @@ namespace Management.BL
                 var creatinineItem = currentResults.FirstOrDefault(x => x.TestCodeId == 676);
                 var egfrItem = currentResults.FirstOrDefault(x => x.TestCodeId == 677);
 
-                if (creatinineItem != null && egfrItem != null)
+                if (creatinineItem != null
+                    && egfrItem != null
+                    && await _resultEditUnlockBL.CanEditXNAsync(id, ToolBL.Get_DateNow()))
                 {
                     // Parse kết quả creatinin (µmol/L)
                     double? ParseNumber(string s)
@@ -653,7 +660,20 @@ namespace Management.BL
                     .Where(p => p.Active == true && ids.Contains(p.Id))
                     .ToDictionaryAsync(x => x.Id);
 
-                var now = DateTime.Now;
+                var patientIds = dict.Values
+                    .Where(x => x.PatientId.HasValue)
+                    .Select(x => x.PatientId!.Value)
+                    .Distinct()
+                    .ToList();
+
+                // XN mở theo cả lần làm (Patient.Id), không mở theo từng dòng ResultXN.
+                var now = ToolBL.Get_DateNow();
+                foreach (var patientId in patientIds)
+                {
+                    if (!await _resultEditUnlockBL.CanEditXNAsync(patientId, now))
+                        return false;
+                }
+
                 var anyChanged = false;
 
                 foreach (var item in lstResult)
@@ -815,8 +835,11 @@ namespace Management.BL
         {
             if (patientId <= 0 || items == null) return 0;
 
+            if (!await _resultEditUnlockBL.CanEditXNAsync(patientId, ToolBL.Get_DateNow()))
+                return 0;
+
             // 1) Load data nền
-            var now = DateTime.Now;
+            var now = ToolBL.Get_DateNow();
 
             // Tất cả kết quả hiện có của bệnh nhân (để tìm sẵn key & service đã chỉ định)
             var patientResults = await _db.ResultXNs
