@@ -2917,103 +2917,118 @@ function ReturnResult_GetListServiceForPatient(id) {
 }
 
 function ReturnResult_Invalid() {
-    var id = $('#sat_returnresult_id').val();
-    if (id === "") {
+    var patientId = $('#sat_returnresult_id').val();
+
+    if (!patientId) {
         SwalHelper.Toast.warning("Vui lòng chọn bệnh nhân!");
+        return;
     }
-    // Lấy tất cả checkbox được chọn và KeyResultForHis tương ứng
-    const selectedKeys = [];
+
+    // ResultCDHA.Id của các dịch vụ đang được chọn.
+    // Backend sẽ tự lấy KeyResultForHis từ DB theo ResultCDHA.Id.
+    var resultIds = [];
 
     $('.sat-returnresult-chk-service:checked').each(function () {
-        var keyResult = $(this).data('key-result');
-        if (keyResult) {
-            selectedKeys.push(keyResult);
+        var resultId = parseInt($(this).val(), 10);
+
+        if (!isNaN(resultId) && resultId > 0) {
+            resultIds.push(resultId);
         }
     });
 
-    if (selectedKeys.length === 0) {
-        SwalHelper.Toast.warning('Vui lòng chọn ít nhất một dịch vụ!');
+    if (resultIds.length === 0) {
+        SwalHelper.Toast.warning("Vui lòng chọn ít nhất một dịch vụ!");
         return;
     }
 
-    console.log("KeyResultForHis được chọn:", selectedKeys);
-    if (confirm('Bạn muốn InValid kết quả của bệnh nhân ?')) {
-        $.ajax({
-            url: "/SA_TIM_ReturnResult/Invalid",
-            type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'text',
-            data: JSON.stringify({
-                patientId: parseInt(id),
-                keyResultList: selectedKeys,
-                categoryCode: 'SAT'
-            }),
-            success: function (result) {
-                if (result === 'True') {
-                    SwalHelper.Toast.success('Invalid thành công và đã xóa file PDF!');
-                    ReturnResult_Refresh();
-                    ReturnResult_Get_Count();
-                }
-                else {
-                    SwalHelper.Alert.error('Lỗi', 'Không thể Invalid. Vui lòng kiểm tra lại!');
-                }
-            },
-            error: function () {
-                SwalHelper.Alert.error('Lỗi', 'Không thể Invalid. Vui lòng kiểm tra lại!');
-            }
-        });
+    console.log("ResultCDHA.Id được chọn:", resultIds);
+
+    if (!confirm('Bạn muốn InValid kết quả của bệnh nhân ?')) {
+        return;
     }
+
+    $.ajax({
+        url: "/SA_TIM_ReturnResult/Invalid",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        data: JSON.stringify({
+            patientId: parseInt(patientId, 10),
+            resultIds: resultIds,
+            categoryCode: "SAT"
+        }),
+        success: function (result) {
+            if (result === "True") {
+                SwalHelper.Toast.success("Invalid thành công!");
+                ReturnResult_Refresh();
+                ReturnResult_Get_Count();
+            }
+            else {
+                SwalHelper.Alert.error('Lỗi', result || 'Không thể Invalid. Vui lòng kiểm tra lại!');
+            }
+        },
+        error: function (xhr) {
+            SwalHelper.Alert.error('Lỗi', xhr.responseText || 'Không thể Invalid. Vui lòng kiểm tra lại!');
+        }
+    });
 }
 
 function ReturnResult_Invalid_RemoveDigitalSign() {
-    var id = $('#sat_returnresult_id').val();
-    if (id === "") {
-        SwalHelper.Toast.warning('Vui lòng chọn bệnh nhân!');
-    }
-    // Lấy ServiceId
-    var resultCDHAId = "";
-    var selectedKeys = [];
-    $(".row-service").each(function () {
-        $(this).find(".form-check-input").each(function () {
-            if ($(this).is(':checked')) {
-                resultCDHAId = $(this).val();
-                var keyResult = $(this).data('key-result');
-                if (keyResult) selectedKeys.push(keyResult);
-            }
-        });
-    });
+    var patientId = $('#sat_returnresult_id').val();
 
-    if (resultCDHAId === "") {
-        SwalHelper.Toast.warning('Vui lòng chọn dịch vụ!');
+    if (!patientId) {
+        SwalHelper.Toast.warning("Vui lòng chọn bệnh nhân!");
         return;
     }
-    if (confirm('Bạn muốn InValid kết quả của bệnh nhân (hủy Ký Số kết quả này) ?')) {
-        $.ajax({
-            url: "/SA_TIM_ReturnResult/Invalid",
-            type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'text',
-            data: JSON.stringify({
-                patientId: parseInt(id),
-                keyResultList: selectedKeys,
-                categoryCode: 'SAT'
-            }),
-            success: function (result) {
-                if (result === 'True') {
-                    SwalHelper.Toast.success("Invalid thành công và đã xóa hủy ký số!");
-                    UpdateSignStatus(resultCDHAId);
-                    ReturnResult_Refresh();
-                    //ReturnResult_Get_Count();
-                }
-                else {
-                    SwalHelper.Alert.error("Không thể Invalid. Vui lòng kiểm tra lại!");
-                }
-            },
-            error: function () {
-                SwalHelper.Alert.error("Không thể Invalid. Vui lòng kiểm tra lại!");
-            }
-        });
+
+    var resultCDHAId = "";
+    var resultIds = [];
+
+    $(".row-service .form-check-input:checked").each(function () {
+        var selectedId = parseInt($(this).val(), 10);
+
+        if (!isNaN(selectedId) && selectedId > 0) {
+            resultIds.push(selectedId);
+
+            // Nút hủy ký số hiện chỉ thao tác trạng thái ký của một dịch vụ.
+            // Giữ lại id đang chọn để UpdateSignStatus chạy như luồng cũ.
+            resultCDHAId = selectedId;
+        }
+    });
+
+    if (resultIds.length === 0) {
+        SwalHelper.Toast.warning("Vui lòng chọn dịch vụ!");
+        return;
     }
+
+    if (!confirm('Bạn muốn InValid kết quả của bệnh nhân (hủy Ký Số kết quả này) ?')) {
+        return;
+    }
+
+    $.ajax({
+        url: "/SA_TIM_ReturnResult/Invalid",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        data: JSON.stringify({
+            patientId: parseInt(patientId, 10),
+            resultIds: resultIds,
+            categoryCode: "SAT"
+        }),
+        success: function (result) {
+            if (result === "True") {
+                SwalHelper.Toast.success("Invalid thành công và đã hủy ký số!");
+                UpdateSignStatus(resultCDHAId);
+                ReturnResult_Refresh();
+            }
+            else {
+                SwalHelper.Alert.error('Lỗi', result || 'Không thể Invalid. Vui lòng kiểm tra lại!');
+            }
+        },
+        error: function (xhr) {
+            SwalHelper.Alert.error('Lỗi', xhr.responseText || 'Không thể Invalid. Vui lòng kiểm tra lại!');
+        }
+    });
 }
 function ReturnResult_Get_Count() {
     $.ajax({
@@ -3429,7 +3444,7 @@ function ReturnResult_CheckSignStatus(resultCDHAId) {
 
     // Hiện “đang kiểm tra…”
     toggleSignButtons({ loading: true });
-    console.log(resultCDHAId); 
+    console.log(resultCDHAId);
     $.ajax({
         url: "/SA_TIM_ReturnResult/GetSignStoreId",
         type: "GET",
@@ -3479,7 +3494,7 @@ function ReturnResult_SignPdf() {
         SwalHelper.Toast.warning('Vui lòng chọn bệnh nhân!');
         return;
     }
-   
+
     // Lấy ResultCDHAId (dịch vụ đang chọn) – giống logic ValidPrint
     var resultCDHAId = "";
     $(".row-service").each(function () {

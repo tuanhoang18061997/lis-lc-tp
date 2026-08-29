@@ -26,7 +26,7 @@ namespace Management.Controllers
         public readonly string _SA = "SA";
 
         public SA_ReturnResultController(ILogger<SA_ReturnResultController> logger, PatientCDHABL patientBL, ObjectBL objectBL, LocationBL locationBL,
-                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL, 
+                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL,
                             GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL,
                             ResultInvalidBL resultInvalidBL)
         {
@@ -263,18 +263,43 @@ namespace Management.Controllers
         {
             try
             {
+                if (request == null ||
+                    request.PatientId <= 0 ||
+                    request.ResultIds == null ||
+                    request.ResultIds.Count == 0)
+                {
+                    return BadRequest("Vui lòng chọn ít nhất một dịch vụ.");
+                }
+
                 var _userLogin = this.GetUserLogin();
-                if (!_userLogin.HasValue) return Unauthorized();
+                if (!_userLogin.HasValue)
+                {
+                    return Unauthorized("Không xác định được người dùng.");
+                }
 
                 var result = await _resultInvalidBL.InvalidCDHAAsync(
-                    request.PatientId, request.ResultIds, _SA, _userLogin.Value);
-                if (!result.Success) return BadRequest(result.Message);
+                    request.PatientId,
+                    request.ResultIds,
+                    _SA,
+                    _userLogin.Value
+                );
+
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
+                }
 
                 return Content("True");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Invalid operation failed for PatientId: {PatientId}", request?.PatientId);
+                _logger.LogError(
+                    ex,
+                    "Invalid CDHA failed for PatientId: {PatientId}, Module: {ModuleCode}",
+                    request?.PatientId,
+                    _SA
+                );
+
                 return Content("False");
             }
         }

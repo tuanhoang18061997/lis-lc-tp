@@ -27,12 +27,13 @@ namespace Management.Controllers
         private readonly ToolBL _toolBL;
         private readonly HospitalBL _hospitalBL;
         private readonly IWebHostEnvironment _environment;
+        private readonly ResultInvalidBL _resultInvalidBL;
         public readonly DeviceBL _deviceBL;
         public readonly string _SAT = "SAT";
 
         public SA_TIM_ReturnResultController(ILogger<SA_ReturnResultController> logger, PatientCDHABL patientBL, ObjectBL objectBL, LocationBL locationBL,
-                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL, 
-                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL, DeviceBL deviceBL)
+                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL,
+                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL, DeviceBL deviceBL, ResultInvalidBL resultInvalidBL)
         {
             _logger = logger;
             _patientCDHABL = patientBL;
@@ -49,6 +50,7 @@ namespace Management.Controllers
             _toolBL = toolBL;
             _hospitalBL = hospitalBL;
             _deviceBL = deviceBL;
+            _resultInvalidBL = resultInvalidBL;
         }
 
         [HttpGet]
@@ -284,9 +286,12 @@ namespace Management.Controllers
         {
             try
             {
-                if (request == null || request.PatientId <= 0)
+                if (request == null ||
+                    request.PatientId <= 0 ||
+                    request.ResultIds == null ||
+                    request.ResultIds.Count == 0)
                 {
-                    return BadRequest("Thông tin không hợp lệ.");
+                    return BadRequest("Vui lòng chọn ít nhất một dịch vụ.");
                 }
 
                 var _userLogin = this.GetUserLogin();
@@ -295,35 +300,29 @@ namespace Management.Controllers
                     return Unauthorized("Không xác định được người dùng.");
                 }
 
-                // 1. Cập nhật trạng thái bệnh nhân (Invalid)
-                var _process = await _patientCDHABL.GetSample_ProcessResult_ReturnResult(
+                var result = await _resultInvalidBL.InvalidCDHAAsync(
                     request.PatientId,
-                    false,  // wait
-                    true,   // process
-                    false,  // valid
-                    _userLogin.Value,
-                    _SAT
+                    request.ResultIds,
+                    _SAT,
+                    _userLogin.Value
                 );
 
-                if (!_process)
+                if (!result.Success)
                 {
-                    return Content("False");
-                }
-
-                // 2. Xóa các file PDF tương ứng (nếu có danh sách KeyResultForHis)
-                if (request.KeyResultList != null && request.KeyResultList.Any())
-                {
-                    var categoryCode = request.CategoryCode ?? _SAT;
-                    var pdfRemoved = _patientCDHABL.Remove_Result_PDF(request.KeyResultList, categoryCode);
-
-                    _logger.LogInformation($"Removed PDF files: {pdfRemoved} for keys: {string.Join(", ", request.KeyResultList)}");
+                    return BadRequest(result.Message);
                 }
 
                 return Content("True");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Invalid operation failed for PatientId: {PatientId}", request?.PatientId);
+                _logger.LogError(
+                    ex,
+                    "Invalid CDHA failed for PatientId: {PatientId}, Module: {ModuleCode}",
+                    request?.PatientId,
+                    _SAT
+                );
+
                 return Content("False");
             }
         }
@@ -332,7 +331,7 @@ namespace Management.Controllers
         public class InvalidRequestModel
         {
             public long PatientId { get; set; }
-            public List<string> KeyResultList { get; set; }
+            public List<long> ResultIds { get; set; } = new();
             public string CategoryCode { get; set; }
         }
 

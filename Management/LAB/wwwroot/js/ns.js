@@ -2526,52 +2526,60 @@ function ReturnResult_GetListServiceForPatient(id) {
 }
 
 function ReturnResult_Invalid() {
-    var id = $('#ns_returnresult_id').val();
-    if (id === "") {
+    var patientId = $('#ns_returnresult_id').val();
+
+    if (!patientId) {
         SwalHelper.Toast.warning("Vui lòng chọn bệnh nhân!");
+        return;
     }
-    // Lấy tất cả checkbox được chọn và KeyResultForHis tương ứng
-    const selectedKeys = [];
+
+    // ResultCDHA.Id của các dịch vụ đang được chọn.
+    // Backend sẽ tự lấy KeyResultForHis từ DB theo ResultCDHA.Id.
+    var resultIds = [];
 
     $('.ns-returnresult-chk-service:checked').each(function () {
-        var keyResult = $(this).data('key-result');
-        if (keyResult) {
-            selectedKeys.push(keyResult);
+        var resultId = parseInt($(this).val(), 10);
+
+        if (!isNaN(resultId) && resultId > 0) {
+            resultIds.push(resultId);
         }
     });
 
-    if (selectedKeys.length === 0) {
+    if (resultIds.length === 0) {
         SwalHelper.Toast.warning("Vui lòng chọn ít nhất một dịch vụ!");
         return;
     }
 
-    console.log("KeyResultForHis được chọn:", selectedKeys);
-    if (confirm('Bạn muốn InValid kết quả của bệnh nhân ?')) {
-        $.ajax({
-            url: "/NS_ReturnResult/Invalid",
-            type: 'POST',
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'text',
-            data: JSON.stringify({
-                patientId: parseInt(id),
-                keyResultList: selectedKeys,
-                categoryCode: 'NS'
-            }),
-            success: function (result) {
-                if (result === 'True') {
-                    SwalHelper.Toast.success("Invalid thành công và đã xóa file PDF!");
-                    ReturnResult_Refresh();
-                    ReturnResult_Get_Count();
-                }
-                else {
-                    SwalHelper.Toast.error("Không thể Invalid. Vui lòng kiểm tra lại!");
-                }
-            },
-            error: function () {
-                SwalHelper.Toast.error("Không thể Invalid. Vui lòng kiểm tra lại!");
-            }
-        });
+    console.log("ResultCDHA.Id được chọn:", resultIds);
+
+    if (!confirm('Bạn muốn InValid kết quả của bệnh nhân ?')) {
+        return;
     }
+
+    $.ajax({
+        url: "/NS_ReturnResult/Invalid",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        data: JSON.stringify({
+            patientId: parseInt(patientId, 10),
+            resultIds: resultIds,
+            categoryCode: "NS"
+        }),
+        success: function (result) {
+            if (result === "True") {
+                SwalHelper.Toast.success("Invalid thành công!");
+                ReturnResult_Refresh();
+                ReturnResult_Get_Count();
+            }
+            else {
+                SwalHelper.Toast.error(result || "Không thể Invalid. Vui lòng kiểm tra lại!");
+            }
+        },
+        error: function (xhr) {
+            SwalHelper.Toast.error(xhr.responseText || "Không thể Invalid. Vui lòng kiểm tra lại!");
+        }
+    });
 }
 
 function ReturnResult_Get_Count() {
