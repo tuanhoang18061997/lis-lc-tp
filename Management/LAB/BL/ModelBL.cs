@@ -552,6 +552,7 @@ namespace Management.BL
         public string MaBenhAn { get; set; }
         public string Seq { get; set; }
         public string Sid { get; set; }
+        public string SoCccd { get; set; }
         public DateTime? DateSearch { get; set; }
 
         // Kết quả theo từng TestCodeId
@@ -579,6 +580,7 @@ namespace Management.BL
         public DateTime? Age { get; set; }
         public string MaDotKham { get; set; }
         public string MaBenhAn { get; set; }
+        public string? SoCccd { get; set; }
 
         public string Seq { get; set; }
         public string Description { get; set; }

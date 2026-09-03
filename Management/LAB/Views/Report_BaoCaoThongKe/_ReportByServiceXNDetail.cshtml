@@ -108,6 +108,7 @@
                         <th style="min-width:150px;">Tên khách hàng</th>
                         <th style="min-width:80px;">Giới tính</th>
                         <th style="min-width:80px;">Ngày sinh</th>
+                        <th style="min-width:80px;">Số CCCD</th>
                         <th style="min-width:100px;">Đợt Khám</th>
                         <th style="min-width:100px;">Mã bệnh án</th>
                         <th style="min-width:80px;">Seq</th>
@@ -133,6 +134,7 @@
                             <tr data-patient-name="@row.PatientName"
                                 data-gender="@row.Gender"
                                 data-age="@row.Age"
+                                data-soCccd="@row.SoCccd"
                                 data-madotkham="@row.MaDotKham"
                                 data-mabenhan="@row.MaBenhAn"
                                 data-seq="@row.Seq"
@@ -141,6 +143,7 @@
                                 <td>@row.PatientName</td>
                                 <td>@row.Gender</td>
                                 <td>@row.Age?.ToString("dd/MM/yyyy")</td>
+                                <td>@row.SoCccd</td>
                                 <td>@row.MaDotKham</td>
                                 <td>@row.MaBenhAn</td>
                                 <td>@row.Seq</td>
@@ -173,7 +176,7 @@
     </div>
 </div>
 <script>
-        $(document).ready(function () {
+    $(document).ready(function () {
         // Hàm cập nhật STT cho bảng XN
         function updateSTT_XN() {
             var index = 1;

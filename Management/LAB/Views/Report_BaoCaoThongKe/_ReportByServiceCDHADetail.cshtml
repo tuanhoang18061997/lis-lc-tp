@@ -167,6 +167,7 @@
                         <th style="min-width:160px;">Tên khách hàng</th>
                         <th style="min-width:80px;">Giới tính</th>
                         <th style="min-width:80px;">Ngày sinh</th>
+                        <th style="min-width:80px;">Số CCCD</th>
                         <th style="min-width:100px;">Đợt Khám</th>
                         <th style="min-width:120px;">Mã bệnh án</th>
                         <th style="min-width:220px;">Mô tả</th>
@@ -183,6 +184,7 @@
                             <tr data-patient-name="@row.PatientName"
                                 data-gender="@row.Gender"
                                 data-age="@row.Age"
+                                data-soCccd="@row.SoCccd"
                                 data-madotkham="@row.MaDotKham"
                                 data-mabenhan="@row.MaBenhAn"
                                 data-datesearch="@(row.DateSearch?.ToString("yyyy-MM-dd"))">
@@ -190,6 +192,7 @@
                                 <td>@row.PatientName</td>
                                 <td>@row.Gender</td>
                                 <td>@row.Age?.ToString("dd/MM/yyyy")</td>
+                                <td>@row.SoCccd</td>
                                 <td>@row.MaDotKham</td>
                                 <td>@row.MaBenhAn</td>
                                 <td>@Html.Raw(row.Description)</td>

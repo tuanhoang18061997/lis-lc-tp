@@ -1794,7 +1794,8 @@ namespace Management.BL
                             MaBenhAn = first.MaBenhAn,
                             Seq = first.Seq,
                             Sid = first.Sid,
-                            DateSearch = first.InsertTime
+                            DateSearch = first.InsertTime,
+                            SoCccd = first.SoCccd
                         };
 
                         foreach (var tc in testCodes)
@@ -1910,6 +1911,7 @@ namespace Management.BL
                     Result = x.ResultCDHA.Result,
                     Suggest = x.ResultCDHA.Suggest,
                     DateSearch = x.Patient.InsertTime,
+                    SoCccd = x.Patient.SoCccd
                 })
                 .ToList();
 

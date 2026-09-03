@@ -552,7 +552,7 @@ namespace Management.BL
                                                     patient = await AddPatient(null, lstGroup[0].Seq, lstGroup[0].PatientId, lstGroup[0].TicketId, lstGroup[0].PatientName,
                                                         sex, lstGroup[0].Address, age, lstGroup[0].Diagnostic, objectName, lstGroup[0].LocationName, 
                                                         lstGroup[0].DoctorName, dateTimeServer, lstGroup[0].AssignDate, lstGroup[0].Type, lstGroup[0].MaBenhAn, 
-                                                        lstGroup[0].MaDotKham, lstGroup[0].Phone);
+                                                        lstGroup[0].MaDotKham, lstGroup[0].Phone, lstGroup[0].SoCccd);
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -712,7 +712,7 @@ namespace Management.BL
 
         public async Task<Patient> AddPatient(string sid, string seq, string pid, string ticket_id, string patientName, string sex,
             string address, DateTime? age, string diagnostic, string objectName, string locationName,
-            string doctorName, DateTime dateTimeServer, string assignDate, string benhan, string maBenhAn, string maDotKham, string phone)
+            string doctorName, DateTime dateTimeServer, string assignDate, string benhan, string maBenhAn, string maDotKham, string phone, string soCccd)
         {
             try
             {
@@ -849,6 +849,7 @@ namespace Management.BL
                         patientOld.MaBenhAn = maBenhAn;
                         patientOld.MaDotKham = maDotKham;
                         patientOld.Phone = phone;
+                        patientOld.SoCccd = soCccd;
 
                         await context.Patients.AddAsync(patientOld);
                         await context.SaveChangesAsync();
@@ -2149,6 +2150,7 @@ namespace Management.BL
         public string MaBenhAn { get; set; }
         public string MaDotKham { get; set; }
         public string Phone { get; set; }
+        public string? SoCccd { get; set; }
     }
 
     public class PatientInfo_Del

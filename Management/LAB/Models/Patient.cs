@@ -140,6 +140,7 @@ namespace Management.Models
         public string? TicketId { get; set; }
         public bool Active { get; set; }       
         public string? BenhAn { get; set; }
+        public string? SoCccd { get; set; }
 
         public virtual List<ResultXN> ResultXNs { get; set; }
         public virtual List<ResultCDHA> ResultCDHAs { get; set; }

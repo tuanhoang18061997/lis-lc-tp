@@ -351,14 +351,43 @@ function Report_ViewServiceDetail(serviceId) {
     }
     
 }
-// Xuất Excel nội dung chi tiết trong modal
+
+// Xuất Excel CHỈ những dòng đang hiển thị trong modal
 $(document).on("click", "#btn-export-detail", function () {
-    var table = $("#modal-service-detail").find("table").first();
-    if (table.length === 0) {
+
+    var $table = $("#modal-service-detail").find("table").first();
+
+    if ($table.length === 0) {
         SwalHelper.Toast.error("Không tìm thấy bảng dữ liệu để xuất!");
         return;
     }
-    TableToExcel.convert(table[0], {
+
+    var $visibleRows = $table.find("tbody tr:visible");
+
+    if ($visibleRows.length === 0) {
+        SwalHelper.Toast.warning("Không có dữ liệu đang hiển thị để xuất!");
+        return;
+    }
+
+    // Clone table, không tác động giao diện hiện tại
+    var $exportTable = $table.clone();
+
+    // Xóa dữ liệu cũ trong clone
+    $exportTable.find("tbody").empty();
+
+    // Copy đúng các dòng hiện đang hiển thị
+    $visibleRows.each(function () {
+        $exportTable.find("tbody").append(
+            $(this).clone()
+        );
+    });
+
+    // Đánh lại STT từ 1 -> N
+    $exportTable.find("tbody tr").each(function (index) {
+        $(this).find("td").first().text(index + 1);
+    });
+
+    TableToExcel.convert($exportTable[0], {
         name: "ChiTietDichVu.xlsx",
         sheet: {
             name: "KQ Xet Nghiem"

@@ -163,12 +163,8 @@ namespace Management.Controllers
         [HttpGet]
         public async Task<ActionResult> GetPatientResultByServiceXN(long serviceId, DateTime fromtime, DateTime totime)
         {
-            var debugFrom = fromtime;
-            var debugTo = totime;
             var from = new DateTime(fromtime.Year, fromtime.Month, fromtime.Day, 23, 59, 59).AddDays(-1);
             var to = new DateTime(totime.Year, totime.Month, totime.Day, 23, 59, 59);
-            var debugFromb = from;
-            var debugToc = to;
             var model = await _reportBL.LC_GetPatientResultByServiceXN(serviceId, fromtime, totime);
             return PartialView("_ReportByServiceXNDetail", model);
         }
