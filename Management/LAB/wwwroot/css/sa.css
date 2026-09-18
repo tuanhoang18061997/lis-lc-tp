@@ -1137,10 +1137,11 @@ option {
 
     .sa-right-service-gridview .table-responsive .right .desscription {
         width: 100%;
-        height: 335px;
+        height: 65%;
         float: left;
         padding-left: 5px;
         margin-bottom: 5px;
+        overflow-y: scroll;
     }
 
         .sa-right-service-gridview .table-responsive .right .desscription .content {
@@ -1158,7 +1159,7 @@ option {
 
     .sa-right-service-gridview .table-responsive .right .result-suggest {
         width: 100%;
-        height: 61.5px;
+        height: 25%;
         float: left;
     }
 

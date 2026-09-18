@@ -45,8 +45,8 @@ namespace Management.BL
 
         public APIBL()
         {
-            _db = new LABContext();           
-        }     
+            _db = new LABContext();
+        }
 
         public async Task<bool> StartAutoTask()
         {
@@ -263,7 +263,7 @@ namespace Management.BL
             await InitTimer_Auto_GetPatientAndService();
             await InitTimer_Auto_Update_ResultStandard_To_ResultXN();
             await InitTimer_Auto_PushResultBHYT();
-        }  
+        }
 
         public async Task InitTimer_Auto_GetPatientAndService()
         {
@@ -550,8 +550,8 @@ namespace Management.BL
                                                 try
                                                 {
                                                     patient = await AddPatient(null, lstGroup[0].Seq, lstGroup[0].PatientId, lstGroup[0].TicketId, lstGroup[0].PatientName,
-                                                        sex, lstGroup[0].Address, age, lstGroup[0].Diagnostic, objectName, lstGroup[0].LocationName, 
-                                                        lstGroup[0].DoctorName, dateTimeServer, lstGroup[0].AssignDate, lstGroup[0].Type, lstGroup[0].MaBenhAn, 
+                                                        sex, lstGroup[0].Address, age, lstGroup[0].Diagnostic, objectName, lstGroup[0].LocationName,
+                                                        lstGroup[0].DoctorName, dateTimeServer, lstGroup[0].AssignDate, lstGroup[0].Type, lstGroup[0].MaBenhAn,
                                                         lstGroup[0].MaDotKham, lstGroup[0].Phone, lstGroup[0].SoCccd);
                                                 }
                                                 catch (Exception ex)
@@ -599,7 +599,7 @@ namespace Management.BL
                                                                     await AddResultXN(patient.Id, item.TicketItemId, dateTimeServer, service, item.DoctorName, sidToHis, item.Type);
 
                                                                     // 2) Đẩy SID về HIS (để HIS & LIS cùng trỏ 1 SID)
-                                                                    lstSIDForTicketItem.Add(new SIDForTicketItem { ticketItemId = item.TicketItemId, sid = sidToHis, type = item.Type});
+                                                                    lstSIDForTicketItem.Add(new SIDForTicketItem { ticketItemId = item.TicketItemId, sid = sidToHis, type = item.Type });
 
                                                                     statusToHis = StatusForHIS.waitting;
 
@@ -763,14 +763,14 @@ namespace Management.BL
                 {
                     using (var context = new LABContext())
                     {
-                        patientOld = await context.Patients.FirstOrDefaultAsync(p => 
+                        patientOld = await context.Patients.FirstOrDefaultAsync(p =>
                                p.PatientId == pid
                             && p.TicketId == ticket_id
-                            && p.DoctorId == doctorId 
-                            && p.InsertTime > assignDateTmp.AddMinutes(-15) 
-                            && p.InsertTime.Value.Day == assignDateTmp.Day 
-                            && p.InsertTime.Value.Month == assignDateTmp.Month 
-                            && p.InsertTime.Value.Year == assignDateTmp.Year 
+                            && p.DoctorId == doctorId
+                            && p.InsertTime > assignDateTmp.AddMinutes(-15)
+                            && p.InsertTime.Value.Day == assignDateTmp.Day
+                            && p.InsertTime.Value.Month == assignDateTmp.Month
+                            && p.InsertTime.Value.Year == assignDateTmp.Year
                             && (p.BenhAn ?? "").Trim().ToLower() == normalizedType);
                     }
                 }
@@ -779,7 +779,8 @@ namespace Management.BL
 
                 if (patientOld == null)
                 {
-                    if(string.IsNullOrEmpty(seq)) {
+                    if (string.IsNullOrEmpty(seq))
+                    {
                         seq = await GetSeq();
                     }
                     try
@@ -806,8 +807,8 @@ namespace Management.BL
                     // ★ THÊM ĐOẠN NÀY: nếu SID đã tồn tại rồi thì dùng luôn record đó, khỏi tạo mới
                     using (var context = new LABContext())
                     {
-                        var existedBySid = await context.Patients.FirstOrDefaultAsync(p => 
-                            p.Sid == sid 
+                        var existedBySid = await context.Patients.FirstOrDefaultAsync(p =>
+                            p.Sid == sid
                             && (p.BenhAn ?? "").Trim().ToLower() == normalizedType
                         );
 
@@ -883,7 +884,7 @@ namespace Management.BL
                 long? doctorId = null;
                 if (doctor != null) doctorId = doctor.Id;
                 using (var context = new LABContext())
-                {                    
+                {
                     var lstResultOld = await context.ResultXNs.Where(p => p.PatientId == patientId).ToListAsync();
                     var patient = await context.Patients.Where(p => p.Id == patientId).FirstOrDefaultAsync();
                     ResultXN resultOld = null;
@@ -921,7 +922,7 @@ namespace Management.BL
                                     result.Active = true;
                                     result.TypeBenhAn = typeBenhAn;
                                     await context.ResultXNs.AddAsync(result);
-                                }                               
+                                }
                                 await context.SaveChangesAsync();
                             }
                         }
@@ -935,55 +936,103 @@ namespace Management.BL
             }
         }
 
-        public async Task<bool> AddResultCDHA(long? patientId, string ticket_item_id, DateTime dateTimeServer, Service service, string doctorName, string keyResultForHis, string typeBenhAn)
+        public async Task<bool> AddResultCDHA(
+            long? patientId,
+            string ticket_item_id,
+            DateTime dateTimeServer,
+            Service service,
+            string doctorName,
+            string keyResultForHis,
+            string typeBenhAn)
         {
             try
             {
-                var doctor = lstDoctor.Where(p => p.Name.Equals(doctorName)).FirstOrDefault();
+                var doctor = lstDoctor
+                  .Where(p => p.Name.Equals(doctorName))
+                  .FirstOrDefault();
+
                 long? doctorId = null;
-                if (doctor != null) doctorId = doctor.Id;
+
+                if (doctor != null)
+                    doctorId = doctor.Id;
+
                 using (var context = new LABContext())
                 {
+                    var patient = await context.Patients
+                      .Where(p => p.Id == patientId)
+                      .FirstOrDefaultAsync();
 
-                    var lstResultOld = await context.ResultCDHAs.Where(p => p.PatientId == patientId && p.Service.Category.Code == service.Category.Code).ToListAsync();
-                    var patient = await context.Patients.Where(p => p.Id == patientId).FirstOrDefaultAsync();
-                    ResultCDHA resultOld = null;
-                    if (lstResultOld != null && lstResultOld.Count > 0)
-                    {
-                        resultOld = lstResultOld.Where(p => p.ServiceId == service.Id).FirstOrDefault();
-                    }
-                    else
-                    {
-                        if (service.Category.Code == "SA")
-                            patient.WaitSA = true;
-                        else if (service.Category.Code == "SAT")
-                            patient.WaitSAT = true;
-                        else if (service.Category.Code == "DDT")
-                            patient.WaitDDT = true;
-                        else if (service.Category.Code == "NS")
-                            patient.WaitNS = true;
-                        else if (service.Category.Code == "XQ")
-                            patient.WaitXQ = true;
-                        else if (service.Category.Code == "NSCTC")
-                            patient.WaitNSCTC = true;
-                        else if (service.Category.Code == "TDCN")
-                            patient.WaitTDCN = true;
-                    }
+                    if (patient == null)
+                        return false;
+
+                    // =========================================================
+                    // Một chỉ định HIS được xác định theo TicketItemId + ServiceId.
+                    //
+                    // Không chỉ kiểm tra ServiceId, vì cùng một bệnh nhân có thể
+                    // được chỉ định lại cùng dịch vụ ở lần/ngày khác.
+                    // =========================================================
+                    var resultOld = await context.ResultCDHAs
+                      .FirstOrDefaultAsync(p =>
+                        p.PatientId == patientId &&
+                        p.ServiceId == service.Id &&
+                        p.TicketItemId == ticket_item_id &&
+                        p.Active == true);
 
                     if (resultOld == null)
                     {
-                        ResultCDHA result = new ResultCDHA();
-                        result.PatientId = patientId;
-                        result.ServiceId = service.Id;
-                        result.TicketItemId = ticket_item_id;
-                        result.InsertTime = dateTimeServer;
-                        result.DoctorId = doctorId;
-                        result.KeyResultForHis = keyResultForHis;
-                        result.Active = true;
-                        result.TypeBenhAn = typeBenhAn;
+                        // Nếu đây là dịch vụ đầu tiên của module thì bật Wait*
+                        // theo workflow hiện tại.
+                        var hasResultInModule = await context.ResultCDHAs
+                          .AnyAsync(p =>
+                            p.Active == true &&
+                            p.PatientId == patientId &&
+                            p.Service.Category.Code == service.Category.Code);
+
+                        if (!hasResultInModule)
+                        {
+                            if (service.Category.Code == "SA")
+                                patient.WaitSA = true;
+                            else if (service.Category.Code == "SAT")
+                                patient.WaitSAT = true;
+                            else if (service.Category.Code == "DDT")
+                                patient.WaitDDT = true;
+                            else if (service.Category.Code == "NS")
+                                patient.WaitNS = true;
+                            else if (service.Category.Code == "XQ")
+                                patient.WaitXQ = true;
+                            else if (service.Category.Code == "NSCTC")
+                                patient.WaitNSCTC = true;
+                            else if (service.Category.Code == "TDCN")
+                                patient.WaitTDCN = true;
+                        }
+
+                        var result = new ResultCDHA
+                        {
+                            PatientId = patientId,
+                            ServiceId = service.Id,
+                            TicketItemId = ticket_item_id,
+
+                            InsertTime = dateTimeServer,
+                            DoctorId = doctorId,
+
+                            KeyResultForHis = keyResultForHis,
+                            TypeBenhAn = typeBenhAn,
+
+                            Active = true,
+
+                            // ===============================================
+                            // Service-level validation state
+                            // Chỉ định mới từ HIS chưa từng Valid.
+                            // ===============================================
+                            IsValidated = false,
+                            LastValidatedAt = null,
+                            LastValidatedByUserId = null
+                        };
+
                         await context.ResultCDHAs.AddAsync(result);
                         await context.SaveChangesAsync();
                     }
+
                     return true;
                 }
             }
@@ -1170,10 +1219,10 @@ namespace Management.BL
                                  preInserTime.Year.ToString().Substring(2, 2) + "-" + resultStandard.Seq;
 
                         await UpdateResultXN(sid, preSid, seq, resultStandard.TestCodeId, resultStandard.Result, resultStandard.PosNeg, resultStandard);
-                        if(!lstSid.Contains(sid)) lstSid.Add(sid);
+                        if (!lstSid.Contains(sid)) lstSid.Add(sid);
                     }
 
-                    foreach(var sid in lstSid)
+                    foreach (var sid in lstSid)
                     {
                         await FullResultXN(sid);
                     }
@@ -1524,7 +1573,7 @@ namespace Management.BL
                         foreach (var item in lstResult)
                         {
                             if (item.TestCode.IsTestHead) continue;
-                            
+
                             //var result_BHYT = lstResult_BHYT.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
                             //if (result_BHYT == null)
                             //{
@@ -1599,56 +1648,79 @@ namespace Management.BL
             {
                 using (var context = new LABContext())
                 {
-                    // chỉ lấy những kết quả đã được nhập kết luận (Result) theo từng loại dịch vụ
-                    var lstResultImage = await context.ResultCDHAs.Where(p => p.Active == true && p.PushBHYT == false && p.Patient.InsertTime > from && p.Patient.InsertTime < to && !string.IsNullOrWhiteSpace(p.Result) &&
-                                                             ((p.Patient.ValidSA == true && p.Service.Category.Code == "SA") ||
-                                                              (p.Patient.ValidSAT == true && p.Service.Category.Code == "SAT") ||
-                                                              (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
-                                                              (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
-                                                              (p.Patient.ValidNSCTC == true && p.Service.Category.Code == "NSCTC") ||
-                                                              (p.Patient.ValidDDT == true && p.Service.Category.Code == "DDT"))).ToListAsync();
-                    // 2. Lấy riêng kết quả TDCN
-                    // TDCN không bắt buộc phải có Result
-                    var lstResultTDCN = await context.ResultCDHAs
-                        .Where(p =>
-                            p.Active == true &&
-                            p.PushBHYT == false &&
-                            p.Patient.InsertTime > from &&
-                            p.Patient.InsertTime < to &&
-                            p.Patient.ValidTDCN == true &&
-                            p.Service.Category.Code == "TDCN")
+                    // Các module CDHA đã chuyển sang service-level validation.
+                    // Record mới: chỉ push khi chính ResultCDHA đó IsValidated = true.
+                    // Legacy: IsValidated = null thì fallback Patient.Valid* để không làm mất dữ liệu cũ.
+                    var lstResultImage = await context.ResultCDHAs
+                        .Where(p => p.Active == true &&
+                                    p.PushBHYT == false &&
+                                    p.Patient.InsertTime > from &&
+                                    p.Patient.InsertTime < to &&
+                                    p.Service.Category.Code != "TDCN" &&
+                                    !string.IsNullOrWhiteSpace(p.Result) &&
+                                    (
+                                        p.IsValidated == true ||
+                                        (
+                                            p.IsValidated == null &&
+                                            (
+                                                (p.Patient.ValidSA == true && p.Service.Category.Code == "SA") ||
+                                                (p.Patient.ValidSAT == true && p.Service.Category.Code == "SAT") ||
+                                                (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
+                                                (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
+                                                (p.Patient.ValidNSCTC == true && p.Service.Category.Code == "NSCTC") ||
+                                                (p.Patient.ValidDDT == true && p.Service.Category.Code == "DDT")
+                                            )
+                                        )
+                                    ))
                         .ToListAsync();
-                    // 3. Gộp TDCN vào danh sách chung
+
+                    // TDCN không bắt buộc có Result.
+                    // Record mới vẫn phải IsValidated = true; legacy fallback Patient.ValidTDCN.
+                    var lstResultTDCN = await context.ResultCDHAs
+                        .Where(p => p.Active == true &&
+                                    p.PushBHYT == false &&
+                                    p.Patient.InsertTime > from &&
+                                    p.Patient.InsertTime < to &&
+                                    p.Service.Category.Code == "TDCN" &&
+                                    (p.IsValidated == true || (p.IsValidated == null && p.Patient.ValidTDCN == true)))
+                        .ToListAsync();
+
                     if (lstResultTDCN.Count > 0)
                     {
                         lstResultImage.AddRange(lstResultTDCN);
                     }
+
                     var lstResult_BHYT = new List<Result_BHYT>();
                     var lstStatusTicketItemId = new List<StatusTicketItemId>();
+
                     if (lstResultImage != null)
                     {
                         foreach (var item in lstResultImage)
                         {
-                            var date = item?.Service?.Category?.Code == "SA" ? item?.Patient?.ReturnResultTimeSA : 
-                                      (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.ReturnResultTimeSAT : 
-                                      (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.ReturnResultTimeXQ :
-                                      (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.ReturnResultTimeDDT :
-                                      (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.ReturnResultTimeNSCTC :
-                                      (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.ReturnResultTimeTDCN : item?.Patient?.ReturnResultTimeNS)))));
+                            // Record service-level dùng LastValidatedAt riêng của chính dịch vụ.
+                            // Legacy hoặc fail-safe thiếu timestamp sẽ fallback Patient.ReturnResultTime* như trước.
+                            DateTime? legacyDate = item?.Service?.Category?.Code == "SA" ? item?.Patient?.ReturnResultTimeSA :
+                                                   (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.ReturnResultTimeSAT :
+                                                   (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.ReturnResultTimeXQ :
+                                                   (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.ReturnResultTimeDDT :
+                                                   (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.ReturnResultTimeNSCTC :
+                                                   (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.ReturnResultTimeTDCN : item?.Patient?.ReturnResultTimeNS)))));
+
+                            var date = item.IsValidated.HasValue && item.LastValidatedAt.HasValue ? item.LastValidatedAt : legacyDate;
 
                             var nguoiThucHien = item?.Service?.Category?.Code == "SA" ? item?.Patient?.UserSA?.Name :
-                                      (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.Name :
-                                      (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.Name :
-                                      (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.UserDDT?.Name :
-                                      (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.UserNSCTC?.Name :
-                                      (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.UserTDCN?.Name : item?.Patient?.UserNS?.Name)))));
+                                              (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.Name :
+                                              (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.Name :
+                                              (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.UserDDT?.Name :
+                                              (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.UserNSCTC?.Name :
+                                              (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.UserTDCN?.Name : item?.Patient?.UserNS?.Name)))));
 
                             var bsDocKQ = item?.Service?.Category?.Code == "SA" ? item?.Patient?.UserSA?.MaBHYT :
-                                     (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.MaBHYT :
-                                     (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.MaBHYT :
-                                     (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.UserDDT?.MaBHYT :
-                                     (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.UserNSCTC?.MaBHYT :
-                                     (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.UserTDCN?.MaBHYT : item?.Patient?.UserNS?.MaBHYT)))));
+                                         (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.UserDDT?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.UserNSCTC?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.UserTDCN?.MaBHYT : item?.Patient?.UserNS?.MaBHYT)))));
 
                             if (!string.IsNullOrEmpty(nguoiThucHien))
                             {
@@ -1657,7 +1729,6 @@ namespace Management.BL
 
                             lstResult_BHYT.Add(new Result_BHYT { patient_id = item?.Patient?.PatientId, ticket_id = item?.Patient?.TicketId, service_id = item?.Service?.Code, ticket_item_id = item.TicketItemId, type = item.Patient.BenhAn, mechine_code = item.DeviceCodeBHYT, describe = item.Description, conclusion = item.Result, date = date ?? DateTime.Now, nguoi_thuc_hien = nguoiThucHien, bs_doc_kq = bsDocKQ });
                             lstStatusTicketItemId.Add(new StatusTicketItemId { ticket_item_id = item.TicketItemId, type = item.TypeBenhAn, status = StatusForHIS.closed, sid = item.KeyResultForHis, result = item.Result });
-
                         }
                     }
 
@@ -1676,7 +1747,6 @@ namespace Management.BL
                         await UpdateStatusTicketItemId(lstStatusTicketItemId);
                     }
                 }
-
             }
             catch { }
         }
@@ -1713,7 +1783,7 @@ namespace Management.BL
                     return _setting.Value;
                 }
                 return null;
-            }         
+            }
         }
 
         /*
@@ -1727,7 +1797,7 @@ namespace Management.BL
                 {
                     // Tìm tất cả bản ghi bệnh nhân theo PatientId (và TicketId nếu có)
                     IQueryable<Patient> query = context.Patients.Where(p => p.PatientId == request.PatientId);
-                    
+
                     // Nếu có TicketId thì lọc thêm theo TicketId
                     if (!string.IsNullOrEmpty(request.TicketId))
                     {

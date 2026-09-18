@@ -68,41 +68,130 @@ namespace Management.BL
             DateTime now)
         {
             moduleCode = NormalizeModule(moduleCode);
-            if (!CdhaModules.Contains(moduleCode) || resultIds.Count == 0)
+
+            if (!CdhaModules.Contains(moduleCode) ||
+                resultIds == null ||
+                resultIds.Count == 0)
+            {
+                return false;
+            }
+
+            var ids = resultIds
+                .Where(x => x > 0)
+                .Distinct()
+                .ToList();
+
+            if (ids.Count == 0)
                 return false;
 
-            var ids = resultIds.Distinct().ToList();
-            var results = await _db.ResultCDHAs.AsNoTracking()
-                .Where(x => x.Active
-                    && x.PatientId == patientId
-                    && ids.Contains(x.Id)
-                    && x.Service.Category.Code == moduleCode)
-                .Select(x => new { x.Id, x.Patient })
+            var results = await _db.ResultCDHAs
+                .AsNoTracking()
+                .Where(x =>
+                    x.Active &&
+                    x.PatientId == patientId &&
+                    ids.Contains(x.Id) &&
+                    x.Service.Category.Code == moduleCode)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.IsValidated,
+                    x.LastValidatedAt,
+                    Patient = x.Patient
+                })
                 .ToListAsync();
 
             if (results.Count != ids.Count)
                 return false;
 
-            var patient = results[0].Patient;
-            if (patient == null || !GetModuleValid(patient, moduleCode))
-                return false;
+            var lockedResultIds = new List<long>();
 
-            var returnTime = GetReturnResultTime(patient, moduleCode);
-            if (!IsLockedByDate(returnTime, now))
+            foreach (var result in results)
+            {
+                if (result.Patient == null)
+                    return false;
+
+                // =====================================================
+                // RECORD MỚI
+                // =====================================================
+                if (result.IsValidated.HasValue)
+                {
+                    // Chỉ service đang Valid mới được Invalid.
+                    //
+                    // false + NULL:
+                    // chưa từng Valid.
+                    //
+                    // false + LastValidatedAt:
+                    // đã Invalid rồi / đang Process.
+                    if (!result.IsValidated.Value)
+                        return false;
+                }
+                else
+                {
+                    // =================================================
+                    // LEGACY
+                    // =================================================
+                    if (!GetModuleValid(
+                        result.Patient,
+                        moduleCode))
+                    {
+                        return false;
+                    }
+                }
+
+                var validationTime =
+                    GetCDHAValidationTime(
+                        result.IsValidated,
+                        result.LastValidatedAt,
+                        result.Patient,
+                        moduleCode);
+
+                // Fail-safe:
+                // service được đánh dấu Valid nhưng không có timestamp.
+                if (result.IsValidated == true &&
+                    !validationTime.HasValue)
+                {
+                    return false;
+                }
+
+                if (IsLockedByDate(
+                    validationTime,
+                    now))
+                {
+                    lockedResultIds.Add(
+                        result.Id);
+                }
+            }
+
+            // Không có service nào qua ngày.
+            // Cho phép Invalid cùng ngày.
+            if (lockedResultIds.Count == 0)
                 return true;
 
-            var activeCount = await _db.ResultEditUnlocks.AsNoTracking().CountAsync(x =>
-                x.IsActive
-                && x.Scope == CdhaScope
-                && x.Source == "ADMIN"
-                && x.PatientId == patientId
-                && x.ModuleCode == moduleCode
-                && x.ResultCDHAId.HasValue
-                && ids.Contains(x.ResultCDHAId.Value)
-                && x.RevokedAt == null
-                && x.ExpireAt > now);
+            // =========================================================
+            // Qua ngày:
+            // từng ResultCDHA phải có ADMIN permission riêng.
+            // =========================================================
+            var activeAdminResultIds =
+                await _db.ResultEditUnlocks
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.IsActive &&
+                        x.Scope == CdhaScope &&
+                        x.Source == "ADMIN" &&
+                        x.PatientId == patientId &&
+                        x.ModuleCode == moduleCode &&
+                        x.ResultCDHAId.HasValue &&
+                        lockedResultIds.Contains(
+                            x.ResultCDHAId.Value) &&
+                        x.RevokedAt == null &&
+                        x.ExpireAt > now)
+                    .Select(x =>
+                        x.ResultCDHAId!.Value)
+                    .Distinct()
+                    .ToListAsync();
 
-            return activeCount == ids.Count;
+            return activeAdminResultIds.Count ==
+                   lockedResultIds.Count;
         }
 
         public async Task<bool> CanEditXNAsync(long patientId, DateTime now)
@@ -131,36 +220,142 @@ namespace Management.BL
                 requireUsed: true);
         }
 
+        //public async Task<bool> CanEditCDHAAsync(long resultCDHAId, DateTime now)
+        //{
+        //    var result = await _db.ResultCDHAs.AsNoTracking()
+        //        .Where(x => x.Active && x.Id == resultCDHAId)
+        //        .Select(x => new
+        //        {
+        //            Result = x,
+        //            ModuleCode = x.Service.Category.Code,
+        //            Patient = x.Patient
+        //        })
+        //        .FirstOrDefaultAsync();
+
+        //    if (result == null || result.Patient == null)
+        //        return false;
+
+        //    var moduleCode = NormalizeModule(result.ModuleCode);
+        //    var returnTime = GetReturnResultTime(result.Patient, moduleCode);
+
+        //    // Kết quả chưa từng Valid: đây là luồng thực hiện ban đầu, không cần quyền mở khóa.
+        //    if (!returnTime.HasValue)
+        //        return true;
+
+        //    // Dịch vụ mới được chỉ định sau lần trả kết quả trước là luồng thực hiện mới,
+        //    // không phải sửa lại dịch vụ cũ.
+        //    if (result.Result.InsertTime.HasValue && result.Result.InsertTime > returnTime)
+        //        return true;
+
+        //    // Khi đã từng trả kết quả, CDHA luôn cần đúng phạm vi dịch vụ đã Invalid.
+        //    return await HasActivePermissionAsync(
+        //        result.Patient.Id,
+        //        moduleCode,
+        //        resultCDHAId,
+        //        now,
+        //        requireUsed: true);
+        //}
         public async Task<bool> CanEditCDHAAsync(long resultCDHAId, DateTime now)
         {
-            var result = await _db.ResultCDHAs.AsNoTracking()
-                .Where(x => x.Active && x.Id == resultCDHAId)
+            var result = await _db.ResultCDHAs
+                .AsNoTracking()
+                .Where(x =>
+                    x.Active &&
+                    x.Id == resultCDHAId)
                 .Select(x => new
                 {
-                    Result = x,
+                    x.Id,
+                    x.PatientId,
+                    x.InsertTime,
+
+                    x.IsValidated,
+                    x.LastValidatedAt,
+
                     ModuleCode = x.Service.Category.Code,
                     Patient = x.Patient
                 })
                 .FirstOrDefaultAsync();
 
-            if (result == null || result.Patient == null)
+            if (result == null ||
+                result.Patient == null ||
+                !result.PatientId.HasValue)
+            {
                 return false;
+            }
 
             var moduleCode = NormalizeModule(result.ModuleCode);
-            var returnTime = GetReturnResultTime(result.Patient, moduleCode);
 
-            // Kết quả chưa từng Valid: đây là luồng thực hiện ban đầu, không cần quyền mở khóa.
+            if (!CdhaModules.Contains(moduleCode))
+                return false;
+
+            // =========================================================
+            // RECORD THEO CƠ CHẾ MỚI
+            // =========================================================
+            if (result.IsValidated.HasValue)
+            {
+                // =========================================================
+                // CASE 1:
+                // Service hiện vẫn đang Valid.
+                //
+                // Dù có permission hay không cũng KHÔNG được sửa.
+                // Phải hoàn thành Invalid trước để IsValidated chuyển false.
+                // =========================================================
+                if (result.IsValidated.Value)
+                {
+                    return false;
+                }
+
+                // =========================================================
+                // CASE 2:
+                // false + LastValidatedAt = NULL
+                //
+                // Dịch vụ mới, chưa từng Valid.
+                // Cho phép nhập/sửa bình thường.
+                // =========================================================
+                if (!result.LastValidatedAt.HasValue)
+                {
+                    return true;
+                }
+
+                // =========================================================
+                // CASE 3:
+                // false + LastValidatedAt != NULL
+                //
+                // Dịch vụ đã từng Valid và hiện đã Invalid.
+                // Chỉ được sửa nếu permission của CHÍNH service này
+                // đang Active và đã được sử dụng qua thao tác Invalid.
+                // =========================================================
+                return await HasActivePermissionAsync(
+                    result.PatientId.Value,
+                    moduleCode,
+                    resultCDHAId,
+                    now,
+                    requireUsed: true);
+            }
+
+            // =========================================================
+            // LEGACY RECORD
+            // =========================================================
+            // Không có IsValidated => giữ logic cũ để không phá
+            // các kết quả được tạo trước thời điểm deploy cơ chế mới.
+            var returnTime = GetReturnResultTime(
+                result.Patient,
+                moduleCode);
+
+            // Chưa từng trả kết quả theo dữ liệu legacy.
             if (!returnTime.HasValue)
                 return true;
 
-            // Dịch vụ mới được chỉ định sau lần trả kết quả trước là luồng thực hiện mới,
-            // không phải sửa lại dịch vụ cũ.
-            if (result.Result.InsertTime.HasValue && result.Result.InsertTime > returnTime)
+            // Dịch vụ được chỉ định sau lần trả kết quả cũ.
+            if (result.InsertTime.HasValue &&
+                result.InsertTime.Value > returnTime.Value)
+            {
                 return true;
+            }
 
-            // Khi đã từng trả kết quả, CDHA luôn cần đúng phạm vi dịch vụ đã Invalid.
+            // Dịch vụ legacy đã thuộc lần trả kết quả trước.
             return await HasActivePermissionAsync(
-                result.Patient.Id,
+                result.PatientId.Value,
                 moduleCode,
                 resultCDHAId,
                 now,
@@ -202,72 +397,183 @@ namespace Management.BL
             DateTime now)
         {
             moduleCode = NormalizeModule(moduleCode);
-            var ids = resultIds.Distinct().ToList();
-            var results = await _db.ResultCDHAs.AsNoTracking()
-                .Where(x => x.Active
-                    && x.PatientId == patientId
-                    && ids.Contains(x.Id)
-                    && x.Service.Category.Code == moduleCode)
-                .Select(x => new { x.Id, x.ServiceId, Patient = x.Patient })
-                .ToListAsync();
 
-            if (results.Count != ids.Count || results[0].Patient == null)
+            if (!CdhaModules.Contains(moduleCode))
                 return false;
 
-            var returnTime = GetReturnResultTime(results[0].Patient!, moduleCode);
-            var lockedByDate = IsLockedByDate(returnTime, now);
+            var ids = resultIds
+                .Where(x => x > 0)
+                .Distinct()
+                .ToList();
+
+            if (ids.Count == 0)
+                return false;
+
+            var results = await _db.ResultCDHAs
+                .AsNoTracking()
+                .Where(x =>
+                    x.Active &&
+                    x.PatientId == patientId &&
+                    ids.Contains(x.Id) &&
+                    x.Service.Category.Code == moduleCode)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.ServiceId,
+                    x.IsValidated,
+                    x.LastValidatedAt,
+                    Patient = x.Patient
+                })
+                .ToListAsync();
+
+            if (results.Count != ids.Count)
+                return false;
+
+            // =========================================================
+            // PHASE 1:
+            // Kiểm tra TOÀN BỘ trước khi thay đổi permission.
+            //
+            // Tránh trường hợp xử lý dịch vụ đầu tiên xong rồi mới phát
+            // hiện dịch vụ thứ hai không có quyền ADMIN.
+            // =========================================================
+
+            var prepared = new List<(
+                long ResultId,
+                long? ServiceId,
+                bool LockedByDate,
+                ResultEditUnlock? Permission)>();
 
             foreach (var result in results)
             {
-                var permission = await FindActivePermissionAsync(patientId, moduleCode, result.Id, now);
+                if (result.Patient == null)
+                    return false;
 
-                if (lockedByDate)
+                // Service-level record
+                if (result.IsValidated.HasValue)
                 {
-                    if (permission == null || permission.Source != "ADMIN")
+                    // Chỉ service đang Valid mới được bắt đầu Invalid.
+                    if (!result.IsValidated.Value)
                         return false;
-
-                    permission.UsedAt ??= now;
-                    permission.UsedByUserId ??= userId;
-                    continue;
+                }
+                else
+                {
+                    // Legacy fallback.
+                    if (!GetModuleValid(result.Patient, moduleCode))
+                        return false;
                 }
 
-                if (permission == null)
+                var validationTime = GetCDHAValidationTime(
+                    result.IsValidated,
+                    result.LastValidatedAt,
+                    result.Patient,
+                    moduleCode);
+
+                if (result.IsValidated == true &&
+                    !validationTime.HasValue)
                 {
-                    // Bản ghi hết hạn vẫn còn IsActive=1 sẽ vướng unique filtered index.
-                    await RevokeTargetPermissionsAsync(
+                    return false;
+                }
+
+                var lockedByDate =
+                    IsLockedByDate(validationTime, now);
+
+                var permission =
+                    await FindActivePermissionAsync(
                         patientId,
                         moduleCode,
                         result.Id,
+                        now);
+
+                // Qua ngày bắt buộc permission ADMIN.
+                if (lockedByDate)
+                {
+                    if (permission == null ||
+                        !string.Equals(
+                            permission.Source,
+                            "ADMIN",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                }
+
+                prepared.Add((
+                    result.Id,
+                    result.ServiceId,
+                    lockedByDate,
+                    permission));
+            }
+
+            // =========================================================
+            // PHASE 2:
+            // Tất cả đã hợp lệ, lúc này mới activate permission.
+            // =========================================================
+
+            foreach (var item in prepared)
+            {
+                if (item.LockedByDate)
+                {
+                    // Permission ADMIN đã được kiểm tra ở Phase 1.
+                    item.Permission!.UsedAt ??= now;
+                    item.Permission.UsedByUserId ??= userId;
+
+                    continue;
+                }
+
+                // -----------------------------------------------------
+                // Invalid trong cùng ngày.
+                // -----------------------------------------------------
+                if (item.Permission == null)
+                {
+                    // Dọn permission cũ/hết hạn để tránh unique index.
+                    await RevokeTargetPermissionsAsync(
+                        patientId,
+                        moduleCode,
+                        item.ResultId,
                         userId,
                         now,
                         "Quyền cũ đã hết hạn");
 
-                    permission = new ResultEditUnlock
+                    var permission = new ResultEditUnlock
                     {
                         PatientId = patientId,
                         ModuleCode = moduleCode,
                         Scope = CdhaScope,
-                        ResultCDHAId = result.Id,
-                        ServiceId = result.ServiceId,
+
+                        ResultCDHAId = item.ResultId,
+                        ServiceId = item.ServiceId,
+
                         Source = "SAME_DAY",
-                        UnlockReason = "Phạm vi sửa được tạo khi Invalid kết quả trong ngày",
+
+                        UnlockReason =
+                            "Phạm vi sửa được tạo khi Invalid kết quả trong ngày",
+
                         UnlockedAt = now,
+
+                        // SAME_DAY hết hiệu lực lúc 00:00 ngày kế tiếp.
                         ExpireAt = now.Date.AddDays(1),
+
                         UnlockedByUserId = userId,
+
+                        // Invalid đang diễn ra nên permission được đánh dấu
+                        // là đã dùng ngay.
                         UsedAt = now,
                         UsedByUserId = userId,
+
                         IsActive = true
                     };
+
                     await _db.ResultEditUnlocks.AddAsync(permission);
                 }
                 else
                 {
-                    permission.UsedAt ??= now;
-                    permission.UsedByUserId ??= userId;
+                    item.Permission.UsedAt ??= now;
+                    item.Permission.UsedByUserId ??= userId;
                 }
             }
 
             await _db.SaveChangesAsync();
+
             return true;
         }
 
@@ -305,20 +611,64 @@ namespace Management.BL
             }
             else if (targetType == "CDHA" && CdhaModules.Contains(moduleCode))
             {
-                var result = await _db.ResultCDHAs.AsNoTracking()
-                    .Where(x => x.Active
-                        && x.Id == request.ResultCDHAId
-                        && x.PatientId == request.PatientId
-                        && x.Service.Category.Code == moduleCode)
-                    .Select(x => new { x.Id, x.ServiceId, Patient = x.Patient })
+                var result = await _db.ResultCDHAs
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.Active &&
+                        x.Id == request.ResultCDHAId &&
+                        x.PatientId == request.PatientId &&
+                        x.Service.Category.Code == moduleCode)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.ServiceId,
+
+                        x.IsValidated,
+                        x.LastValidatedAt,
+
+                        Patient = x.Patient
+                    })
                     .FirstOrDefaultAsync();
+
                 if (result == null || result.Patient == null)
-                    return (false, "Không tìm thấy kết quả dịch vụ cần mở khóa.", false);
+                {
+                    return (
+                        false,
+                        "Không tìm thấy kết quả dịch vụ cần mở khóa.",
+                        false);
+                }
 
                 resultCDHAId = result.Id;
                 serviceId = result.ServiceId;
-                returnTime = GetReturnResultTime(result.Patient, moduleCode);
-                alreadyInProcess = GetModuleProcess(result.Patient, moduleCode);
+
+                // =========================================================
+                // Thời điểm Valid theo từng service.
+                // Legacy sẽ fallback về Patient.ReturnResultTime*
+                // =========================================================
+                returnTime = GetCDHAValidationTime(
+                    result.IsValidated,
+                    result.LastValidatedAt,
+                    result.Patient,
+                    moduleCode);
+
+                // =========================================================
+                // Xác định service đang ở trạng thái Process.
+                //
+                // Cơ chế mới:
+                // false + LastValidatedAt != null
+                // => đã từng Valid và hiện đang Invalid/Process.
+                //
+                // Legacy:
+                // fallback về Patient.Process*
+                // =========================================================
+                if (result.IsValidated.HasValue)
+                {
+                    alreadyInProcess = result.IsValidated.Value == false && result.LastValidatedAt.HasValue;
+                }
+                else
+                {
+                    alreadyInProcess = GetModuleProcess(result.Patient, moduleCode);
+                }
             }
             else
             {
@@ -395,6 +745,7 @@ namespace Management.BL
                 : (false, "Không có quyền mở khóa nào đang hoạt động.");
         }
 
+        // Dùng cho XN
         public async Task RevokeAfterValidAsync(
             long patientId,
             string moduleCode,
@@ -408,6 +759,32 @@ namespace Management.BL
                 userId,
                 now,
                 "Tự động khóa lại sau khi Valid kết quả");
+        }
+
+        // Dùng cho CDHA
+        public async Task RevokeAfterValidCDHAAsync(
+            long patientId,
+            string moduleCode,
+            long resultCDHAId,
+            long userId,
+            DateTime now)
+        {
+            moduleCode = NormalizeModule(moduleCode);
+
+            if (patientId <= 0 ||
+                resultCDHAId <= 0 ||
+                !CdhaModules.Contains(moduleCode))
+            {
+                return;
+            }
+
+            await RevokeTargetPermissionsAsync(
+                patientId,
+                moduleCode,
+                resultCDHAId,
+                userId,
+                now,
+                "Tự động khóa lại sau khi Valid kết quả CDHA");
         }
 
         public async Task<List<ToolAdminResultRow>> SearchAsync(
@@ -516,7 +893,7 @@ namespace Management.BL
                 if (module != "ALL")
                     resultQuery = resultQuery.Where(x => x.Service.Category.Code == module);
 
-                resultQuery = ApplyReturnTimeFilter(resultQuery, from, toExclusive);
+                resultQuery = ApplyCDHAValidationTimeFilter(resultQuery, from, toExclusive);
 
                 if (term.Length > 0)
                 {
@@ -542,6 +919,10 @@ namespace Management.BL
                         ModuleCode = x.Service.Category.Code,
                         ServiceName = x.Service.Name,
 
+                        // Service-level state
+                        x.IsValidated,
+                        x.LastValidatedAt,
+
                         PatientTableId = x.Patient.Id,
                         PatientCode = x.Patient.PatientId,
                         MedicalRecordCode = x.Patient.MaBenhAn,
@@ -555,14 +936,17 @@ namespace Management.BL
                         ReturnResultTimeNSCTC = x.Patient.ReturnResultTimeNSCTC,
                         ReturnResultTimeXQ = x.Patient.ReturnResultTimeXQ,
                         ReturnResultTimeTDCN = x.Patient.ReturnResultTimeTDCN
-                    })
-                    .ToListAsync();
+                    }).ToListAsync();
 
-                rows.AddRange(cdhaResults.Select(x =>
+                foreach (var x in cdhaResults)
                 {
-                    var code = NormalizeModule(x.ModuleCode);
+                    var code =
+                        NormalizeModule(x.ModuleCode);
 
-                    DateTime? returnTime = code switch
+                    // =========================================================
+                    // Timestamp module cũ chỉ dùng fallback.
+                    // =========================================================
+                    DateTime? legacyReturnTime = code switch
                     {
                         "SA" => x.ReturnResultTimeSA,
                         "SAT" => x.ReturnResultTimeSAT,
@@ -574,24 +958,93 @@ namespace Management.BL
                         _ => null
                     };
 
-                    return new ToolAdminResultRow
+                    DateTime? effectiveReturnTime;
+
+                    // =========================================================
+                    // RECORD MỚI
+                    // =========================================================
+                    if (x.IsValidated.HasValue)
+                    {
+                        if (x.LastValidatedAt.HasValue)
+                        {
+                            effectiveReturnTime =
+                                x.LastValidatedAt;
+                        }
+                        else if (x.IsValidated.Value)
+                        {
+                            // Fail-safe transitional record
+                            effectiveReturnTime =
+                                legacyReturnTime;
+                        }
+                        else
+                        {
+                            // false + NULL
+                            // => chưa từng Valid.
+                            effectiveReturnTime = null;
+                        }
+                    }
+                    else
+                    {
+                        // =====================================================
+                        // LEGACY
+                        // =====================================================
+                        effectiveReturnTime =
+                            legacyReturnTime;
+                    }
+
+                    // Dịch vụ chưa từng Valid không thuộc Tools Admin.
+                    if (!effectiveReturnTime.HasValue)
+                        continue;
+
+                    rows.Add(new ToolAdminResultRow
                     {
                         TargetType = "CDHA",
-                        PatientTableId = x.PatientTableId,
-                        ResultCDHAId = x.ResultCDHAId,
-                        ServiceId = x.ServiceId,
-                        ModuleCode = code,
-                        PatientCode = x.PatientCode ?? string.Empty,
-                        MedicalRecordCode = x.MedicalRecordCode ?? x.Sid ?? string.Empty,
-                        PatientName = x.PatientName ?? string.Empty,
-                        ServiceName = x.ServiceName ?? string.Empty,
-                        ServiceNames = string.IsNullOrWhiteSpace(x.ServiceName)
+
+                        PatientTableId =
+                            x.PatientTableId,
+
+                        ResultCDHAId =
+                            x.ResultCDHAId,
+
+                        ServiceId =
+                            x.ServiceId,
+
+                        ModuleCode =
+                            code,
+
+                        PatientCode =
+                            x.PatientCode ?? string.Empty,
+
+                        MedicalRecordCode =
+                            x.MedicalRecordCode
+                            ?? x.Sid
+                            ?? string.Empty,
+
+                        PatientName =
+                            x.PatientName ?? string.Empty,
+
+                        ServiceName =
+                            x.ServiceName ?? string.Empty,
+
+                        ServiceNames =
+                            string.IsNullOrWhiteSpace(
+                                x.ServiceName)
                             ? new List<string>()
-                            : new List<string> { x.ServiceName },
-                        ReturnResultTime = returnTime!.Value,
-                        IsLockedByDate = IsLockedByDate(returnTime, now)
-                    };
-                }));
+                            : new List<string>
+                            {
+                x.ServiceName
+                            },
+
+                        // Timestamp RIÊNG của service
+                        ReturnResultTime =
+                            effectiveReturnTime.Value,
+
+                        IsLockedByDate =
+                            IsLockedByDate(
+                                effectiveReturnTime,
+                                now)
+                    });
+                }
             }
 
             var patientKeys = rows.Select(x => x.PatientTableId).Distinct().ToList();
@@ -710,19 +1163,168 @@ namespace Management.BL
             return permissions.Count;
         }
 
-        private static IQueryable<ResultCDHA> ApplyReturnTimeFilter(
-            IQueryable<ResultCDHA> query,
-            DateTime from,
-            DateTime toExclusive)
+        private static IQueryable<ResultCDHA> ApplyCDHAValidationTimeFilter(IQueryable<ResultCDHA> query, DateTime from, DateTime toExclusive)
         {
             return query.Where(x =>
-                (x.Service.Category.Code == "SA" && x.Patient.ReturnResultTimeSA >= from && x.Patient.ReturnResultTimeSA < toExclusive)
-                || (x.Service.Category.Code == "SAT" && x.Patient.ReturnResultTimeSAT >= from && x.Patient.ReturnResultTimeSAT < toExclusive)
-                || (x.Service.Category.Code == "DDT" && x.Patient.ReturnResultTimeDDT >= from && x.Patient.ReturnResultTimeDDT < toExclusive)
-                || (x.Service.Category.Code == "NS" && x.Patient.ReturnResultTimeNS >= from && x.Patient.ReturnResultTimeNS < toExclusive)
-                || (x.Service.Category.Code == "NSCTC" && x.Patient.ReturnResultTimeNSCTC >= from && x.Patient.ReturnResultTimeNSCTC < toExclusive)
-                || (x.Service.Category.Code == "XQ" && x.Patient.ReturnResultTimeXQ >= from && x.Patient.ReturnResultTimeXQ < toExclusive)
-                || (x.Service.Category.Code == "TDCN" && x.Patient.ReturnResultTimeTDCN >= from && x.Patient.ReturnResultTimeTDCN < toExclusive));
+
+                // =====================================================
+                // 1. RECORD MỚI
+                //
+                // Nếu đã có LastValidatedAt thì dùng timestamp riêng
+                // của ResultCDHA, bất kể hiện tại IsValidated=true
+                // hay false.
+                //
+                // false + LastValidatedAt != null nghĩa là đã Invalid,
+                // nhưng vẫn cần xuất hiện trong Tools Admin.
+                // =====================================================
+                (
+                    x.IsValidated.HasValue &&
+                    x.LastValidatedAt.HasValue &&
+                    x.LastValidatedAt >= from &&
+                    x.LastValidatedAt < toExclusive
+                )
+
+                ||
+
+                // =====================================================
+                // 2. FAIL-SAFE
+                //
+                // IsValidated=true nhưng LastValidatedAt=NULL.
+                // Trạng thái này không nên xảy ra sau khi flow mới hoàn
+                // thiện, nhưng trong giai đoạn chuyển tiếp vẫn fallback
+                // timestamp Patient để tránh làm mất dữ liệu Tools Admin.
+                // =====================================================
+                (
+                    x.IsValidated == true &&
+                    !x.LastValidatedAt.HasValue &&
+
+                    (
+                        (
+                            x.Service.Category.Code == "SA" &&
+                            x.Patient.ReturnResultTimeSA >= from &&
+                            x.Patient.ReturnResultTimeSA < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "SAT" &&
+                            x.Patient.ReturnResultTimeSAT >= from &&
+                            x.Patient.ReturnResultTimeSAT < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "DDT" &&
+                            x.Patient.ReturnResultTimeDDT >= from &&
+                            x.Patient.ReturnResultTimeDDT < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "NS" &&
+                            x.Patient.ReturnResultTimeNS >= from &&
+                            x.Patient.ReturnResultTimeNS < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "NSCTC" &&
+                            x.Patient.ReturnResultTimeNSCTC >= from &&
+                            x.Patient.ReturnResultTimeNSCTC < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "XQ" &&
+                            x.Patient.ReturnResultTimeXQ >= from &&
+                            x.Patient.ReturnResultTimeXQ < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "TDCN" &&
+                            x.Patient.ReturnResultTimeTDCN >= from &&
+                            x.Patient.ReturnResultTimeTDCN < toExclusive
+                        )
+                    )
+                )
+
+                ||
+
+                // =====================================================
+                // 3. LEGACY
+                // =====================================================
+                (
+                    !x.IsValidated.HasValue &&
+
+                    (
+                        (
+                            x.Service.Category.Code == "SA" &&
+                            x.Patient.ReturnResultTimeSA >= from &&
+                            x.Patient.ReturnResultTimeSA < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "SAT" &&
+                            x.Patient.ReturnResultTimeSAT >= from &&
+                            x.Patient.ReturnResultTimeSAT < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "DDT" &&
+                            x.Patient.ReturnResultTimeDDT >= from &&
+                            x.Patient.ReturnResultTimeDDT < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "NS" &&
+                            x.Patient.ReturnResultTimeNS >= from &&
+                            x.Patient.ReturnResultTimeNS < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "NSCTC" &&
+                            x.Patient.ReturnResultTimeNSCTC >= from &&
+                            x.Patient.ReturnResultTimeNSCTC < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "XQ" &&
+                            x.Patient.ReturnResultTimeXQ >= from &&
+                            x.Patient.ReturnResultTimeXQ < toExclusive
+                        )
+                        ||
+                        (
+                            x.Service.Category.Code == "TDCN" &&
+                            x.Patient.ReturnResultTimeTDCN >= from &&
+                            x.Patient.ReturnResultTimeTDCN < toExclusive
+                        )
+                    )
+                )
+            );
+        }
+
+        private static DateTime? GetCDHAValidationTime(
+            bool? isValidated,
+            DateTime? lastValidatedAt,
+            Patient patient,
+            string moduleCode)
+        {
+            // Record đã đi theo cơ chế service-level mới.
+            if (isValidated.HasValue)
+            {
+                // Đã từng Valid, kể cả hiện tại đang Invalid.
+                if (lastValidatedAt.HasValue)
+                    return lastValidatedAt;
+
+                // Safety fallback:
+                // nếu IsValidated=true nhưng LastValidatedAt chưa được ghi
+                // thì dùng timestamp Patient để tránh mở khóa nhầm.
+                if (isValidated.Value)
+                    return GetReturnResultTime(patient, moduleCode);
+
+                // IsValidated=false + LastValidatedAt=NULL
+                // => dịch vụ mới, chưa từng Valid.
+                return null;
+            }
+
+            // Legacy record:
+            // chưa có state riêng, giữ logic Patient cũ.
+            return GetReturnResultTime(patient, moduleCode);
         }
 
         public static DateTime? GetReturnResultTime(Patient patient, string moduleCode)

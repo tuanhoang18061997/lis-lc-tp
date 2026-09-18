@@ -50,5 +50,8 @@ namespace Management.Models
         public long? SignStoreId { get; set; }
         public int? SignStatus { get; set; }
         public string? TypeBenhAn { get; set; } = null;
+        public bool? IsValidated { get; set; }
+        public DateTime? LastValidatedAt { get; set; }
+        public long? LastValidatedByUserId { get; set; }
     }
 }

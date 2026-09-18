@@ -377,8 +377,8 @@ namespace Management.BL
                             on patient.Id equals result.PatientId
                         join service in _db.Services
                             on result.ServiceId equals service.Id
-                        where patient.InsertTime >= start
-                              && patient.InsertTime < endExclusive
+                        where patient.GetSampleTimeXN >= start
+                              && patient.GetSampleTimeXN < endExclusive
                               && (patient.ValidXN == true || patient.ProcessXN == true)
                               && result.Active == true
                               && patient.Active == true
@@ -1349,10 +1349,10 @@ namespace Management.BL
         }
 
         public async Task<List<ReportProcessPatientGroup>> LC_GetReportByProcessWithPatients(
-    DateTime fromTime,
-    DateTime toTime,
-    string location,
-    string user)
+            DateTime fromTime,
+            DateTime toTime,
+            string location,
+            string user)
         {
             try
             {
@@ -1367,13 +1367,13 @@ namespace Management.BL
 
                 var supportedLocations = new[]
                 {
-            "XN",
-            "SA",
-            "XQ",
-            "DDT",
-            "NS",
-            "TDCN"
-        };
+                    "XN",
+                    "SA",
+                    "XQ",
+                    "DDT",
+                    "NS",
+                    "TDCN"
+                };
 
                 if (string.IsNullOrWhiteSpace(location)
                     || !supportedLocations.Contains(location))
@@ -1390,14 +1390,19 @@ namespace Management.BL
                         from resultXN in _db.ResultXNs
                         join patient in _db.Patients
                             on resultXN.PatientId equals patient.Id
+                        //join returnUser in _db.Users
+                        //    on patient.UserReturnResultXN equals returnUser.Id
+                        // LEFT JOIN User
                         join returnUser in _db.Users
-                            on patient.UserReturnResultXN equals returnUser.Id
+                            on patient.UserReturnResultXN equals returnUser.Id into userGroup
+                        from returnUser in userGroup.DefaultIfEmpty()
+
                         join service in _db.Services
                             on resultXN.ServiceId equals service.Id
-                        where patient.ReturnResultTimeXN >= start
-                              && patient.ReturnResultTimeXN < end
-                              && patient.UserReturnResultXN != null
-                              && patient.ValidXN == true
+                        where patient.GetSampleTimeXN >= start
+                              && patient.GetSampleTimeXN < end
+                              //&& patient.UserReturnResultXN != null
+                              //&& patient.ValidXN == true
                               && resultXN.Active == true
                               && patient.Active == true
                         group new
@@ -1725,8 +1730,8 @@ namespace Management.BL
                 where r.ServiceId == serviceId
                       && r.Active == true
                       && p.Active == true
-                      && p.InsertTime >= start
-                      && p.InsertTime < end
+                      && p.GetSampleTimeXN >= start
+                      && p.GetSampleTimeXN < end
                       && (p.ValidXN == true || p.ProcessXN == true)
                 select new
                 {

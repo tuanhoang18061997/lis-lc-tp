@@ -79,7 +79,7 @@ namespace Management.Controllers
                 ViewData["lstUserFunction"] = await _userBL.GetUserFunction(_userLoginId.Value);
             }
 
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient(from, to, false, false, true, _DDT);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient_Flexible(from, to, _DDT, "valid");
             ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
 
             // Pass the selected dates to the view
@@ -119,9 +119,9 @@ namespace Management.Controllers
             SaveSearchDatesToSession(from, to);
 
 
-            var countGetSample = await _patientCDHABL.Get_CountPatient(from, to, true, false, false, _DDT);
-            var countProcess = await _patientCDHABL.Get_CountPatient(from, to, false, true, false, _DDT);
-            var countReturnResult = await _patientCDHABL.Get_CountPatient(from, to, false, false, true, _DDT);
+            var countGetSample = await _patientCDHABL.Get_CountPatient_New(from, to, true, false, false, _DDT);
+            var countProcess = await _patientCDHABL.Get_CountPatient_New(from, to, false, true, false, _DDT);
+            var countReturnResult = await _patientCDHABL.Get_CountPatient_New(from, to, false, false, true, _DDT);
             ViewData["countGetSample"] = countGetSample;
             ViewData["countProcess"] = countProcess;
             ViewData["countReturnResult"] = countReturnResult;
@@ -154,7 +154,7 @@ namespace Management.Controllers
                 // Ensure time is set to 23:59:59 for the to date
                 to = new DateTime(savedTo.Year, savedTo.Month, savedTo.Day, 23, 59, 59);
             }
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, null, _DDT);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, false, true, null, _DDT);
             SaveSearchDatesToSession(from, to);
 
             return PartialView("_DDT_ReturnResult_ListPatient");
@@ -169,7 +169,7 @@ namespace Management.Controllers
 
             var from = new DateTime(timeSearchFrom.Year, timeSearchFrom.Month, timeSearchFrom.Day, 00, 00, 00);
             var to = new DateTime(timeSearchTo.Year, timeSearchTo.Month, timeSearchTo.Day, 23, 59, 59);
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, pidorseq, _DDT);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, false, true, pidorseq, _DDT);
 
             return PartialView("_DDT_ReturnResult_ListPatient");
         }

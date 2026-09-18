@@ -86,7 +86,7 @@ namespace Management.Controllers
                 ViewData["lstUserFunction"] = await _userBL.GetUserFunction(_userLoginId.Value);
             }
 
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient(from, to, false, true, false, _TDCN);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient_Flexible(from, to, _TDCN, "process");
             ViewData["lstUser"] = await _userBL.GetListUser(UserTypeModel.TDCN);
             ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
             ViewData["lstSampleResult"] = await _sampleBL.GetListSampleByCategory(_TDCN);
@@ -129,9 +129,9 @@ namespace Management.Controllers
             SaveSearchDatesToSession(from, to);
 
 
-            var countGetSample = await _patientCDHABL.Get_CountPatient(from, to, true, false, false, _TDCN);
-            var countProcess = await _patientCDHABL.Get_CountPatient(from, to, false, true, false, _TDCN);
-            var countReturnResult = await _patientCDHABL.Get_CountPatient(from, to, false, false, true, _TDCN);
+            var countGetSample = await _patientCDHABL.Get_CountPatient_New(from, to, true, false, false, _TDCN);
+            var countProcess = await _patientCDHABL.Get_CountPatient_New(from, to, false, true, false, _TDCN);
+            var countReturnResult = await _patientCDHABL.Get_CountPatient_New(from, to, false, false, true, _TDCN);
             ViewData["countGetSample"] = countGetSample;
             ViewData["countProcess"] = countProcess;
             ViewData["countReturnResult"] = countReturnResult;
@@ -166,7 +166,7 @@ namespace Management.Controllers
             }
             SaveSearchDatesToSession(from, to);
 
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, true, false, null, _TDCN);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, true, false, null, _TDCN);
 
             return PartialView("_TDCN_Process_ListPatient");
         }
@@ -180,7 +180,7 @@ namespace Management.Controllers
 
             var from = new DateTime(timeSearchFrom.Year, timeSearchFrom.Month, timeSearchFrom.Day, 23, 59, 59).AddDays(-1);
             var to = new DateTime(timeSearchTo.Year, timeSearchTo.Month, timeSearchTo.Day, 23, 59, 59);
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, true, false, pidorseq, _TDCN);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, true, false, pidorseq, _TDCN);
 
             return PartialView("_TDCN_Process_ListPatient");
         }
@@ -496,17 +496,8 @@ namespace Management.Controllers
 
             try
             {
-                // Chỉ lấy item đầu tiên để cập nhật trạng thái Patient theo logic hiện tại.
-                // UI vẫn gửi toàn bộ dịch vụ để backend biết danh sách dịch vụ của bệnh nhân tại thời điểm bấm "Đã thực hiện".
-                var updated = await _patientCDHABL.Update(
-                    resultCDHA.patientId,
-                    resultCDHA.returnResultTime,
-                    resultCDHA.userReturnResult,
-                    false,
-                    false,
-                    true,
-                    _userLogin.Value,
-                    _TDCN);
+                var _dateTime = ToolBL.Get_DateNow();
+                var updated = await _resultCDHABL.ValidateCDHAMultipleAsync(resultCDHAs, _TDCN, _userLogin.Value, _dateTime);
 
                 return Json(new
                 {
@@ -534,7 +525,7 @@ namespace Management.Controllers
                 var _device = this.GetSession_Device();
                 if (await _resultCDHABL.Update(resultCDHA, _userLogin.Value, _dateTime, _device))
                 {
-                    if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _TDCN))
+                    if (await _resultCDHABL.ValidateCDHAAsync(resultCDHA, _TDCN, _userLogin.Value, _dateTime))
                     {
                         var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
                         if (_result != null)
@@ -596,13 +587,13 @@ namespace Management.Controllers
             var _userLogin = this.GetUserLogin();
             var _device = this.GetSession_Device();
 
-            // Giữ nguyên logic cũ: update nội dung kết quả trước, sau đó update trạng thái Patient sang Valid.
+            // Update nội dung kết quả trước, sau đó Valid đúng ResultCDHA theo service-level.
             if (!await _resultCDHABL.Update(resultCDHA, _userLogin.Value, _dateTime, _device))
             {
                 return Content(string.Empty);
             }
 
-            if (!await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _TDCN))
+            if (!await _resultCDHABL.ValidateCDHAAsync(resultCDHA, _TDCN, _userLogin.Value, _dateTime))
             {
                 return Content(string.Empty);
             }
@@ -641,7 +632,7 @@ namespace Management.Controllers
                 var _dateTime = ToolBL.Get_DateNow();
                 var _userLogin = this.GetUserLogin();
                 var _device = this.GetSession_Device();
-                if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _TDCN))
+                if (await _resultCDHABL.ValidateCDHAAsync(resultCDHA, _TDCN, _userLogin.Value, _dateTime))
                 {
                     var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
                     if (_result != null)

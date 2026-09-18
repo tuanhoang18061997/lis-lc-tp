@@ -108,18 +108,20 @@ namespace Management.BL
                     (categoryCode == "TDCN" && p.ValidTDCN)
                 );
 
-                // ✅ Tối ưu: Lấy danh sách PatientId có completed trước
-                var patientIdsWithCompleted = await _db.ResultCDHAs
-                    .AsNoTracking()
-                    .Where(r => r.Active
-                             && r.Service.Category.Code == categoryCode
-                             && r.Result != null
-                             && r.Result != "")
-                    .Select(r => r.PatientId)
-                    .Distinct()
-                    .ToListAsync();
+                if (categoryCode != "TDCN")
+                {
+                    var patientIdsWithCompleted = await _db.ResultCDHAs
+                        .AsNoTracking()
+                        .Where(r => r.Active
+                                 && r.Service.Category.Code == categoryCode
+                                 && r.Result != null
+                                 && r.Result != "")
+                        .Select(r => r.PatientId)
+                        .Distinct()
+                        .ToListAsync();
 
-                q = q.Where(p => patientIdsWithCompleted.Contains(p.Id));
+                    q = q.Where(p => patientIdsWithCompleted.Contains(p.Id));
+                }
             }
 
             // Sắp xếp theo mốc trả kết quả của nhóm
@@ -260,7 +262,10 @@ namespace Management.BL
                     (categoryCode == "DDT" && p.ValidDDT) ||
                     (categoryCode == "TDCN" && p.ValidTDCN)
                 );
-
+                if (categoryCode == "TDCN")
+                {
+                    return await baseQ.CountAsync();
+                }
                 // ✅ Tối ưu: Lấy danh sách PatientId có completed trước
                 var patientIdsWithCompleted = await _db.ResultCDHAs
                     .AsNoTracking()
@@ -424,14 +429,15 @@ namespace Management.BL
                     (categoryCode == "DDT" && p.ValidDDT) ||
                     (categoryCode == "TDCN" && p.ValidTDCN)
                 );
-                // ĐÃ THỰC HIỆN: có ÍT NHẤT 1 dịch vụ completed trong ResultCDHA (Result có dữ liệu)
-                q = q.Where(p => _db.ResultCDHAs.Any(r =>
-                    r.Active == true &&
-                    r.PatientId == p.Id &&
-                    r.Service.Category.Code == categoryCode &&
-                    r.Result != null && r.Result != ""
-                // && r.SignStatus == 1   // mở nếu muốn chỉ tính khi đã ký
-                ));
+                if (categoryCode != "TDCN")
+                {
+                    q = q.Where(p => _db.ResultCDHAs.Any(r =>
+                        r.Active == true &&
+                        r.PatientId == p.Id &&
+                        r.Service.Category.Code == categoryCode &&
+                        r.Result != null &&
+                        r.Result != ""));
+                }
             }
 
             // Sắp xếp theo mốc trả kết quả của nhóm (giữ thói quen cũ)
@@ -578,14 +584,6 @@ namespace Management.BL
                     _patient.UserUpdateId = userInsertOrUpdate;
                     await _db.SaveChangesAsync();
 
-                    if (valid && userInsertOrUpdate.HasValue)
-                    {
-                        await _resultEditUnlockBL.RevokeAfterValidAsync(
-                            id,
-                            group,
-                            userInsertOrUpdate.Value,
-                            ToolBL.Get_DateNow());
-                    }
                     return true;
                 }
                 return false;
@@ -870,14 +868,6 @@ namespace Management.BL
                     _patient.UserUpdateId = userInsertOrUpdate;
                     await _db.SaveChangesAsync();
 
-                    if (valid && userInsertOrUpdate.HasValue)
-                    {
-                        await _resultEditUnlockBL.RevokeAfterValidAsync(
-                            id,
-                            group,
-                            userInsertOrUpdate.Value,
-                            ToolBL.Get_DateNow());
-                    }
                     return true;
                 }
             }

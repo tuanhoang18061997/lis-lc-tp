@@ -339,151 +339,515 @@ namespace Management.Controllers
             return Content(_saveResult.ToString());
         }
 
+        //[HttpPost]
+        //[Authorize]
+        //public async Task<IActionResult> ValidPrint([FromBody] ResultCDHAModel resultCDHA)
+        //{
+        //    if (resultCDHA != null)
+        //    {
+        //        var _dateTime = ToolBL.Get_DateNow();
+        //        var _userLogin = this.GetUserLogin();
+        //        var _device = this.GetSession_Device();
+        //        if (await _resultCDHABL.Update(resultCDHA, resultCDHA.userReturnResult, _dateTime, _device))
+        //        {
+        //            if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _SA))
+        //            {
+        //                var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
+        //                if (_result != null)
+        //                {
+        //                    try
+        //                    {
+        //                        // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
+        //                        if (resultCDHA.userReturnResult > 0)   // vì userReturnResult là kiểu int/long
+        //                        {
+        //                            var returnUser = await _userBL.GetUser(resultCDHA.userReturnResult);
+        //                            if (returnUser != null)
+        //                            {
+        //                                ViewData["ReturnUser"] = returnUser; // để Content/Header/Footer dùng khi in
+        //                            }
+        //                        }
+        //                        // ========== FILTER ẢNH THEO DANH SÁCH NGƯỜI DÙNG CHỌN ==========
+        //                        if (resultCDHA.selectedImageIds != null && resultCDHA.selectedImageIds.Count > 0 && _result.ImageCDHAs != null)
+        //                        {
+        //                            // Bảo toàn thứ tự người dùng chọn
+        //                            var orderMap = resultCDHA.selectedImageIds
+        //                                                .Select((id, idx) => new { id, idx })
+        //                                                .ToDictionary(x => x.id, x => x.idx);
+
+        //                            // Lọc & sắp xếp theo thứ tự người dùng
+        //                            _result.ImageCDHAs = _result.ImageCDHAs
+        //                                .Where(img => orderMap.ContainsKey(img.Id))         // nếu Id là string: img.ImageCDHAIdString
+        //                                .OrderBy(img => orderMap[img.Id])
+        //                                .ToList();
+        //                        }
+        //                        // ==================================================================
+        //                        ViewData["ResultCDHA"] = _result;
+        //                        var _hospital = await _hospitalBL.GetHospital();
+        //                        var _serviceCDHA = _serviceBL.GetById(_result?.Service?.Id);
+        //                        if(_serviceCDHA != null )
+        //                        {
+        //                            ViewData["ServiceCDHA"] = _serviceCDHA.Result;
+        //                        }
+        //                        else
+        //                        {
+        //                            ViewData["ServiceCDHA"] = null;
+        //                        }
+        //                        // In ngang
+        //                        //var header = await this.RenderViewAsync("Header_Landscape", _hospital);
+        //                        //var content_result = await this.RenderViewAsync("Content_Result_Landscape", _hospital);
+        //                        //var content_image = await this.RenderViewAsync("Content_Image_Landscape", _hospital);
+        //                        //var footer = await this.RenderViewAsync("Footer_Landscape", _hospital);
+        //                        // In dọc
+        //                        var header = await this.RenderViewAsync("Header", _hospital);
+        //                        var content = await this.RenderViewAsync("Content", _hospital);
+        //                        var footer = await this.RenderViewAsync("Footer", _hospital);
+        //                        var _folder = Path.Combine(_environment.WebRootPath, "pdf", "sa");
+        //                        var _file = Path.Combine(_folder, _result?.KeyResultForHis + ".pdf");
+        //                        var fileBase64 = await _toolBL.ExportPdf_Result(_folder, _file, header, content, footer);
+        //                        //var fileBase64 = await _toolBL.ExportPdf_Result_Landscape_OnePage_FromFiles(_folder, _file, header, content_result, content_image, footer, Path.Combine(_environment.WebRootPath, "pdf_templates", "Landscape2ColRaw_SA.html"));
+        //                        return Content(fileBase64);
+        //                    }
+        //                    catch { }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return Content(string.Empty);
+        //}
+
+        // Version mới của ValidPrint 18/09/2026
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> ValidPrint([FromBody] ResultCDHAModel resultCDHA)
         {
-            if (resultCDHA != null)
+            if (resultCDHA == null)
             {
-                var _dateTime = ToolBL.Get_DateNow();
-                var _userLogin = this.GetUserLogin();
-                var _device = this.GetSession_Device();
-                if (await _resultCDHABL.Update(resultCDHA, resultCDHA.userReturnResult, _dateTime, _device))
-                {
-                    if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _SA))
-                    {
-                        var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
-                        if (_result != null)
-                        {
-                            try
-                            {
-                                // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
-                                if (resultCDHA.userReturnResult > 0)   // vì userReturnResult là kiểu int/long
-                                {
-                                    var returnUser = await _userBL.GetUser(resultCDHA.userReturnResult);
-                                    if (returnUser != null)
-                                    {
-                                        ViewData["ReturnUser"] = returnUser; // để Content/Header/Footer dùng khi in
-                                    }
-                                }
-                                // ========== FILTER ẢNH THEO DANH SÁCH NGƯỜI DÙNG CHỌN ==========
-                                if (resultCDHA.selectedImageIds != null && resultCDHA.selectedImageIds.Count > 0 && _result.ImageCDHAs != null)
-                                {
-                                    // Bảo toàn thứ tự người dùng chọn
-                                    var orderMap = resultCDHA.selectedImageIds
-                                                        .Select((id, idx) => new { id, idx })
-                                                        .ToDictionary(x => x.id, x => x.idx);
+                return Content(string.Empty);
+            }
 
-                                    // Lọc & sắp xếp theo thứ tự người dùng
-                                    _result.ImageCDHAs = _result.ImageCDHAs
-                                        .Where(img => orderMap.ContainsKey(img.Id))         // nếu Id là string: img.ImageCDHAIdString
-                                        .OrderBy(img => orderMap[img.Id])
-                                        .ToList();
-                                }
-                                // ==================================================================
-                                ViewData["ResultCDHA"] = _result;
-                                var _hospital = await _hospitalBL.GetHospital();
-                                var _serviceCDHA = _serviceBL.GetById(_result?.Service?.Id);
-                                if(_serviceCDHA != null )
-                                {
-                                    ViewData["ServiceCDHA"] = _serviceCDHA.Result;
-                                }
-                                else
-                                {
-                                    ViewData["ServiceCDHA"] = null;
-                                }
-                                // In ngang
-                                //var header = await this.RenderViewAsync("Header_Landscape", _hospital);
-                                //var content_result = await this.RenderViewAsync("Content_Result_Landscape", _hospital);
-                                //var content_image = await this.RenderViewAsync("Content_Image_Landscape", _hospital);
-                                //var footer = await this.RenderViewAsync("Footer_Landscape", _hospital);
-                                // In dọc
-                                var header = await this.RenderViewAsync("Header", _hospital);
-                                var content = await this.RenderViewAsync("Content", _hospital);
-                                var footer = await this.RenderViewAsync("Footer", _hospital);
-                                var _folder = Path.Combine(_environment.WebRootPath, "pdf", "sa");
-                                var _file = Path.Combine(_folder, _result?.KeyResultForHis + ".pdf");
-                                var fileBase64 = await _toolBL.ExportPdf_Result(_folder, _file, header, content, footer);
-                                //var fileBase64 = await _toolBL.ExportPdf_Result_Landscape_OnePage_FromFiles(_folder, _file, header, content_result, content_image, footer, Path.Combine(_environment.WebRootPath, "pdf_templates", "Landscape2ColRaw_SA.html"));
-                                return Content(fileBase64);
-                            }
-                            catch { }
-                        }
+            var _dateTime = ToolBL.Get_DateNow();
+            var _userLogin = this.GetUserLogin();
+            var _device = this.GetSession_Device();
+
+            // =========================================================
+            // PHẢI có user login.
+            // Không dùng .Value trước khi kiểm tra.
+            // =========================================================
+            if (!_userLogin.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            // =========================================================
+            // STEP 1:
+            // Lưu nội dung kết quả hiện tại.
+            //
+            // ResultCDHABL.Update() vẫn chịu trách nhiệm kiểm tra:
+            // CanEditCDHAAsync(resultCDHAId)
+            //
+            // Nếu service:
+            // - chưa từng Valid -> cho sửa
+            // - đã Invalid đúng quyền -> cho sửa
+            // - đang Valid / không có quyền -> chặn
+            // =========================================================
+            var updated = await _resultCDHABL.Update(
+                resultCDHA,
+                resultCDHA.userReturnResult,
+                _dateTime,
+                _device);
+
+            if (!updated)
+            {
+                return Content(string.Empty);
+            }
+
+            // =========================================================
+            // STEP 2:
+            // Valid đúng ResultCDHA hiện tại.
+            //
+            // ValidateCDHAAsync chịu trách nhiệm:
+            // - IsValidated = true
+            // - LastValidatedAt = server time
+            // - LastValidatedByUserId = login user
+            //
+            // Đồng thời giữ aggregate state Patient:
+            // - WaitSA = false
+            // - ProcessSA = false
+            // - ValidSA = true
+            // - ReturnResultTimeSA
+            // - UserReturnResultSA
+            //
+            // Sau cùng revoke CHỈ permission của ResultCDHA này.
+            // Không revoke các service SA khác.
+            // =========================================================
+            var validated = await _resultCDHABL.ValidateCDHAAsync(
+                resultCDHA,
+                _SA,
+                _userLogin.Value,
+                _dateTime);
+
+            if (!validated)
+            {
+                return Content(string.Empty);
+            }
+
+            // =========================================================
+            // STEP 3:
+            // Load lại chính ResultCDHA vừa Valid để tạo PDF.
+            // =========================================================
+            var _result =
+                await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(
+                    resultCDHA.resultCDHAId);
+
+            if (_result == null)
+            {
+                return Content(string.Empty);
+            }
+
+            try
+            {
+                // =====================================================
+                // LẤY THÔNG TIN BÁC SĨ THỰC HIỆN / TRẢ KẾT QUẢ
+                // =====================================================
+                if (resultCDHA.userReturnResult > 0)
+                {
+                    var returnUser =
+                        await _userBL.GetUser(
+                            resultCDHA.userReturnResult);
+
+                    if (returnUser != null)
+                    {
+                        ViewData["ReturnUser"] = returnUser;
                     }
                 }
+
+                // =====================================================
+                // FILTER ẢNH THEO DANH SÁCH USER ĐÃ CHỌN
+                //
+                // Giữ đúng thứ tự selectedImageIds.
+                // =====================================================
+                if (resultCDHA.selectedImageIds != null &&
+                    resultCDHA.selectedImageIds.Count > 0 &&
+                    _result.ImageCDHAs != null)
+                {
+                    var orderMap =
+                        resultCDHA.selectedImageIds
+                            .Select((id, idx) => new
+                            {
+                                id,
+                                idx
+                            })
+                            .ToDictionary(
+                                x => x.id,
+                                x => x.idx);
+
+                    _result.ImageCDHAs =
+                        _result.ImageCDHAs
+                            .Where(img =>
+                                orderMap.ContainsKey(img.Id))
+                            .OrderBy(img =>
+                                orderMap[img.Id])
+                            .ToList();
+                }
+
+                // =====================================================
+                // DỮ LIỆU CHO VIEW PDF
+                // =====================================================
+                ViewData["ResultCDHA"] = _result;
+
+                var _hospital =
+                    await _hospitalBL.GetHospital();
+
+                var _serviceCDHA =
+                    _serviceBL.GetById(
+                        _result?.Service?.Id);
+
+                if (_serviceCDHA != null)
+                {
+                    ViewData["ServiceCDHA"] =
+                        _serviceCDHA.Result;
+                }
+                else
+                {
+                    ViewData["ServiceCDHA"] = null;
+                }
+
+                // =====================================================
+                // IN DỌC
+                // =====================================================
+                var header =
+                    await this.RenderViewAsync(
+                        "Header",
+                        _hospital);
+
+                var content =
+                    await this.RenderViewAsync(
+                        "Content",
+                        _hospital);
+
+                var footer =
+                    await this.RenderViewAsync(
+                        "Footer",
+                        _hospital);
+
+                // =====================================================
+                // EXPORT PDF
+                // =====================================================
+                var _folder = Path.Combine(
+                    _environment.WebRootPath,
+                    "pdf",
+                    "sa");
+
+                var _file = Path.Combine(
+                    _folder,
+                    _result?.KeyResultForHis + ".pdf");
+
+                var fileBase64 =
+                    await _toolBL.ExportPdf_Result(
+                        _folder,
+                        _file,
+                        header,
+                        content,
+                        footer);
+
+                return Content(fileBase64);
             }
-            return Content(string.Empty);
+            catch
+            {
+                return Content(string.Empty);
+            }
         }
 
+        //public async Task<IActionResult> ValidPrintMultiple([FromBody] ResultCDHAModel resultCDHA)
+        //{
+        //    if (resultCDHA != null)
+        //    {
+        //        var _dateTime = ToolBL.Get_DateNow();
+        //        var _userLogin = this.GetUserLogin();
+        //        var _device = this.GetSession_Device();
+        //        if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _SA))
+        //        {
+        //            var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
+        //            if (_result != null)
+        //            {
+        //                try
+        //                {
+        //                    // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
+        //                    if (resultCDHA.userReturnResult > 0)   // vì userReturnResult là kiểu int/long
+        //                    {
+        //                        var returnUser = await _userBL.GetUser(resultCDHA.userReturnResult);
+        //                        if (returnUser != null)
+        //                        {
+        //                            ViewData["ReturnUser"] = returnUser; // để Content/Header/Footer dùng khi in
+        //                        }
+        //                    }
+        //                    // ========== FILTER ẢNH THEO DANH SÁCH NGƯỜI DÙNG CHỌN ==========
+        //                    if (resultCDHA.selectedImageIds != null && resultCDHA.selectedImageIds.Count > 0 && _result.ImageCDHAs != null)
+        //                    {
+        //                        // Bảo toàn thứ tự người dùng chọn
+        //                        var orderMap = resultCDHA.selectedImageIds
+        //                                            .Select((id, idx) => new { id, idx })
+        //                                            .ToDictionary(x => x.id, x => x.idx);
+
+        //                        // Lọc & sắp xếp theo thứ tự người dùng
+        //                        _result.ImageCDHAs = _result.ImageCDHAs
+        //                            .Where(img => orderMap.ContainsKey(img.Id))         // nếu Id là string: img.ImageCDHAIdString
+        //                            .OrderBy(img => orderMap[img.Id])
+        //                            .ToList();
+        //                    }
+        //                    // ==================================================================
+        //                    ViewData["ResultCDHA"] = _result;
+        //                    var _hospital = await _hospitalBL.GetHospital();
+        //                    var _serviceCDHA = _serviceBL.GetById(_result?.Service?.Id);
+        //                    if (_serviceCDHA != null)
+        //                    {
+        //                        ViewData["ServiceCDHA"] = _serviceCDHA.Result;
+        //                    }
+        //                    else
+        //                    {
+        //                        ViewData["ServiceCDHA"] = null;
+        //                    }
+        //                    // In ngang
+        //                    //var header = await this.RenderViewAsync("Header_Landscape", _hospital);
+        //                    //var content_result = await this.RenderViewAsync("Content_Result_Landscape", _hospital);
+        //                    //var content_image = await this.RenderViewAsync("Content_Image_Landscape", _hospital);
+        //                    //var footer = await this.RenderViewAsync("Footer_Landscape", _hospital);
+        //                    // In dọc
+        //                    var header = await this.RenderViewAsync("Header", _hospital);
+        //                    var content = await this.RenderViewAsync("Content", _hospital);
+        //                    var footer = await this.RenderViewAsync("Footer", _hospital);
+        //                    var _folder = Path.Combine(_environment.WebRootPath, "pdf", "sa");
+        //                    var _file = Path.Combine(_folder, _result?.KeyResultForHis + ".pdf");
+        //                    var fileBase64 = await _toolBL.ExportPdf_Result(_folder, _file, header, content, footer);
+        //                    //var fileBase64 = await _toolBL.ExportPdf_Result_Landscape_OnePage_FromFiles(_folder, _file, header, content_result, content_image, footer, Path.Combine(_environment.WebRootPath, "pdf_templates", "Landscape2ColRaw_SA.html"));
+        //                    return Content(fileBase64);
+        //                }
+        //                catch { }
+        //            }
+        //        }
+        //    }
+        //    return Content(string.Empty);
+        //}
+
+
+        // Version mới của ValidPrintMultiple 18/09/2026
         public async Task<IActionResult> ValidPrintMultiple([FromBody] ResultCDHAModel resultCDHA)
         {
-            if (resultCDHA != null)
+            if (resultCDHA == null)
             {
-                var _dateTime = ToolBL.Get_DateNow();
-                var _userLogin = this.GetUserLogin();
-                var _device = this.GetSession_Device();
-                if (await _patientCDHABL.Update(resultCDHA.patientId, resultCDHA.returnResultTime, resultCDHA.userReturnResult, false, false, true, _userLogin.Value, _SA))
-                {
-                    var _result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultCDHA.resultCDHAId);
-                    if (_result != null)
-                    {
-                        try
-                        {
-                            // === LẤY THÔNG TIN BÁC SĨ THỰC HIỆN (ReturnUser) ===
-                            if (resultCDHA.userReturnResult > 0)   // vì userReturnResult là kiểu int/long
-                            {
-                                var returnUser = await _userBL.GetUser(resultCDHA.userReturnResult);
-                                if (returnUser != null)
-                                {
-                                    ViewData["ReturnUser"] = returnUser; // để Content/Header/Footer dùng khi in
-                                }
-                            }
-                            // ========== FILTER ẢNH THEO DANH SÁCH NGƯỜI DÙNG CHỌN ==========
-                            if (resultCDHA.selectedImageIds != null && resultCDHA.selectedImageIds.Count > 0 && _result.ImageCDHAs != null)
-                            {
-                                // Bảo toàn thứ tự người dùng chọn
-                                var orderMap = resultCDHA.selectedImageIds
-                                                    .Select((id, idx) => new { id, idx })
-                                                    .ToDictionary(x => x.id, x => x.idx);
+                return Content(string.Empty);
+            }
 
-                                // Lọc & sắp xếp theo thứ tự người dùng
-                                _result.ImageCDHAs = _result.ImageCDHAs
-                                    .Where(img => orderMap.ContainsKey(img.Id))         // nếu Id là string: img.ImageCDHAIdString
-                                    .OrderBy(img => orderMap[img.Id])
-                                    .ToList();
-                            }
-                            // ==================================================================
-                            ViewData["ResultCDHA"] = _result;
-                            var _hospital = await _hospitalBL.GetHospital();
-                            var _serviceCDHA = _serviceBL.GetById(_result?.Service?.Id);
-                            if (_serviceCDHA != null)
-                            {
-                                ViewData["ServiceCDHA"] = _serviceCDHA.Result;
-                            }
-                            else
-                            {
-                                ViewData["ServiceCDHA"] = null;
-                            }
-                            // In ngang
-                            //var header = await this.RenderViewAsync("Header_Landscape", _hospital);
-                            //var content_result = await this.RenderViewAsync("Content_Result_Landscape", _hospital);
-                            //var content_image = await this.RenderViewAsync("Content_Image_Landscape", _hospital);
-                            //var footer = await this.RenderViewAsync("Footer_Landscape", _hospital);
-                            // In dọc
-                            var header = await this.RenderViewAsync("Header", _hospital);
-                            var content = await this.RenderViewAsync("Content", _hospital);
-                            var footer = await this.RenderViewAsync("Footer", _hospital);
-                            var _folder = Path.Combine(_environment.WebRootPath, "pdf", "sa");
-                            var _file = Path.Combine(_folder, _result?.KeyResultForHis + ".pdf");
-                            var fileBase64 = await _toolBL.ExportPdf_Result(_folder, _file, header, content, footer);
-                            //var fileBase64 = await _toolBL.ExportPdf_Result_Landscape_OnePage_FromFiles(_folder, _file, header, content_result, content_image, footer, Path.Combine(_environment.WebRootPath, "pdf_templates", "Landscape2ColRaw_SA.html"));
-                            return Content(fileBase64);
-                        }
-                        catch { }
+            var _dateTime = ToolBL.Get_DateNow();
+            var _userLogin = this.GetUserLogin();
+
+            if (!_userLogin.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            // =========================================================
+            // STEP 1:
+            // Valid đúng ResultCDHA hiện tại.
+            //
+            // ValidPrintMultiple theo code cũ KHÔNG lưu lại
+            // Description / Result / Suggest.
+            //
+            // Nó dùng dữ liệu đã Save trước đó.
+            // Vì vậy ở đây KHÔNG gọi ResultCDHABL.Update().
+            // =========================================================
+            var validated =
+                await _resultCDHABL.ValidateCDHAAsync(
+                    resultCDHA,
+                    _SA,
+                    _userLogin.Value,
+                    _dateTime);
+
+            if (!validated)
+            {
+                return Content(string.Empty);
+            }
+
+            // =========================================================
+            // STEP 2:
+            // Load lại ResultCDHA vừa Valid.
+            // =========================================================
+            var _result =
+                await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(
+                    resultCDHA.resultCDHAId);
+
+            if (_result == null)
+            {
+                return Content(string.Empty);
+            }
+
+            try
+            {
+                // =====================================================
+                // LẤY THÔNG TIN BÁC SĨ THỰC HIỆN / TRẢ KẾT QUẢ
+                // =====================================================
+                if (resultCDHA.userReturnResult > 0)
+                {
+                    var returnUser =
+                        await _userBL.GetUser(
+                            resultCDHA.userReturnResult);
+
+                    if (returnUser != null)
+                    {
+                        ViewData["ReturnUser"] = returnUser;
                     }
                 }
+
+                // =====================================================
+                // FILTER ẢNH ĐƯỢC USER CHỌN
+                // =====================================================
+                if (resultCDHA.selectedImageIds != null &&
+                    resultCDHA.selectedImageIds.Count > 0 &&
+                    _result.ImageCDHAs != null)
+                {
+                    var orderMap =
+                        resultCDHA.selectedImageIds
+                            .Select((id, idx) => new
+                            {
+                                id,
+                                idx
+                            })
+                            .ToDictionary(
+                                x => x.id,
+                                x => x.idx);
+
+                    _result.ImageCDHAs =
+                        _result.ImageCDHAs
+                            .Where(img =>
+                                orderMap.ContainsKey(img.Id))
+                            .OrderBy(img =>
+                                orderMap[img.Id])
+                            .ToList();
+                }
+
+                // =====================================================
+                // DỮ LIỆU VIEW
+                // =====================================================
+                ViewData["ResultCDHA"] = _result;
+
+                var _hospital =
+                    await _hospitalBL.GetHospital();
+
+                var _serviceCDHA =
+                    _serviceBL.GetById(
+                        _result?.Service?.Id);
+
+                if (_serviceCDHA != null)
+                {
+                    ViewData["ServiceCDHA"] =
+                        _serviceCDHA.Result;
+                }
+                else
+                {
+                    ViewData["ServiceCDHA"] = null;
+                }
+
+                // =====================================================
+                // RENDER PDF
+                // =====================================================
+                var header =
+                    await this.RenderViewAsync(
+                        "Header",
+                        _hospital);
+
+                var content =
+                    await this.RenderViewAsync(
+                        "Content",
+                        _hospital);
+
+                var footer =
+                    await this.RenderViewAsync(
+                        "Footer",
+                        _hospital);
+
+                var _folder = Path.Combine(
+                    _environment.WebRootPath,
+                    "pdf",
+                    "sa");
+
+                var _file = Path.Combine(
+                    _folder,
+                    _result?.KeyResultForHis + ".pdf");
+
+                var fileBase64 =
+                    await _toolBL.ExportPdf_Result(
+                        _folder,
+                        _file,
+                        header,
+                        content,
+                        footer);
+
+                return Content(fileBase64);
             }
-            return Content(string.Empty);
+            catch
+            {
+                return Content(string.Empty);
+            }
         }
         public class ValidPrintAllInput
         {

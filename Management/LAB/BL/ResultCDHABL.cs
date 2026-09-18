@@ -14,6 +14,17 @@ namespace Management.BL
         private readonly LABContext _db;
         private readonly ServiceTestBL _serviceTestBL;
         private readonly ResultEditUnlockBL _resultEditUnlockBL;
+        private static readonly HashSet<string> CdhaValidationModules =
+            new(StringComparer.OrdinalIgnoreCase)
+        {
+            "SA",
+            "SAT",
+            "DDT",
+            "NS",
+            "NSCTC",
+            "XQ",
+            "TDCN"
+        };
         public ResultCDHABL(
             LABContext db,
             ServiceTestBL serviceTestBL,
@@ -81,6 +92,15 @@ namespace Management.BL
                 _resultCDHA.DoctorId = doctorId;
                 _resultCDHA.KeyResultForHis = categoryCode + "-" + Guid.NewGuid().ToString();
                 _resultCDHA.Active = true;
+
+                // ============================================================
+                // Validation state theo từng dịch vụ
+                // Dịch vụ mới chắc chắn chưa từng Valid.
+                // ============================================================
+                _resultCDHA.IsValidated = false;
+                _resultCDHA.LastValidatedAt = null;
+                _resultCDHA.LastValidatedByUserId = null;
+
                 await _db.ResultCDHAs.AddAsync(_resultCDHA);
                 await _db.SaveChangesAsync();
                 return true;
@@ -121,11 +141,430 @@ namespace Management.BL
             }
         }
 
+        public async Task<bool> ValidateCDHAAsync(
+            ResultCDHAModel resultCDHA,
+            string moduleCode,
+            long loginUserId,
+            DateTime validatedAt)
+        {
+            if (resultCDHA == null)
+                return false;
+
+            return await ValidateCDHAMultipleAsync(
+                new List<ResultCDHAModel>
+                {
+                    resultCDHA
+                },
+                moduleCode,
+                loginUserId,
+                validatedAt
+            );
+        }
+
+        public async Task<bool> ValidateCDHAMultipleAsync(
+            IReadOnlyCollection<ResultCDHAModel> resultCDHAs,
+            string moduleCode,
+            long loginUserId,
+            DateTime validatedAt)
+        {
+            try
+            {
+                moduleCode = (moduleCode ?? string.Empty)
+                    .Trim()
+                    .ToUpperInvariant();
+
+                if (!CdhaValidationModules.Contains(moduleCode) ||
+                    resultCDHAs == null ||
+                    resultCDHAs.Count == 0 ||
+                    loginUserId <= 0)
+                {
+                    return false;
+                }
+
+                var items = resultCDHAs
+                    .Where(x =>
+                        x != null &&
+                        x.resultCDHAId > 0 &&
+                        x.patientId > 0)
+                    .ToList();
+
+                if (items.Count != resultCDHAs.Count)
+                    return false;
+
+                // Không cho duplicate ResultCDHAId.
+                var ids = items
+                    .Select(x => x.resultCDHAId)
+                    .Distinct()
+                    .ToList();
+
+                if (ids.Count != items.Count)
+                    return false;
+
+                // Tất cả phải thuộc cùng 1 Patient.
+                var patientIds = items
+                    .Select(x => x.patientId)
+                    .Distinct()
+                    .ToList();
+
+                if (patientIds.Count != 1)
+                    return false;
+
+                var patientId = patientIds[0];
+
+                // =====================================================
+                // PHASE 1:
+                // Kiểm tra TOÀN BỘ trước.
+                //
+                // Không Valid service đầu rồi mới phát hiện service thứ 2
+                // không hợp lệ.
+                // =====================================================
+                foreach (var item in items)
+                {
+                    if (!await _resultEditUnlockBL.CanEditCDHAAsync(
+                        item.resultCDHAId,
+                        validatedAt))
+                    {
+                        return false;
+                    }
+                }
+
+                // Không tin ResultId/module từ client.
+                var results = await _db.ResultCDHAs
+                    .Where(x =>
+                        x.Active &&
+                        x.PatientId == patientId &&
+                        ids.Contains(x.Id) &&
+                        x.Service.Category.Code == moduleCode)
+                    .ToListAsync();
+
+                if (results.Count != ids.Count)
+                    return false;
+
+                var resultsById =
+                    results.ToDictionary(x => x.Id);
+
+                // =====================================================
+                // PHASE 2:
+                // Valid từng ResultCDHA.
+                // =====================================================
+                foreach (var item in items)
+                {
+                    if (!resultsById.TryGetValue(
+                            item.resultCDHAId,
+                            out var result))
+                    {
+                        return false;
+                    }
+
+                    result.IsValidated = true;
+                    result.LastValidatedAt = validatedAt;
+                    result.LastValidatedByUserId = loginUserId;
+                }
+
+                // =====================================================
+                // PHASE 3:
+                // Tính lại aggregate Patient.
+                //
+                // Chỉ lấy metadata trả kết quả từ item đầu tiên.
+                // Đối với MarkPatientAsDone TDCN, các item cùng một lần
+                // thao tác nên metadata Patient là chung.
+                // =====================================================
+                var first = items[0];
+
+                var aggregateUpdated =
+                    await RecalculatePatientModuleStateAsync(
+                        patientId,
+                        moduleCode,
+                        loginUserId,
+                        first.returnResultTime,
+                        first.userReturnResult);
+
+                if (!aggregateUpdated)
+                    return false;
+
+                // ResultCDHA + Patient cùng SaveChanges.
+                await _db.SaveChangesAsync();
+
+                // =====================================================
+                // PHASE 4:
+                // Revoke đúng từng ResultCDHA vừa Valid.
+                // =====================================================
+                foreach (var result in results)
+                {
+                    await _resultEditUnlockBL
+                        .RevokeAfterValidCDHAAsync(
+                            patientId,
+                            moduleCode,
+                            result.Id,
+                            loginUserId,
+                            validatedAt);
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> RecalculatePatientModuleStateAsync(
+            long patientId,
+            string moduleCode,
+            long userId,
+            DateTime? returnResultTime = null,
+            long? userReturnResult = null)
+        {
+            moduleCode = (moduleCode ?? string.Empty)
+                .Trim()
+                .ToUpperInvariant();
+
+            if (patientId <= 0 ||
+                userId <= 0 ||
+                !CdhaValidationModules.Contains(moduleCode))
+            {
+                return false;
+            }
+
+            var patient = await _db.Patients
+                .Where(x =>
+                    x.Active &&
+                    x.Id == patientId)
+                .FirstOrDefaultAsync();
+
+            if (patient == null)
+                return false;
+
+            // =========================================================
+            // Lưu state legacy TRƯỚC khi tính lại Patient.
+            // =========================================================
+            var legacyModuleValid =
+                GetPatientModuleValid(
+                    patient,
+                    moduleCode);
+
+            var legacyReturnTime =
+                ResultEditUnlockBL.GetReturnResultTime(
+                    patient,
+                    moduleCode);
+
+            // Không dùng AsNoTracking().
+            //
+            // Nếu caller vừa đổi IsValidated của ResultCDHA nhưng chưa
+            // SaveChanges thì EF tracking vẫn trả đúng state mới.
+            var results = await _db.ResultCDHAs
+                .Where(x =>
+                    x.Active &&
+                    x.PatientId == patientId &&
+                    x.Service.Category.Code == moduleCode)
+                .ToListAsync();
+
+            var hasValidated = false;
+            var hasPending = false;
+
+            foreach (var result in results)
+            {
+                // =====================================================
+                // CƠ CHẾ MỚI
+                // =====================================================
+                if (result.IsValidated.HasValue)
+                {
+                    if (result.IsValidated.Value)
+                    {
+                        hasValidated = true;
+                    }
+                    else
+                    {
+                        hasPending = true;
+                    }
+
+                    continue;
+                }
+
+                // =====================================================
+                // LEGACY
+                //
+                // Record được tạo trước schema mới vẫn fallback theo
+                // Patient.Valid* + ReturnResultTime*.
+                //
+                // Nếu InsertTime sau lần trả kết quả cũ thì đó là một
+                // dịch vụ mới chưa Valid.
+                // =====================================================
+                var legacyValidated =
+                    legacyModuleValid &&
+                    legacyReturnTime.HasValue &&
+                    (
+                        !result.InsertTime.HasValue ||
+                        result.InsertTime.Value <=
+                            legacyReturnTime.Value
+                    );
+
+                if (legacyValidated)
+                {
+                    hasValidated = true;
+                }
+                else
+                {
+                    hasPending = true;
+                }
+            }
+
+            ApplyPatientModuleState(
+                patient,
+                moduleCode,
+                hasValidated,
+                hasPending,
+                returnResultTime,
+                userReturnResult);
+
+            patient.UserUpdateId = userId;
+
+            // Persist aggregate ngay trong chính DbContext của ResultCDHABL.
+            // Không phụ thuộc ResultInvalidBL và ResultCDHABL có dùng cùng LABContext hay không.
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
+
+        private static bool GetPatientModuleValid(
+            Patient patient,
+            string moduleCode)
+        {
+            return moduleCode switch
+            {
+                "SA" => patient.ValidSA,
+                "SAT" => patient.ValidSAT,
+                "DDT" => patient.ValidDDT,
+                "NS" => patient.ValidNS,
+                "NSCTC" => patient.ValidNSCTC,
+                "XQ" => patient.ValidXQ,
+                "TDCN" => patient.ValidTDCN,
+                _ => false
+            };
+        }
+
+        private static void ApplyPatientModuleState(
+            Patient patient,
+            string moduleCode,
+            bool hasValidated,
+            bool hasPending,
+            DateTime? returnResultTime,
+            long? userReturnResult)
+        {
+            switch (moduleCode)
+            {
+                case "SA":
+                    patient.WaitSA = false;
+                    patient.ProcessSA = hasPending;
+                    patient.ValidSA = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeSA =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultSA =
+                            userReturnResult.Value;
+
+                    break;
+
+                case "SAT":
+                    patient.WaitSAT = false;
+                    patient.ProcessSAT = hasPending;
+                    patient.ValidSAT = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeSAT =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultSAT =
+                            userReturnResult.Value;
+
+                    break;
+
+                case "DDT":
+                    patient.WaitDDT = false;
+                    patient.ProcessDDT = hasPending;
+                    patient.ValidDDT = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeDDT =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultDDT =
+                            userReturnResult.Value;
+
+                    break;
+
+                case "NS":
+                    patient.WaitNS = false;
+                    patient.ProcessNS = hasPending;
+                    patient.ValidNS = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeNS =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultNS =
+                            userReturnResult.Value;
+
+                    break;
+
+                case "NSCTC":
+                    patient.WaitNSCTC = false;
+                    patient.ProcessNSCTC = hasPending;
+                    patient.ValidNSCTC = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeNSCTC =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultNSCTC =
+                            userReturnResult.Value;
+
+                    break;
+
+                case "XQ":
+                    patient.WaitXQ = false;
+                    patient.ProcessXQ = hasPending;
+                    patient.ValidXQ = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeXQ =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultXQ =
+                            userReturnResult.Value;
+
+                    break;
+
+                case "TDCN":
+                    patient.WaitTDCN = false;
+                    patient.ProcessTDCN = hasPending;
+                    patient.ValidTDCN = hasValidated;
+
+                    if (returnResultTime.HasValue)
+                        patient.ReturnResultTimeTDCN =
+                            returnResultTime.Value;
+
+                    if (userReturnResult.HasValue)
+                        patient.UserReturnResultTDCN =
+                            userReturnResult.Value;
+
+                    break;
+            }
+        }
+
         public async Task<ResultCDHA> GetResultCDHAByPatientId_ForValidPrint(long resultCDHAId)
         {
             try
             {
-                return await _db.ResultCDHAs.Where(p => p.Active == true &&  p.Id == resultCDHAId).FirstOrDefaultAsync();
+                return await _db.ResultCDHAs.Where(p => p.Active == true && p.Id == resultCDHAId).FirstOrDefaultAsync();
             }
             catch
             {
@@ -162,7 +601,7 @@ namespace Management.BL
         {
             try
             {
-                return await _db.ResultCDHAs.Where(p => p.Active == true &&  p.Id == id).FirstOrDefaultAsync();
+                return await _db.ResultCDHAs.Where(p => p.Active == true && p.Id == id).FirstOrDefaultAsync();
             }
             catch
             {
@@ -193,9 +632,9 @@ namespace Management.BL
             var imagePath1_resultCDHAId = string.Empty;
             try
             {
-                
+
                 var item = await _db.ImageCDHAs.Where(p => p.Id == id).FirstOrDefaultAsync();
-                if(item != null)
+                if (item != null)
                 {
                     imagePath1_resultCDHAId = item.ImagePath1 + ";" + item.ResultCDHAId;
                     _db.ImageCDHAs.Remove(item);
@@ -214,7 +653,7 @@ namespace Management.BL
             try
             {
                 var resultCDHA = await _db.ResultCDHAs.Where(p => p.Active == true && p.PatientId == patientId && p.Service.Category.Code == categoryCode).FirstOrDefaultAsync();
-                if(resultCDHA != null)
+                if (resultCDHA != null)
                 {
                     if (categoryCode == "SA")
                     {

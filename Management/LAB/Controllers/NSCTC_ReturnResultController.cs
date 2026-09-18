@@ -22,11 +22,12 @@ namespace Management.Controllers
         private readonly ToolBL _toolBL;
         private readonly HospitalBL _hospitalBL;
         private readonly IWebHostEnvironment _environment;
+        private readonly ResultInvalidBL _resultInvalidBL;
         public readonly string _NSCTC = "NSCTC";
 
         public NSCTC_ReturnResultController(ILogger<NSCTC_ReturnResultController> logger, PatientCDHABL patientBL, ObjectBL objectBL, LocationBL locationBL,
                             DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, SettingBL settingBL,
-                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL)
+                            GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL, ResultInvalidBL resultInvalidBL)
         {
             _logger = logger;
             _patientCDHABL = patientBL;
@@ -42,6 +43,7 @@ namespace Management.Controllers
             _environment = environment;
             _toolBL = toolBL;
             _hospitalBL = hospitalBL;
+            _resultInvalidBL = resultInvalidBL;
         }
 
         [HttpGet]
@@ -76,7 +78,7 @@ namespace Management.Controllers
                 ViewData["lstUserFunction"] = await _userBL.GetUserFunction(_userLoginId.Value);
             }
 
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient(from, to, false, false, true, _NSCTC);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient_Flexible(from, to, _NSCTC, "valid");
             ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
 
             // Pass the selected dates to the view
@@ -115,9 +117,9 @@ namespace Management.Controllers
             }
             SaveSearchDatesToSession(from, to);
 
-            var countGetSample = await _patientCDHABL.Get_CountPatient(from, to, true, false, false, _NSCTC);
-            var countProcess = await _patientCDHABL.Get_CountPatient(from, to, false, true, false, _NSCTC);
-            var countReturnResult = await _patientCDHABL.Get_CountPatient(from, to, false, false, true, _NSCTC);
+            var countGetSample = await _patientCDHABL.Get_CountPatient_New(from, to, true, false, false, _NSCTC);
+            var countProcess = await _patientCDHABL.Get_CountPatient_New(from, to, false, true, false, _NSCTC);
+            var countReturnResult = await _patientCDHABL.Get_CountPatient_New(from, to, false, false, true, _NSCTC);
             ViewData["countGetSample"] = countGetSample;
             ViewData["countProcess"] = countProcess;
             ViewData["countReturnResult"] = countReturnResult;
@@ -152,7 +154,7 @@ namespace Management.Controllers
             }
             SaveSearchDatesToSession(from, to);
 
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, null, _NSCTC);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, false, true, null, _NSCTC);
 
             return PartialView("_NSCTC_ReturnResult_ListPatient");
         }
@@ -166,7 +168,7 @@ namespace Management.Controllers
 
             var from = new DateTime(timeSearchFrom.Year, timeSearchFrom.Month, timeSearchFrom.Day, 00, 00, 00);
             var to = new DateTime(timeSearchTo.Year, timeSearchTo.Month, timeSearchTo.Day, 23, 59, 59);
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, pidorseq, _NSCTC);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, false, true, pidorseq, _NSCTC);
 
             return PartialView("_NSCTC_ReturnResult_ListPatient");
         }
@@ -259,35 +261,40 @@ namespace Management.Controllers
                     return Unauthorized("Không xác định được người dùng.");
                 }
 
-                // 1. Cập nhật trạng thái bệnh nhân (Invalid)
-                var _process = await _patientCDHABL.GetSample_ProcessResult_ReturnResult(
-                    request.PatientId,
-                    false,  // wait
-                    true,   // process
-                    false,  // valid
-                    _userLogin.Value,
-                    _NSCTC
-                );
+                var resultIds = request.ResultIds?.Where(x => x > 0).Distinct().ToList() ?? new List<long>();
 
-                if (!_process)
+                // Tương thích UI NSCTC cũ đang gửi KeyResultList.
+                if (resultIds.Count == 0 && request.KeyResultList != null && request.KeyResultList.Any())
                 {
-                    return Content("False");
+                    var results = await _resultCDHABL.GetListResultCDHAByPatientId(request.PatientId, _NSCTC);
+                    if (results == null)
+                    {
+                        return BadRequest("Không tìm thấy danh sách dịch vụ.");
+                    }
+
+                    resultIds = results
+                        .Where(x => !string.IsNullOrWhiteSpace(x.KeyResultForHis) && request.KeyResultList.Contains(x.KeyResultForHis))
+                        .Select(x => x.Id)
+                        .Distinct()
+                        .ToList();
                 }
 
-                // 2. Xóa các file PDF tương ứng (nếu có danh sách KeyResultForHis)
-                if (request.KeyResultList != null && request.KeyResultList.Any())
+                if (resultIds.Count == 0)
                 {
-                    var categoryCode = request.CategoryCode ?? _NSCTC;
-                    var pdfRemoved = _patientCDHABL.Remove_Result_PDF(request.KeyResultList, categoryCode);
+                    return BadRequest("Vui lòng chọn ít nhất một dịch vụ.");
+                }
 
-                    _logger.LogInformation($"Removed PDF files: {pdfRemoved} for keys: {string.Join(", ", request.KeyResultList)}");
+                var result = await _resultInvalidBL.InvalidCDHAAsync(request.PatientId, resultIds, _NSCTC, _userLogin.Value);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
                 }
 
                 return Content("True");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Invalid operation failed for PatientId: {PatientId}", request?.PatientId);
+                _logger.LogError(ex, "Invalid CDHA failed for PatientId: {PatientId}, Module: {ModuleCode}", request?.PatientId, _NSCTC);
                 return Content("False");
             }
         }
@@ -296,9 +303,11 @@ namespace Management.Controllers
         public class InvalidRequestModel
         {
             public long PatientId { get; set; }
-            public List<string> KeyResultList { get; set; }
+            public List<long> ResultIds { get; set; } = new();
+            public List<string> KeyResultList { get; set; } = new();
             public string CategoryCode { get; set; }
         }
+
 
         [HttpGet]
         [Authorize]

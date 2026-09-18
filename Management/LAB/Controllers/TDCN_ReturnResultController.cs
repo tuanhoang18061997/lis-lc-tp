@@ -81,7 +81,7 @@ namespace Management.Controllers
                 ViewData["lstUserFunction"] = await _userBL.GetUserFunction(_userLoginId.Value);
             }
 
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient(from, to, false, false, true, _TDCN);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient_Flexible(from, to, _TDCN, "valid");
             ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
 
             // Pass the selected dates to the view
@@ -121,9 +121,9 @@ namespace Management.Controllers
             SaveSearchDatesToSession(from, to);
 
 
-            var countGetSample = await _patientCDHABL.Get_CountPatient(from, to, true, false, false, _TDCN);
-            var countProcess = await _patientCDHABL.Get_CountPatient(from, to, false, true, false, _TDCN);
-            var countReturnResult = await _patientCDHABL.Get_CountPatient(from, to, false, false, true, _TDCN);
+            var countGetSample = await _patientCDHABL.Get_CountPatient_New(from, to, true, false, false, _TDCN);
+            var countProcess = await _patientCDHABL.Get_CountPatient_New(from, to, false, true, false, _TDCN);
+            var countReturnResult = await _patientCDHABL.Get_CountPatient_New(from, to, false, false, true, _TDCN);
             ViewData["countGetSample"] = countGetSample;
             ViewData["countProcess"] = countProcess;
             ViewData["countReturnResult"] = countReturnResult;
@@ -156,7 +156,7 @@ namespace Management.Controllers
                 // Ensure time is set to 23:59:59 for the to date
                 to = new DateTime(savedTo.Year, savedTo.Month, savedTo.Day, 23, 59, 59);
             }
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, null, _TDCN);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, false, true, null, _TDCN);
             SaveSearchDatesToSession(from, to);
 
             return PartialView("_TDCN_ReturnResult_ListPatient");
@@ -171,7 +171,7 @@ namespace Management.Controllers
 
             var from = new DateTime(timeSearchFrom.Year, timeSearchFrom.Month, timeSearchFrom.Day, 00, 00, 00);
             var to = new DateTime(timeSearchTo.Year, timeSearchTo.Month, timeSearchTo.Day, 23, 59, 59);
-            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid(from, to, false, false, true, pidorseq, _TDCN);
+            ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatientByPidOrSid_New(from, to, false, false, true, pidorseq, _TDCN);
 
             return PartialView("_TDCN_ReturnResult_ListPatient");
         }
@@ -518,26 +518,46 @@ namespace Management.Controllers
 
             try
             {
-                // 1. Cập nhật trạng thái bệnh nhân (Invalid)
-                var _process = await _patientCDHABL.GetSample_ProcessResult_ReturnResult(
-                    patientId,
-                    false,  // wait
-                    true,   // process
-                    false,  // valid
-                    _userLogin.Value,
-                    _TDCN
-                );
-
-                if (!_process)
+                var patient = await _patientCDHABL.Get_PatientBySid(patientId);
+                if (patient == null)
                 {
-                    return Content("False");
+                    return Json(new { success = false, message = "Không tìm thấy bệnh nhân." });
+                }
+
+                var results = await _resultCDHABL.GetListResultCDHAByPatientId(patientId, _TDCN);
+                if (results == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy danh sách dịch vụ TDCN." });
+                }
+
+                var resultIds = results
+                    .Where(x =>
+                        x.IsValidated == true ||
+                        (!x.IsValidated.HasValue &&
+                         patient.ValidTDCN &&
+                         patient.ReturnResultTimeTDCN.HasValue &&
+                         (!x.InsertTime.HasValue || x.InsertTime.Value <= patient.ReturnResultTimeTDCN.Value)))
+                    .Select(x => x.Id)
+                    .Distinct()
+                    .ToList();
+
+                // Không còn service Valid thì coi như bệnh nhân đã ở trạng thái cần thiết.
+                if (resultIds.Count == 0)
+                {
+                    return Content("True");
+                }
+
+                var result = await _resultInvalidBL.InvalidCDHAAsync(patientId, resultIds, _TDCN, _userLogin.Value);
+                if (!result.Success)
+                {
+                    return BadRequest(result.Message);
                 }
 
                 return Content("True");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Invalid operation failed for PatientId: {PatientId}", patientId);
+                _logger.LogError(ex, "ChuyenDangThucHien failed for PatientId: {PatientId}", patientId);
                 return Content("False");
             }
         }

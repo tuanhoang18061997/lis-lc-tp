@@ -92,12 +92,12 @@ namespace Management.Controllers
 
             if (type == "1")
             {
-                ViewData["lstReportResult"] = await _reportBL.LC_GetReportByService(fromtime, totime, location, user.Name, categoryCode);
+                ViewData["lstReportResult"] = await _reportBL.LC_GetReportByService(from, to, location, user.Name, categoryCode);
                 return PartialView("_ReportByService");
             }
             else if (type == "2")
             {
-                ViewData["lstReportResult"] = await _reportBL.LC_GetReportByPatient(fromtime, totime, location, user.Name);
+                ViewData["lstReportResult"] = await _reportBL.LC_GetReportByPatient(from, to, location, user.Name);
                 return PartialView("_ReportByPatient");
             }
             else if (type == "3")
@@ -133,17 +133,17 @@ namespace Management.Controllers
 
                 return PartialView("_ReportByProcess", summaryData);
             }
-            else if (type == "4")
+            else if (type == "4") // Khách hàng thực hiện XÉT NGHIỆM theo DỊCH VỤ
             {
                 //var model = await _reportBL.LC_GetPatientResultByDateRangeXN(fromtime, totime);
                 //return PartialView("_ReportByDateRangeXNDetail", model);
 
-                var model = await _reportBL.LC_GetPatientResultGroupedByServiceXN(fromtime, totime);
+                var model = await _reportBL.LC_GetPatientResultGroupedByServiceXN(from, to);
                 return PartialView("_ReportGroupedByServiceXNDetail", model);
             }
-            else if (type == "5")
+            else if (type == "5")  // Khách hàng thực hiện XÉT NGHIỆM theo NGÀY
             {
-                var model = await _reportBL.LC_GetPatientServicesByDateXN(fromtime, totime);
+                var model = await _reportBL.LC_GetPatientServicesByDateXN(from, to);
                 return PartialView("_ReportPatientServicesByDateXN", model);
             }
             return null;

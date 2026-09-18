@@ -78,7 +78,7 @@ namespace Management.Controllers
             {
                 ViewData["lstUserFunction"] = await _userBL.GetUserFunction(_userLoginId.Value);
             }
-            //ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient(from, to, false, false, true, _SA);
+            //ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient_Flexible(from, to, _SA, "valid");
             ViewData["lstPatient"] = await _patientCDHABL.Get_ListPatient_Flexible(from, to, _SA, "valid");
             ViewData["lstBenhAnModel"] = await BenhAnModel.GetListBenhAnModel();
 
