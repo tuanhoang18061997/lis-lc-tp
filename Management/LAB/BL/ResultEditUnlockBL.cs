@@ -32,6 +32,26 @@ namespace Management.BL
             return returnResultTime.HasValue && now.Date > returnResultTime.Value.Date;
         }
 
+        /// <summary>
+        /// XN đã từng Valid nhưng tại thời điểm Valid vẫn chưa đủ kết quả.
+        /// Trạng thái này được giữ qua lần Invalid/Process tiếp theo cho đến khi
+        /// Valid lại với đầy đủ kết quả (NotFullResultXN = false).
+        /// </summary>
+        private static bool IsXNIncompleteResult(Patient patient)
+        {
+            return patient.NotFullResultXN;
+        }
+
+        /// <summary>
+        /// Chỉ áp dụng khóa qua ngày cho XN không còn ở trạng thái Valid chưa đủ.
+        /// Giữ nguyên behavior legacy cho các ca NotFullResultXN = false.
+        /// </summary>
+        private static bool IsXNLockedByDate(Patient patient, DateTime now)
+        {
+            return !IsXNIncompleteResult(patient)
+                && IsLockedByDate(patient.ReturnResultTimeXN, now);
+        }
+
         public async Task<bool> CanInvalidXNAsync(long patientId, DateTime now)
         {
             var patient = await _db.Patients.AsNoTracking()
@@ -40,7 +60,12 @@ namespace Management.BL
             if (patient == null || !patient.ValidXN)
                 return false;
 
-            var lockedByDate = IsLockedByDate(patient.ReturnResultTimeXN, now);
+            // Valid chưa đủ kết quả: luôn cho phép Invalid để quay lại Process,
+            // kể cả đã qua ngày hoặc lần làm này từng có lịch sử Admin Unlock.
+            if (IsXNIncompleteResult(patient))
+                return true;
+
+            var lockedByDate = IsXNLockedByDate(patient, now);
             var hasAdminUnlockHistory = await HasXNAdminUnlockHistoryAsync(patientId);
 
             // Chỉ cho Invalid tự do khi kết quả vẫn trong ngày VÀ lần làm XN này
@@ -202,7 +227,13 @@ namespace Management.BL
             if (patient == null)
                 return false;
 
-            var lockedByDate = IsLockedByDate(patient.ReturnResultTimeXN, now);
+            // Sau partial Valid, NotFullResultXN vẫn giữ true khi Invalid về Process.
+            // Vì vậy user tiếp tục được sửa/nhập kết quả ở các ngày sau cho đến khi
+            // Valid hoàn tất và NotFullResultXN được đưa về false.
+            if (IsXNIncompleteResult(patient))
+                return true;
+
+            var lockedByDate = IsXNLockedByDate(patient, now);
             var hasAdminUnlockHistory = await HasXNAdminUnlockHistoryAsync(patientId);
 
             // Lần làm mới / kết quả trong ngày chưa từng qua Admin Unlock
@@ -370,7 +401,12 @@ namespace Management.BL
             if (patient == null)
                 return false;
 
-            var lockedByDate = IsLockedByDate(patient.ReturnResultTimeXN, now);
+            // Valid chưa đủ kết quả không cần consume Admin permission.
+            // User được phép Invalid để tiếp tục Process theo workflow bình thường.
+            if (IsXNIncompleteResult(patient))
+                return true;
+
+            var lockedByDate = IsXNLockedByDate(patient, now);
             var hasAdminUnlockHistory = await HasXNAdminUnlockHistoryAsync(patientId);
 
             // XN trong ngày và chưa từng qua Admin Unlock không cần permission.
@@ -604,6 +640,16 @@ namespace Management.BL
                     .FirstOrDefaultAsync(x => x.Active && x.Id == request.PatientId);
                 if (patient == null)
                     return (false, "Không tìm thấy lần làm xét nghiệm.", false);
+
+                // XN Valid chưa đủ kết quả không thuộc diện khóa qua ngày.
+                // User được phép Invalid/Process tiếp mà không cần Tool Admin mở khóa.
+                if (IsXNIncompleteResult(patient))
+                {
+                    return (
+                        false,
+                        "Kết quả xét nghiệm đang Valid chưa đủ; user có thể tiếp tục xử lý mà không cần mở khóa.",
+                        false);
+                }
 
                 returnTime = patient.ReturnResultTimeXN;
                 alreadyInProcess = patient.ProcessXN;
@@ -879,8 +925,9 @@ namespace Management.BL
                         ReturnResultTime = x.ReturnResultTimeXN!.Value,
 
                         IsLockedByDate =
-                            IsLockedByDate(x.ReturnResultTimeXN, now)
-                            || xnAdminHistoryIds.Contains(x.Id)
+                            !IsXNIncompleteResult(x)
+                            && (IsLockedByDate(x.ReturnResultTimeXN, now)
+                                || xnAdminHistoryIds.Contains(x.Id))
                     };
                 }));
             }

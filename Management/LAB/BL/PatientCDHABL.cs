@@ -73,27 +73,33 @@ namespace Management.BL
             {
                 q = ExcludeWait(q, categoryCode);
 
-                // ✅ Tối ưu: Lấy danh sách PatientId có pending trước, sau đó filter
-                var patientIdsWithPending = await _db.ResultCDHAs
-                    .AsNoTracking()
-                    .Where(r => r.Active
-                             && r.Service.Category.Code == categoryCode
-                             && (r.Result == null || r.Result == ""))
-                    .Select(r => r.PatientId)
-                    .Distinct()
-                    .ToListAsync();
+                // TDCN không nhập Result/Description nên tuyệt đối không dùng Result NULL/rỗng để suy ra pending.
+                // Với TDCN, trạng thái Process/Valid chỉ dựa vào cờ aggregate trên Patient.
+                if (categoryCode == "TDCN")
+                {
+                    q = q.Where(p => p.ProcessTDCN);
+                }
+                else
+                {
+                    // Các module còn lại giữ logic hiện tại: Process* hoặc còn dịch vụ chưa có Result.
+                    var patientIdsWithPending = await _db.ResultCDHAs
+                        .AsNoTracking()
+                        .Where(r => r.Active
+                                 && r.Service.Category.Code == categoryCode
+                                 && (r.Result == null || r.Result == ""))
+                        .Select(r => r.PatientId)
+                        .Distinct()
+                        .ToListAsync();
 
-                q = q.Where(p =>
-                    // Process* đang bật theo category
-                    ((categoryCode == "SA" && p.ProcessSA) ||
-                     (categoryCode == "SAT" && p.ProcessSAT) ||
-                     (categoryCode == "NS" && p.ProcessNS) ||
-                     (categoryCode == "NSCTC" && p.ProcessNSCTC) ||
-                     (categoryCode == "XQ" && p.ProcessXQ) ||
-                     (categoryCode == "DDT" && p.ProcessDDT) ||
-                     (categoryCode == "TDCN" && p.ProcessTDCN))
-                    // HOẶC có trong danh sách pending
-                    || patientIdsWithPending.Contains(p.Id));
+                    q = q.Where(p =>
+                        ((categoryCode == "SA" && p.ProcessSA) ||
+                         (categoryCode == "SAT" && p.ProcessSAT) ||
+                         (categoryCode == "NS" && p.ProcessNS) ||
+                         (categoryCode == "NSCTC" && p.ProcessNSCTC) ||
+                         (categoryCode == "XQ" && p.ProcessXQ) ||
+                         (categoryCode == "DDT" && p.ProcessDDT))
+                        || patientIdsWithPending.Contains(p.Id));
+                }
             }
             else if (viewMode == "valid")
             {
@@ -226,7 +232,13 @@ namespace Management.BL
             {
                 baseQ = ExcludeWait(baseQ, categoryCode);
 
-                // ✅ Tối ưu: Lấy danh sách PatientId có pending trước
+                // TDCN không nhập Result/Description nên Process chỉ dựa vào ProcessTDCN.
+                if (categoryCode == "TDCN")
+                {
+                    return await baseQ.CountAsync(p => p.ProcessTDCN);
+                }
+
+                // Các module còn lại giữ logic hiện tại: Process* hoặc còn dịch vụ chưa có Result.
                 var patientIdsWithPending = await _db.ResultCDHAs
                     .AsNoTracking()
                     .Where(r => r.Active
@@ -236,18 +248,14 @@ namespace Management.BL
                     .Distinct()
                     .ToListAsync();
 
-                // ✅ Đếm với điều kiện đơn giản hơn
                 return await baseQ.CountAsync(p =>
                     ((categoryCode == "SA" && p.ProcessSA) ||
                      (categoryCode == "SAT" && p.ProcessSAT) ||
                      (categoryCode == "NS" && p.ProcessNS) ||
                      (categoryCode == "NSCTC" && p.ProcessNSCTC) ||
                      (categoryCode == "XQ" && p.ProcessXQ) ||
-                     (categoryCode == "DDT" && p.ProcessDDT) ||
-                     (categoryCode == "TDCN" && p.ProcessTDCN))
-                    ||
-                    patientIdsWithPending.Contains(p.Id)
-                );
+                     (categoryCode == "DDT" && p.ProcessDDT))
+                    || patientIdsWithPending.Contains(p.Id));
             }
 
             // 3) Tab ĐÃ THỰC HIỆN (VALID):
@@ -396,27 +404,26 @@ namespace Management.BL
             else if (process && !valid)
             {
                 q = ExcludeWait(q, categoryCode);
-                q = q.Where(p =>
-               // Process* đang bật theo category
-               ((categoryCode == "SA" && p.ProcessSA) ||
-                (categoryCode == "SAT" && p.ProcessSAT) ||
-                (categoryCode == "NS" && p.ProcessNS) ||
-                (categoryCode == "NSCTC" && p.ProcessNSCTC) ||
-                (categoryCode == "XQ" && p.ProcessXQ) ||
-                (categoryCode == "DDT" && p.ProcessDDT) ||
-                (categoryCode == "TDCN" && p.ProcessTDCN))
-               // HOẶC vẫn còn ÍT NHẤT 1 dịch vụ pending (Result null/empty)
-               || _db.ResultCDHAs.Any(r =>
-                      r.Active &&
-                      r.PatientId == p.Id &&
-                      r.Service.Category.Code == categoryCode &&
-                      (r.Result == null || r.Result == "")));
-                // ĐANG THỰC HIỆN: có ÍT NHẤT 1 dịch vụ pending trong ResultCDHA (Result null/rỗng)
-                //q = q.Where(p => _db.ResultCDHAs.Any(r =>
-                //    r.Active == true &&
-                //    r.PatientId == p.Id &&
-                //    r.Service.Category.Code == categoryCode &&   // lọc đúng nhóm SA/SAT/NS/XQ/DDT/TDCN
-                //    (r.Result == null || r.Result == "")));
+                // TDCN không nhập Result/Description nên không dùng Result NULL/rỗng để xác định Process.
+                if (categoryCode == "TDCN")
+                {
+                    q = q.Where(p => p.ProcessTDCN);
+                }
+                else
+                {
+                    q = q.Where(p =>
+                       ((categoryCode == "SA" && p.ProcessSA) ||
+                        (categoryCode == "SAT" && p.ProcessSAT) ||
+                        (categoryCode == "NS" && p.ProcessNS) ||
+                        (categoryCode == "NSCTC" && p.ProcessNSCTC) ||
+                        (categoryCode == "XQ" && p.ProcessXQ) ||
+                        (categoryCode == "DDT" && p.ProcessDDT))
+                       || _db.ResultCDHAs.Any(r =>
+                              r.Active &&
+                              r.PatientId == p.Id &&
+                              r.Service.Category.Code == categoryCode &&
+                              (r.Result == null || r.Result == "")));
+                }
             }
             else if (valid)
             {
