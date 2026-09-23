@@ -188,6 +188,7 @@ function User_ResetInput() {
     $("#user-mabhyt").val("");
     $("#user-cks").val("");
     $("#user-cccd").val("");
+    $("#user-his-employee-id").val("");
     $('input:checkbox').removeAttr('checked');
     User_ResetSignatureImage();
 }
@@ -299,7 +300,7 @@ function User_Save() {
     if (!User_ValidateRequired()) {
         return;
     }
-    
+
     // Kiểm tra rule password trước khi lưu
     if (!User_IsPasswordValid()) {
         User_ValidatePasswordRealtime();
@@ -307,7 +308,7 @@ function User_Save() {
         SwalHelper.Toast.warning("Mật khẩu chưa đạt yêu cầu. Vui lòng kiểm tra lại quy tắc mật khẩu");
         return;
     }
-    
+
     var code = $("#user-code").val();
     var name = $("#user-name").val();
     var pass = $("#user-pass").val();
@@ -316,7 +317,11 @@ function User_Save() {
     var type = "";
     var cks = $("#user-cks").val();
     var cccd = $("#user-cccd").val();
-    
+    var hisEmployeeIdRaw = $("#user-his-employee-id").val();
+    var hisEmployeeId = (hisEmployeeIdRaw === null || hisEmployeeIdRaw.trim() === "")
+        ? null
+        : parseInt(hisEmployeeIdRaw, 10);
+
     $(".div-input").each(function () {
         $(this).find(".type").each(function () {
             var checked = $(this).prop('checked');
@@ -325,10 +330,10 @@ function User_Save() {
             }
         })
     })
-    
+
     // Ki?m tra xem c? file ?nh ch? k? du?c ch?n kh?ng
     var signatureFile = User_GetSignatureImageData();
-    
+
     if (signatureFile) {
         // N?u c? file upload, s? d?ng FormData
         var formData = new FormData();
@@ -340,6 +345,7 @@ function User_Save() {
         formData.append('type', type);
         formData.append('cks', cks);
         formData.append('cccd', cccd);
+        formData.append('hisEmployeeId', hisEmployeeId ?? '');
         formData.append('signatureImage', signatureFile);
         // Th?m t?n file d? format
         formData.append('signatureFileName', cks);
@@ -379,9 +385,10 @@ function User_Save() {
             active: active,
             type: type,
             cks: cks,
-            cccd: cccd
+            cccd: cccd,
+            hisEmployeeId: hisEmployeeId
         };
-    
+
         $.ajax({
             url: "/User/Save/",
             data: JSON.stringify(data),
@@ -827,7 +834,7 @@ function Hospital_Cancel() {
 
     if (code) {
         Hospital_LoadInfo(code);
-        Hospital_HideButton(false, true, true);       
+        Hospital_HideButton(false, true, true);
     }
     else {
         Hospital_ResetInput();
@@ -3311,7 +3318,7 @@ function Setting_Start_AutoTask() {
         error: function () {
             SwalHelper.Toast.warning("Không thể Start Auto Task. Vui lòng kiểm tra lại!");
         }
-    }); 
+    });
 }
 
 function Setting_Stop_AutoTask() {
@@ -3355,7 +3362,7 @@ function ResultStandard_Search() {
     var to = $("#resultstandard-to").val();
     var deviceid = $("#resultstandard-device").val();
     var seq = $("#resultstandard-seq").val();
-    
+
     $.ajax({
         url: "/Data/Search?" + "from=" + from + "&to=" + to + "&deviceid=" + deviceid + "&seq=" + seq,
         type: "GET",

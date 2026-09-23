@@ -552,9 +552,9 @@ option {
             table-layout: fixed;
         }
 
-        .settup-left .settup-left-list .table-responsive td{
-          line-height: 25px;
-        }
+            .settup-left .settup-left-list .table-responsive td {
+                line-height: 25px;
+            }
 
         .settup-left .settup-left-list .table-bordered {
             border-color: #c5c5c5;
@@ -610,6 +610,12 @@ option {
             padding: unset;
         }
 
+        .settup-left .settup-left-list .th-his {
+            width: 12%;
+            text-align: center;
+            padding: unset;
+        }
+
         .settup-left .settup-left-list .th-active {
             width: 7%;
             text-align: center;
@@ -653,6 +659,14 @@ option {
             padding-left: 5px;
         }
 
+        .settup-left .settup-left-list .td-his {
+            padding: unset;
+            margin: unset;
+            height: 25px;
+            text-align: left;
+            padding-left: 5px;
+        }
+
         .settup-left .settup-left-list .td-active {
             padding: unset;
             margin: unset;
@@ -676,6 +690,7 @@ option {
     font-weight: bold;
     margin-left: 2px;
 }
+
 .settup-right {
     width: 400px;
     height: 100%;
@@ -742,6 +757,7 @@ option {
                 width: 76.9px;
                 padding: unset;
             }
+
 .password-container {
     position: relative;
     width: 100%;
@@ -763,6 +779,7 @@ option {
     .password-toggle:hover {
         color: #000;
     }
+
 .rule-item {
     font-size: 13px;
     color: #dc3545;
@@ -990,15 +1007,17 @@ option {
             float: left;
             margin-bottom: 5px;
         }
-        .settup-right-sample .settup-right-info .div-lable-input .child-01 {
-            width: 50%;
-            float: left;
-        }
-        .settup-right-sample .settup-right-info .div-lable-input .child-02{
-            width: 50%;
-            float: left;
-            padding-left: 20px;
-        }
+
+            .settup-right-sample .settup-right-info .div-lable-input .child-01 {
+                width: 50%;
+                float: left;
+            }
+
+            .settup-right-sample .settup-right-info .div-lable-input .child-02 {
+                width: 50%;
+                float: left;
+                padding-left: 20px;
+            }
 
         .settup-right-sample .settup-right-info .div-lable {
             width: 100%;
@@ -1076,7 +1095,7 @@ option {
         flex-direction: column;
     }
 
-/*    .settup-left-sample,
+    /*    .settup-left-sample,
     .settup-right-sample {
         width: 100%;
         max-width: 100%;
@@ -1377,12 +1396,12 @@ option {
         grid-template-columns: 1fr;
     }
 
-    .settup-left-testcode{
+    .settup-left-testcode {
         order: 1;
         width: 100%;
     }
 
-    .settup-right-testcode{
+    .settup-right-testcode {
         order: 2; /* info trên */
         width: 100%;
         max-width: 100%;
@@ -1616,6 +1635,7 @@ option {
             width: 86.7px;
             padding: unset;
         }
+
 .settup-left-servicetest {
     flex: 1.5; /* bảng chiếm khoảng 60% */
     min-width: 0;
@@ -1672,6 +1692,7 @@ option {
         padding-right: 0;
     }
 }
+
 @media (max-width: 767px) {
     .settup-left-servicetest .settup-left-list {
         height: 50vh;
@@ -1900,6 +1921,7 @@ option {
             width: 86.7px;
             padding: unset;
         }
+
 .settup-left-map {
     flex: 1.5; /* bảng chiếm khoảng 60% */
     min-width: 0;
@@ -2140,6 +2162,7 @@ option {
             width: 97px;
             padding: unset;
         }
+
 .settup-left-setting {
     flex: 1.5; /* bảng chiếm khoảng 60% */
     min-width: 0;
@@ -2619,7 +2642,7 @@ option {
     }
 
     .settup-left .settup-left-list .table {
-        min-width: 550px;
+        min-width: 680px;
     }
 
     /* Ẩn cột Id trên mobile - ít quan trọng */
@@ -2630,7 +2653,8 @@ option {
 
     /* Cột CKS và CCCD thu nhỏ */
     .settup-left .settup-left-list .th-cks,
-    .settup-left .settup-left-list .th-cccd {
+    .settup-left .settup-left-list .th-cccd,
+    .settup-left .settup-left-list .th-his {
         width: 18%;
     }
 
@@ -2789,6 +2813,7 @@ option {
         transform: translate(-50%, -50%);
     }
 }
+
 .setting-tabs {
     display: flex;
     align-items: center;

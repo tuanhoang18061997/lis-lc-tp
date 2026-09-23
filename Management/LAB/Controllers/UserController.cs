@@ -95,6 +95,9 @@ namespace Management.Controllers
                         active = bool.Parse(Request.Form["active"]),
                         cks = Request.Form["cks"],
                         cccd = Request.Form["cccd"],
+                        hisEmployeeId = int.TryParse(Request.Form["hisEmployeeId"], out var hisEmployeeId)
+                            ? hisEmployeeId
+                            : null,
                         type = Request.Form["type"]
                     };
 

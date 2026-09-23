@@ -236,6 +236,7 @@ namespace Management.BL
         public string type { get; set; }
         public string cks { get; set; }
         public string cccd { get; set; }
+        public int? hisEmployeeId { get; set; }
         public bool active { get; set; }
     }
 
@@ -412,13 +413,13 @@ namespace Management.BL
         public string FromDate { get; set; }
         public string ToDate { get; set; }
         public string DateNow { get; set; }
-        
+
         // Tổng số ca
         public double Total { get; set; }
-        
+
         // Danh sách chi tiết các ca để có thể xem chi tiết
         public List<ReportPatientDetail> PatientDetails { get; set; } = new List<ReportPatientDetail>();
-        
+
         // Giữ lại các trường cũ để tương thích ngược nếu cần (có thể xóa sau)
         [Obsolete("Không sử dụng nữa, dùng Total thay thế")]
         public double TotalBHYT { get; set; }
@@ -441,7 +442,7 @@ namespace Management.BL
         public string BenhAn;
         public string ObjectCode;
     }
-    
+
     // Class mới để lưu chi tiết từng ca bệnh nhân
     public class ReportPatientDetail
     {
@@ -499,7 +500,7 @@ namespace Management.BL
         public string KeyResultForHis { get; set; }
         public long ServiceId { get; set; }
         public string ServiceName { get; set; }
-        public string Status { get; set; }      
+        public string Status { get; set; }
     }
 
     public class PushResultHIS
@@ -621,7 +622,7 @@ namespace Management.BL
         public long ServiceId { get; set; }
         public string ServiceCode { get; set; }
         public string ServiceName { get; set; }
-        
+
         /// <summary>
         /// Tổng số bệnh nhân đã thực hiện dịch vụ này (có đánh dấu X)
         /// </summary>
@@ -642,7 +643,7 @@ namespace Management.BL
         /// </summary>
         public Dictionary<long, string> ServiceMarks { get; set; } = new();
     }
-    
+
     public class ReportProcessPatientGroup
     {
         public string DoctorID { get; set; }

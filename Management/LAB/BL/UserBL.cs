@@ -43,9 +43,9 @@ namespace Management.BL
         public async Task<User> GetUserByCodeAndPassword(User user)
         {
             var _user = await _db.Users.Where(p => p.Active == true && p.Code == user.Code && p.Password == user.Password).FirstOrDefaultAsync();
-            if(_user != null)
+            if (_user != null)
             {
-                return new User() {Id = _user.Id, Code = _user.Code, Name = _user.Name, Password = _user.Password };
+                return new User() { Id = _user.Id, Code = _user.Code, Name = _user.Name, Password = _user.Password };
             }
             return null;
         }
@@ -163,7 +163,17 @@ namespace Management.BL
                 var _user = await _db.Users.Where(p => p.Code == user.code).FirstOrDefaultAsync();
                 if (_user == null)
                 {
-                    _user = new User() { Code = user.code, Name = user.name, Password = user.pass, Active = user.active, MaBHYT = user.mabhyt, Cks = user.cks, Cccd = user.cccd };
+                    _user = new User()
+                    {
+                        Code = user.code,
+                        Name = user.name,
+                        Password = user.pass,
+                        Active = user.active,
+                        MaBHYT = user.mabhyt,
+                        Cks = user.cks,
+                        Cccd = user.cccd,
+                        HisEmployeeId = user.hisEmployeeId
+                    };
                     await _db.Users.AddAsync(_user);
                     await _db.SaveChangesAsync();
                 }
@@ -174,6 +184,7 @@ namespace Management.BL
                     _user.MaBHYT = user.mabhyt;
                     _user.Cks = user.cks;
                     _user.Cccd = user.cccd;
+                    _user.HisEmployeeId = user.hisEmployeeId;
                     _user.Active = user.active;
                     await _db.SaveChangesAsync();
                 }

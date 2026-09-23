@@ -5,12 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Management.Models
 {
-    
+
     [Table("User")]
     [Index(nameof(Code), nameof(Name))]
     public class User
     {
-        
+
         [Key]
         public long Id { get; set; }
         public string Code { get; set; }
@@ -18,6 +18,8 @@ namespace Management.Models
         public string MaBHYT { get; set; }
         public string Password { get; set; }
         public string Cccd { get; set; }
+
+        public int? HisEmployeeId { get; set; }
 
         public bool Active { get; set; }
         public string Cks { get; set; }

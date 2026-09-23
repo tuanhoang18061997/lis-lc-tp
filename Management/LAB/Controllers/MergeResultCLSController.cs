@@ -2,8 +2,14 @@
 using Management.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PdfSharpCore;
+using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Management.Controllers
 {
@@ -134,19 +140,14 @@ namespace Management.Controllers
                         return NotFound($"Không tìm thấy file PDF nào với maBenhAn={maBenhAn}, patientId={patientId}");
                     }
 
-                    // 6) Nếu chỉ có 1 file
-                    if (allFiles.Count == 1)
-                    {
-                        var f = allFiles[0];
-                        var onlyName = Path.GetFileName(f);
-                        Response.Headers["Content-Disposition"] = $"inline; filename=\"{onlyName}\"";
-                        return PhysicalFile(f, "application/pdf", enableRangeProcessing: true);
-                    }
+                    // 6) Merge + chuẩn hóa tất cả page về A4 Portrait.
+                    // Kể cả chỉ có 1 file vẫn đi qua normalize để output luôn đồng nhất.
+                    var merged = MergePdfsToA4(allFiles);
 
-                    // 7) Merge tất cả thành 1 PDF
-                    var merged = MergePdfs(allFiles);
+                    // Giữ nguyên tên file output để không ảnh hưởng client/API hiện tại.
                     var outName = $"{maBenhAn}_{patientId}_merged.pdf";
                     Response.Headers["Content-Disposition"] = $"inline; filename=\"{outName}\"";
+
                     return File(merged, "application/pdf");
                 }
             }
@@ -156,6 +157,7 @@ namespace Management.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         //-------------- Helper----------------
         private string GetCategoryCodeFromSid(string sid)
         {
@@ -464,21 +466,92 @@ namespace Management.Controllers
             return prop?.GetValue(obj);
         }
 
-        private static byte[] MergePdfs(IEnumerable<string> absolutePaths)
+
+        /// <summary>
+        /// Merge PDF production và chuẩn hóa toàn bộ page về A4 Portrait.
+        ///
+        /// Nguyên tắc:
+        /// - Không hard-code theo nguồn file/Lab.
+        /// - Không sửa file PDF gốc.
+        /// - Không crop nội dung.
+        /// - Không kéo méo nội dung.
+        /// - Giữ nguyên aspect ratio rồi fit + center vào A4.
+        /// </summary>
+        private byte[] MergePdfsToA4(IEnumerable<string> absolutePaths)
         {
-            var output = new PdfDocument();
+            using var output = new PdfDocument();
 
-            foreach (var path in absolutePaths.Distinct())
+            var paths = absolutePaths
+                .Where(System.IO.File.Exists)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var path in paths)
             {
-                if (!System.IO.File.Exists(path)) continue;
+                using var form = XPdfForm.FromFile(path);
 
-                using (var input = PdfReader.Open(path, PdfDocumentOpenMode.Import))
+                for (int pageNumber = 1; pageNumber <= form.PageCount; pageNumber++)
                 {
-                    for (int i = 0; i < input.PageCount; i++)
+                    // XPdfForm đánh số page từ 1.
+                    form.PageNumber = pageNumber;
+
+                    // Tạo canvas đích chuẩn A4 Portrait.
+                    var targetPage = output.AddPage();
+                    targetPage.Size = PageSize.A4;
+                    targetPage.Orientation = PageOrientation.Portrait;
+
+                    var sourceWidth = form.PointWidth;
+                    var sourceHeight = form.PointHeight;
+
+                    if (sourceWidth <= 0 || sourceHeight <= 0)
                     {
-                        output.AddPage(input.Pages[i]);
+                        throw new InvalidDataException(
+                            $"PDF page không có kích thước hợp lệ. File={path}, Page={pageNumber}, " +
+                            $"Width={sourceWidth}, Height={sourceHeight}"
+                        );
                     }
+
+                    var targetWidth = targetPage.Width.Point;
+                    var targetHeight = targetPage.Height.Point;
+
+                    // Fit toàn bộ source page vào A4, giữ nguyên tỷ lệ.
+                    var scale = Math.Min(
+                        targetWidth / sourceWidth,
+                        targetHeight / sourceHeight
+                    );
+
+                    var drawWidth = sourceWidth * scale;
+                    var drawHeight = sourceHeight * scale;
+
+                    // Center nội dung trong A4.
+                    var x = (targetWidth - drawWidth) / 2d;
+                    var y = (targetHeight - drawHeight) / 2d;
+
+                    using var gfx = XGraphics.FromPdfPage(targetPage);
+                    gfx.DrawImage(
+                        form,
+                        new XRect(x, y, drawWidth, drawHeight)
+                    );
+
+                    _logger.LogInformation(
+                        "[PDF-A4] File={FileName}; Page={PageNumber}/{PageCount}; " +
+                        "Source={SourceWidth:0.##}x{SourceHeight:0.##}pt; " +
+                        "Target={TargetWidth:0.##}x{TargetHeight:0.##}pt; Scale={Scale:0.####}",
+                        Path.GetFileName(path),
+                        pageNumber,
+                        form.PageCount,
+                        sourceWidth,
+                        sourceHeight,
+                        targetWidth,
+                        targetHeight,
+                        scale
+                    );
                 }
+            }
+
+            if (output.PageCount == 0)
+            {
+                throw new InvalidOperationException("Không có page PDF hợp lệ để merge.");
             }
 
             using var ms = new MemoryStream();

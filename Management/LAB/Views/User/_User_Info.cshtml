@@ -116,6 +116,19 @@
 </div>
 
 <div class="div-lable-input">
+    <div class="div-lable">Mã HIS</div>
+    <div class="div-input">
+        <input type="number"
+               id="user-his-employee-id"
+               class="form-control height-28"
+               min="0"
+               step="1"
+               value="@user?.HisEmployeeId"
+               onkeyup="User_HideButton(true, false, true, false, true)" />
+    </div>
+</div>
+
+<div class="div-lable-input">
     <div class="div-lable">Khoa phòng <span class="required-star">*</span></div>
     <div class="div-input">
         @{
@@ -125,7 +138,7 @@
                 foreach (var item in lstType)
                 {
                     index++;
-                    if(user != null)
+                    if (user != null)
                     {
                         var userType = user.UserTypes.Where(p => p.TypeId == item.Id).FirstOrDefault();
                         if (userType != null)
