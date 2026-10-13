@@ -37,7 +37,7 @@ namespace Management.Controllers
         private readonly IWebHostEnvironment _environment;
 
         public XN_ProcessController(ILogger<XN_ProcessController> logger, PatientXNBL patientBL, ObjectBL objectBL, LocationBL locationBL,
-                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultXNBL resultXNBL, 
+                            DoctorBL doctorBL, UserBL userBL, CategoryBL categoryBL, ServiceBL serviceBL, ResultXNBL resultXNBL,
                             SettingBL settingBL, GroupBL groupBL, IWebHostEnvironment environment, ToolBL toolBL, HospitalBL hospitalBL, ExternalLabParserFactory parserFactory, ExternalFileBL externalFileBL)
         {
             _logger = logger;
@@ -290,7 +290,7 @@ namespace Management.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> SaveResult([FromBody] List<ResultXNModel> lstResult)       
+        public async Task<IActionResult> SaveResult([FromBody] List<ResultXNModel> lstResult)
         {
             var _saveResult = false;
             var _fullResultXN = false;
@@ -661,7 +661,7 @@ namespace Management.Controllers
                 {
                     var _fullResultXN = false;
                     var _notFullResultXN = await _resultXNBL.NotFullResultXN(lstResult[0].patientId);
-                    if(_notFullResultXN == false)
+                    if (_notFullResultXN == false)
                     {
                         _fullResultXN = true;
                     }
@@ -769,7 +769,7 @@ namespace Management.Controllers
                                     }
                                 }
 
-                                var content = string.Join("", contentParts); 
+                                var content = string.Join("", contentParts);
 
                                 var header = await this.RenderViewAsync("Header", _hospital);
                                 var footer = await this.RenderViewAsync("Footer", _hospital);
@@ -1008,35 +1008,84 @@ namespace Management.Controllers
                 );
                 int updatedCount = 0;
                 bool parsedSuccess = false;
+                int parsedCount = 0;
 
-                // 3) Đọc text PDF + parse + update kết quả
-                //    Đây là bước phụ, lỗi không làm fail import file
+                // Một luồng import chung: đọc các dòng theo cột của PDF; nếu định dạng
+                // không có bảng nhận diện được thì parser đang chạy vẫn là fallback.
+                // Không phân nhánh theo bệnh viện, không quyết định theo tên file.
+                var parsedItems = new List<ExternalLabItem>();
+                var seenInTable = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 try
                 {
-                    string allText = ExtractTextFromPdf(tempPath);
+                    var tableItems = ExtractLabResultRowsFromPdf(tempPath, seenInTable);
+                    parsedItems.AddRange(tableItems);
+                }
+                catch (Exception exTable)
+                {
+                    seenInTable.Clear(); // Cho phép fallback nếu trích xuất bảng bị lỗi.
+                    _logger.LogWarning(exTable,
+                        "External lab PDF column extraction skipped. patientId={PatientId}", pidTablePatient);
+                }
 
-                    var parsed = _parserFactory.ParseByName("TamAnLab", allText);
-
-                    if (parsed != null && parsed.Count > 0)
+                // Khi đã nhận được bảng có cột kết quả rõ ràng, không cho parser
+                // text cũ đoán lại các giá trị còn thiếu (dễ nhầm sang cột KTC).
+                // Chỉ fallback khi không nhận diện được bảng nào.
+                if (seenInTable.Count == 0)
+                {
+                    try
                     {
-                        updatedCount = await _resultXNBL.UpdateFromExternal(pidTablePatient, parsed, overwrite, markValid, userLogin);
-                        parsedSuccess = true;
-
-                        var full = await _resultXNBL.FullResultXN(pidTablePatient);
-                        // await _patientBL.Update(pidTablePatient, null, null, userLogin, full);
+                        // Parser hiện có là fallback cho PDF không có bảng cột rõ ràng.
+                        // Tên parser giữ nguyên để tương thích, KHÔNG phân loại bệnh viện.
+                        string allText = ExtractTextFromPdf(tempPath);
+                        var legacyItems = _parserFactory.ParseByName("TamAnLab", allText);
+                        if (legacyItems != null)
+                            parsedItems.AddRange(legacyItems.Where(x => x != null));
+                    }
+                    catch (Exception exLegacy)
+                    {
+                        _logger.LogWarning(exLegacy,
+                            "External lab legacy parser skipped. patientId={PatientId}", pidTablePatient);
                     }
                 }
-                catch (Exception exParse)
+
+                try
                 {
-                    _logger.LogWarning(exParse,
-                        "ImportExternalLabPdf parse/update skipped. pId={PId}, maBenhAn={MaBenhAn}, fileName={FileName}",
-                        pId, pMaBenhAn, fileName);
+                    parsedCount = parsedItems.Count;
+                    if (parsedCount > 0)
+                    {
+                        parsedSuccess = true;
+                        // Chỉ TestCode.Code có hậu tố _taman mới được phép update.
+                        // BL bỏ qua mã không khớp, giá trị rỗng/trùng/không rõ và
+                        // không tự tạo thêm ResultXN.
+                        updatedCount = await _resultXNBL.UpdateFromExternal(
+                            pidTablePatient, parsedItems, overwrite, markValid, userLogin);
+
+                        try
+                        {
+                            var full = await _resultXNBL.FullResultXN(pidTablePatient);
+                            // Giữ nguyên trạng thái bệnh nhân của baseline:
+                            // await _patientBL.Update(pidTablePatient, null, null, userLogin, full);
+                        }
+                        catch (Exception exFull)
+                        {
+                            _logger.LogWarning(exFull,
+                                "External lab completeness check skipped. patientId={PatientId}", pidTablePatient);
+                        }
+                    }
+                }
+                catch (Exception exUpdate)
+                {
+                    _logger.LogWarning(exUpdate,
+                        "ImportExternalLabPdf update skipped. patientId={PatientId}, fileName={FileName}",
+                        pidTablePatient, fileName);
                 }
 
                 return Json(new
                 {
                     success = true,
                     count = updatedCount,
+                    parsedCount = parsedCount,
                     parsedSuccess = parsedSuccess,
                     message = parsedSuccess
                         ? "Import file thành công."
@@ -1109,6 +1158,176 @@ namespace Management.Controllers
                 return sb.ToString();
             }
         }
+        // ====== ĐỌC CỘT PDF - KHÔNG PHÂN BIỆT NHÀ CUNG CẤP ======
+        // Chỉ nhận bảng có tiêu đề rõ Tên xét nghiệm / Kết quả / KTC (hoặc tham chiếu).
+        // Nếu PDF không có cột rõ ràng, để parser cũ xử lý; không quét số gần tên xét nghiệm.
+        private sealed class ImportPdfWord
+        {
+            public string Text { get; set; }
+            public double Left { get; set; }
+            public double Right { get; set; }
+            public double MiddleY { get; set; }
+        }
+
+        private sealed class ImportPdfLine
+        {
+            public double MiddleY { get; set; }
+            public List<ImportPdfWord> Words { get; } = new List<ImportPdfWord>();
+        }
+
+        private static string NormalizeImportLabCode(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            text = text.Trim();
+            if (text.EndsWith("_taman", StringComparison.OrdinalIgnoreCase))
+                text = text.Substring(0, text.Length - "_taman".Length);
+
+            // Mã dùng để so khớp, không dùng để hiển thị; thống nhất khoảng trắng,
+            // dấu nối, dấu tiếng Việt để 'Cyfra 21-1' == 'Cyfra21-1'.
+            text = text.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder();
+            foreach (var ch in text)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch) ==
+                    System.Globalization.UnicodeCategory.NonSpacingMark) continue;
+                if (ch == 'đ' || ch == 'Đ') { sb.Append('d'); continue; }
+                if (char.IsLetterOrDigit(ch)) sb.Append(char.ToLowerInvariant(ch));
+            }
+            return sb.ToString();
+        }
+
+        private static string NormalizeImportPdfName(string label)
+        {
+            if (string.IsNullOrWhiteSpace(label)) return string.Empty;
+            label = Regex.Replace(label.Trim(), @"^Định\s+lượng\s+", "", RegexOptions.IgnoreCase);
+            label = Regex.Replace(label, @"\[\s*Máu\s*\]", "", RegexOptions.IgnoreCase);
+            label = Regex.Replace(label, @"\(\s*(?:HCL|ECL|CLIA|CMIA)\s*\)", "", RegexOptions.IgnoreCase);
+            label = Regex.Replace(label, @"\s+miễn\s+dịch\s+tự\s+động\s*$", "", RegexOptions.IgnoreCase);
+            label = Regex.Replace(label, @"\s+(?:định\s+lượng|định\s+tính)\s*$", "", RegexOptions.IgnoreCase);
+            return Regex.Replace(label, @"\s+", " ").Trim().TrimStart('%');
+        }
+
+        private static List<ImportPdfLine> GroupLabPdfWords(IEnumerable<ImportPdfWord> words)
+        {
+            var lines = new List<ImportPdfLine>();
+            // PDF có thể trả words không theo thứ tự đọc; nhóm theo tọa độ Y trước.
+            foreach (var word in words.OrderByDescending(w => w.MiddleY).ThenBy(w => w.Left))
+            {
+                var last = lines.Count > 0 ? lines[lines.Count - 1] : null;
+                if (last == null || Math.Abs(last.MiddleY - word.MiddleY) > 3.5)
+                {
+                    last = new ImportPdfLine { MiddleY = word.MiddleY };
+                    lines.Add(last);
+                }
+                last.Words.Add(word);
+            }
+            foreach (var line in lines)
+                line.Words.Sort((a, b) => a.Left.CompareTo(b.Left));
+            return lines;
+        }
+
+        private static bool TryGetLabColumnBounds(ImportPdfLine header,
+            out double resultLeft, out double resultRight)
+        {
+            resultLeft = 0;
+            resultRight = 0;
+            var ws = header.Words;
+            if (ws.Count < 5) return false;
+
+            string all = NormalizeImportLabCode(string.Join(" ", ws.Select(w => w.Text)));
+            if (!all.Contains("tenxetnghiem") || !all.Contains("ketqua")) return false;
+
+            // Trái: 'Tên xét nghiệm' -> 'Kết quả'; phải: 'Kết quả' -> 'KTC'.
+            // Nếu không xác định được cột tham chiếu thì không phỏng đoán.
+            int namePos = ws.FindIndex(w => NormalizeImportLabCode(w.Text).Contains("nghiem"));
+            int resultPos = ws.FindIndex(w => NormalizeImportLabCode(w.Text) == "ket" ||
+                                              NormalizeImportLabCode(w.Text) == "ketqua");
+            int rangePos = ws.FindIndex(w => NormalizeImportLabCode(w.Text) == "ktc" ||
+                                             NormalizeImportLabCode(w.Text) == "tham");
+            if (namePos < 0 || resultPos <= namePos || rangePos <= resultPos) return false;
+
+            // Header 'Kết quả' có thể là hai words riêng biệt.
+            int resultLast = resultPos;
+            if (resultPos + 1 < ws.Count && NormalizeImportLabCode(ws[resultPos + 1].Text) == "qua")
+                resultLast++;
+
+            resultLeft = (ws[namePos].Right + ws[resultPos].Left) / 2.0;
+            resultRight = (ws[resultLast].Right + ws[rangePos].Left) / 2.0;
+            return resultLeft > ws[namePos].Right && resultRight > resultLeft + 15;
+        }
+
+        private static bool IsImportablePdfCell(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            text = text.Trim();
+            if (text == "-" || text == "." || text == "--") return false;
+            if (text.Length > 140) return false;
+            // Định lượng, khoảng kết quả (vd 4-6), định tính hoặc kết quả dạng chữ.
+            // Đã giới hạn vào đúng cột Kết quả, tuyệt đối không mượn số cột KTC.
+            return Regex.IsMatch(text, @"\d") ||
+                   Regex.IsMatch(text, @"[\p{L}]", RegexOptions.CultureInvariant);
+        }
+
+        private static List<ExternalLabItem> ExtractLabResultRowsFromPdf(
+            string path, HashSet<string> observedCodes)
+        {
+            var output = new List<ExternalLabItem>();
+            using (var pdf = UglyToad.PdfPig.PdfDocument.Open(path))
+            {
+                foreach (var page in pdf.GetPages())
+                {
+                    var lines = GroupLabPdfWords(page.GetWords()
+                        .Where(w => !string.IsNullOrWhiteSpace(w.Text))
+                        .Select(w => new ImportPdfWord
+                        {
+                            Text = w.Text,
+                            Left = w.BoundingBox.Left,
+                            Right = w.BoundingBox.Right,
+                            MiddleY = (w.BoundingBox.Bottom + w.BoundingBox.Top) / 2.0
+                        }));
+
+                    double resultLeft = 0, resultRight = 0;
+                    bool insideTable = false;
+                    foreach (var line in lines)
+                    {
+                        if (TryGetLabColumnBounds(line, out var newLeft, out var newRight))
+                        {
+                            resultLeft = newLeft;
+                            resultRight = newRight;
+                            insideTable = true;
+                            continue;
+                        }
+                        if (!insideTable) continue;
+
+                        var name = string.Join(" ", line.Words
+                            .Where(w => w.Left < resultLeft)
+                            .Select(w => w.Text)).Trim();
+                        if (string.IsNullOrWhiteSpace(name)) continue;
+                        var code = NormalizeImportPdfName(name);
+                        if (string.IsNullOrWhiteSpace(code)) continue;
+
+                        string key = NormalizeImportLabCode(code);
+                        if (string.IsNullOrEmpty(key)) continue;
+                        observedCodes.Add(key); // Ghi nhận cả dòng không có kết quả.
+
+                        var value = string.Join(" ", line.Words
+                            .Where(w => w.Left >= resultLeft && w.Left < resultRight)
+                            .Select(w => w.Text)).Trim();
+
+                        if (!IsImportablePdfCell(value)) continue;
+                        output.Add(new ExternalLabItem
+                        {
+                            Code = code,
+                            Name = name,
+                            Value = value
+                        });
+                    }
+                }
+            }
+            return output;
+        }
+        // ====== HẾT HELPER PDF ======
+
         #endregion
 
         //#region Lấy danh sách file pdf đã import

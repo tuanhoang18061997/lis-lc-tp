@@ -112,7 +112,7 @@ namespace Management.BL
 
                 var keyResultForHis = "xn-" + Guid.NewGuid().ToString();
                 if (_lstResultXN != null && _lstResultXN.Count > 0) keyResultForHis = _lstResultXN[0].KeyResultForHis;
-                
+
                 foreach (var item in _lstServiceTest)
                 {
                     _resultXN = new ResultXN();
@@ -273,7 +273,7 @@ namespace Management.BL
 
                         // Gán kết quả eGFR
                         egfrItem.Result = egfr.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-                        egfrItem.Status = egfr < 60 ? 1 : 0; 
+                        egfrItem.Status = egfr < 60 ? 1 : 0;
                         egfrItem.UpdateTime = DateTime.Now;
 
                         // Update trực tiếp vào DB
@@ -511,7 +511,7 @@ namespace Management.BL
                     var services = categoryGroup
                         .OrderBy(s => s.ServicePrintOrder)
                         .ToList();
-                        
+
                     groupedResults.Add(new
                     {
                         CategoryId = categoryGroup.Key.CategoryId,
@@ -540,7 +540,7 @@ namespace Management.BL
                     .OrderBy(p => p.Service.Category.PrintOrder)
                     .ThenBy(p => p.Service.PrintOrder)
                     .ToListAsync();
-                    
+
                 if (lstResultCDHA != null)
                 {
                     foreach (var item in lstResultCDHA)
@@ -826,6 +826,11 @@ namespace Management.BL
                 return false;
             }
         }
+        /// <summary>
+        /// Cập nhật kết quả đọc từ PDF vào các ResultXN đã được chỉ định trước.
+        /// Chỉ cho phép TestCode.Code kết thúc bằng '_taman' (không phân biệt bệnh viện).
+        /// Không tạo ResultXN mới. Mã không thấy, giá trị trống/trùng/không rõ sẽ bỏ qua.
+        /// </summary>
         public async Task<int> UpdateFromExternal(
             long patientId,
             IEnumerable<Models.ExternalLabItem> items,
@@ -834,211 +839,137 @@ namespace Management.BL
             long? userId)
         {
             if (patientId <= 0 || items == null) return 0;
-
             if (!await _resultEditUnlockBL.CanEditXNAsync(patientId, ToolBL.Get_DateNow()))
                 return 0;
 
-            // 1) Load data nền
-            var now = ToolBL.Get_DateNow();
-
-            // Tất cả kết quả hiện có của bệnh nhân (để tìm sẵn key & service đã chỉ định)
             var patientResults = await _db.ResultXNs
-                .Where(p => p.Active == true && p.PatientId == patientId)
+                .Where(r => r.Active == true && r.PatientId == patientId)
                 .ToListAsync();
+            if (patientResults.Count == 0) return 0;
 
-            // Lấy/giữ KeyResultForHis theo convention của bạn (như SaveService)
-            // Nếu bệnh nhân từng có kết quả, mượn key cũ; nếu chưa có, tạo key mới
-            string keyResultForHis = patientResults?.OrderBy(p => p.InsertTime).FirstOrDefault()?.KeyResultForHis
-                                     ?? ("xn-" + Guid.NewGuid().ToString()); // cùng convention với SaveService :contentReference[oaicite:1]{index=1}
+            // Giữ gate bằng _taman theo chủ đích: chỉ mã do IT kích hoạt mới được cập nhật.
+            const string suffix = "_taman";
+            var allTestCodes = await _db.TestCodes.ToListAsync();
+            var eligibleCodes = allTestCodes
+                .Where(t => t != null && !t.IsTestHead &&
+                            !string.IsNullOrWhiteSpace(t.Code) &&
+                            t.Code.Trim().EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                .GroupBy(t => NormalizeExternalCodeForImport(t.Code), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
-            // Danh sách dịch vụ bệnh nhân đã có (ưu tiên nhét test mới vào các dịch vụ này)
-            var patientServiceIds = patientResults.Select(r => r.ServiceId).Distinct().ToList();
-
-            // TestCode nội bộ (để map theo Code/Name)
-            var allTestCodes = await _db.TestCodes.ToListAsync(); // giả định DbSet tên TestCodes có sẵn
-            var byCode = allTestCodes.ToDictionary(
-                t => (t.Code ?? "").Trim().ToLowerInvariant(),
-                t => t);
-            //var byName = allTestCodes.ToDictionary(
-            //    t => (t.Name ?? ""),
-            //    t => t);
-
-            // Service-Test mapping: để tìm Service chứa TestCode khi cần insert mới
-            // giả định DbSet tên ServiceTests tồn tại (chuẩn trong domain của bạn)
-            var svcTests = await _db.ServiceTests.ToListAsync();
+            // Không chọn dòng đầu tiên khi có nhiều mã cùng code hoặc nhiều kết quả
+            // của một mã trong PDF. Để người dùng kiểm tra thủ công trường hợp nhập nhằng.
+            var groups = items
+                .Where(x => x != null &&
+                            !string.IsNullOrWhiteSpace(x.Code) &&
+                            !string.IsNullOrWhiteSpace(x.Value))
+                .GroupBy(x => NormalizeExternalCodeForImport(x.Code), StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             int changed = 0;
-
-            foreach (var item in items)
+            var now = ToolBL.Get_DateNow();
+            foreach (var group in groups)
             {
-                if (item == null) continue;
-
-                string codeExt = Regex.Replace(item.Code ?? string.Empty, @"\s+", "") + "_taman";
-                string nameExt = (item.Name ?? "").Trim();
-                string valueExt = (item.Value ?? "").Trim();
-
-                if (string.IsNullOrEmpty(codeExt) && string.IsNullOrEmpty(nameExt))
+                if (string.IsNullOrEmpty(group.Key)) continue;
+                if (!eligibleCodes.TryGetValue(group.Key, out var matchingCodes) || matchingCodes.Count != 1)
                     continue;
 
-                // 2) Map External -> TestCode nội bộ (ưu tiên Code, fallback Name)
-                Models.TestCode objTestCode = null;
-                if (!string.IsNullOrEmpty(codeExt))
+                var values = group.Select(x => x.Value.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                if (values.Count != 1) continue;
+
+                var testCode = matchingCodes[0];
+                var rows = patientResults.Where(r => r.TestCodeId == testCode.Id).ToList();
+                if (rows.Count != 1) continue;
+
+                // Parse chặt: không biến '4-6' thành '4', không lấy nhầm số từ chữ.
+                SplitValueAndQualifier(values[0], out var result, out var numericValue, out var posNeg);
+                if (string.IsNullOrWhiteSpace(result) && string.IsNullOrWhiteSpace(posNeg)) continue;
+
+                var row = rows[0];
+                // Không ghi đè kết quả đã ký số. Muốn sửa phải đi qua flow Invalid.
+                if (row.SignStoreId > 0 && row.SignStatus == 1) continue;
+
+                bool isEmpty = string.IsNullOrWhiteSpace(row.Result) &&
+                               string.IsNullOrWhiteSpace(row.PosNeg);
+                if (!overwrite && !isEmpty) continue;
+
+                string nextResult = result ?? string.Empty;
+                string nextPosNeg = posNeg ?? string.Empty;
+                int? nextStatus = row.Status;
+
+                if (!string.IsNullOrWhiteSpace(nextPosNeg) &&
+                    !string.IsNullOrWhiteSpace(testCode.NormalResult))
                 {
-                    byCode.TryGetValue(codeExt.ToLowerInvariant(), out objTestCode);
+                    var normalizedNormal = NormalizeImportedQualifier(testCode.NormalResult);
+                    nextStatus = string.Equals(nextPosNeg, normalizedNormal,
+                        StringComparison.OrdinalIgnoreCase) ? 0 : 2;
+                }
+                else if (!double.IsNaN(numericValue) && !double.IsInfinity(numericValue))
+                {
+                    if (testCode.LowerLimit.HasValue && numericValue < testCode.LowerLimit.Value)
+                        nextStatus = 1;
+                    else if (testCode.HigherLimit.HasValue && numericValue > testCode.HigherLimit.Value)
+                        nextStatus = 2;
+                    else if (testCode.LowerLimit.HasValue || testCode.HigherLimit.HasValue)
+                        nextStatus = 0;
                 }
 
-                if (objTestCode == null) continue; // không map được thì bỏ qua
+                bool nextValid = markValid
+                    ? (!string.IsNullOrWhiteSpace(nextResult) || !string.IsNullOrWhiteSpace(nextPosNeg))
+                    : row.ValidPrint;
 
-                // Không đổ vào "test head" (nếu có)
-                if (objTestCode.IsTestHead) continue; // theo convention của bạn: Head có Result="." khi khởi tạo :contentReference[oaicite:2]{index=2}
+                if (string.Equals(row.Result ?? string.Empty, nextResult, StringComparison.Ordinal) &&
+                    string.Equals(row.PosNeg ?? string.Empty, nextPosNeg, StringComparison.Ordinal) &&
+                    row.Status == nextStatus && row.ValidPrint == nextValid)
+                    continue;
 
-                // 3) Tách định lượng / định tính (Positive/Negative/Âm/Dương)
-                SplitValueAndQualifier(valueExt, out var result, out var result_value, out var posneg);
-
-                // 4) Tìm ResultXN đã có cho TestCode này
-                var objResultXN = patientResults.FirstOrDefault(r => r.Active == true && r.TestCodeId == objTestCode.Id);
-
-                if (objResultXN != null)
-                {
-                    // Ghi đè nếu bật overwrite hoặc hiện đang trống cả định lượng & định tính
-                    bool isEmpty = string.IsNullOrWhiteSpace(objResultXN.Result) && string.IsNullOrWhiteSpace(objResultXN.PosNeg);
-                    if (overwrite || isEmpty)
-                    {
-                        if (!string.IsNullOrWhiteSpace(result.ToString())) objResultXN.Result = result.ToString(); // định lượng (giá trị 3.12, 5.17) (Cột Result trong bảng ResultXN)
-                        if (!string.IsNullOrWhiteSpace(posneg)) objResultXN.PosNeg = posneg; // định tính (negative | positive) (Cột PosNeg trong bảng ResultXN)
-
-                        if (markValid)
-                        {
-                            objResultXN.ValidPrint = !string.IsNullOrWhiteSpace(objResultXN.Result?.Trim()) ||
-                                                 !string.IsNullOrWhiteSpace(objResultXN.PosNeg?.Trim());
-                        }
-
-                        // set Status của kết quả xét nghiệm 
-                        if (objTestCode != null && !string.IsNullOrEmpty(posneg)) // check theo định tính âm tính hay dương tính trước
-                        {
-                            if (objResultXN != null && objResultXN.PosNeg != null)
-                            {
-                                if (objResultXN.PosNeg == objTestCode.NormalResult.Trim())
-                                {
-                                    objResultXN.Status = 0;
-                                }
-                                else
-                                {
-                                    objResultXN.Status = 2;
-                                }
-                            }
-                            //else
-                            //{
-                            //    objResultXN.Result = Format_Decimal(result);
-                            //    objResultXN.PosNeg = posneg;
-                            //    objResultXN.Status = 0;
-                            //}
-                        }
-                        else if (objTestCode != null && string.IsNullOrEmpty(posneg))
-                        {
-                            if (objResultXN != null)
-                            {
-                                if (objTestCode.LowerLimit == null && objTestCode.HigherLimit != null)
-                                {
-                                    if (result_value > objTestCode.HigherLimit)
-                                    {
-                                        objResultXN.Status = 2;
-                                    }
-                                    else
-                                    {
-                                        objResultXN.Status = 0;
-                                    }
-                                }
-                                else if (objTestCode.LowerLimit != null && objTestCode.HigherLimit == null)
-                                {
-                                    if (result_value < objTestCode.LowerLimit)
-                                    {
-                                        objResultXN.Status = 1;
-                                    }
-                                    else
-                                    {
-                                        objResultXN.Status = 0;
-                                    }
-                                }
-                                else if (objTestCode.LowerLimit != null && objTestCode.HigherLimit != null)
-                                {
-                                    if (result_value < objTestCode.LowerLimit)
-                                    {
-                                        objResultXN.Status = 1;
-                                    }
-                                    else if (result_value > objTestCode.HigherLimit)
-                                    {
-                                        objResultXN.Status = 2;
-                                    }
-                                    else
-                                    {
-                                        objResultXN.Status = 0;
-                                    }
-                                }
-
-                                objResultXN.Result = result;
-                            }
-                            else
-                            {
-                                objResultXN.Result = result;
-                            }
-                        }
-                        objResultXN.Result = result;
-                        objResultXN.UserUpdateId = userId;
-                        changed++;
-                    }
-                    // nếu không overwrite và đã có giá trị thì bỏ qua
-                }
-                //else
-                //{
-                //    // 5) Chưa có -> cần tạo mới: tìm ServiceId phù hợp
-
-                //    // Ưu tiên: dịch vụ bệnh nhân đã có + có chứa test này
-                //    long? serviceId = svcTests
-                //        .Where(st => st.TestCodeId == objTestCode.Id && patientServiceIds.Contains(st.ServiceId))
-                //        .Select(st => (long?)st.ServiceId)
-                //        .FirstOrDefault();
-
-                //    // Fallback: bất kỳ dịch vụ nào chứa test này (chọn cái đầu tiên)
-                //    if (serviceId == null)
-                //    {
-                //        serviceId = svcTests
-                //            .Where(st => st.TestCodeId == objTestCode.Id)
-                //            .Select(st => (long?)st.ServiceId)
-                //            .FirstOrDefault();
-                //    }
-
-                //    if (serviceId == null) continue; // không tìm được dịch vụ chứa test này thì bỏ qua (cần bổ sung mapping)
-
-                //    var newRow = new ResultXN
-                //    {
-                //        Active = true,
-                //        PatientId = patientId,
-                //        TestCodeId = objTestCode.Id,
-                //        ServiceId = serviceId.Value,
-                //        UserInsertId = userId,
-                //        ValidPrint = markValid && (!string.IsNullOrWhiteSpace(result.ToString()) || !string.IsNullOrWhiteSpace(posneg)),
-                //        Status = 0,                                 // giữ nguyên convention như SaveService :contentReference[oaicite:3]{index=3}
-                //        StatusResult = StatusForResult.NotResult,   // như SaveService khi khởi tạo :contentReference[oaicite:4]{index=4}
-                //        Result = result.ToString() ?? string.Empty,
-                //        PosNeg = posneg ?? string.Empty,
-                //        InsertTime = now,
-                //        DoctorId = 0,                               // không rõ BS; có thể update sau tuỳ workflow
-                //        KeyResultForHis = keyResultForHis
-                //    };
-
-                //    await _db.ResultXNs.AddAsync(newRow);
-                //    patientResults.Add(newRow); // để các vòng sau thấy được
-                //    changed++;
-                //}
+                row.Result = nextResult;
+                row.PosNeg = nextPosNeg;  // Xóa giá trị định tính cũ nếu PDF mới chỉ có số.
+                row.Status = nextStatus;
+                row.ValidPrint = nextValid;
+                row.UserUpdateId = userId;
+                row.UpdateTime = now;
+                changed++;
             }
 
-            if (changed > 0)
-            {
-                await _db.SaveChangesAsync();
-            }
-
+            if (changed > 0) await _db.SaveChangesAsync();
             return changed;
+        }
+
+        private static string NormalizeExternalCodeForImport(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+            code = code.Trim();
+            if (code.EndsWith("_taman", StringComparison.OrdinalIgnoreCase))
+                code = code.Substring(0, code.Length - "_taman".Length);
+            code = code.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder();
+            foreach (char c in code)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark) continue;
+                if (c == 'đ' || c == 'Đ') { sb.Append('d'); continue; }
+                if (char.IsLetterOrDigit(c)) sb.Append(char.ToLowerInvariant(c));
+            }
+            return sb.ToString();
+        }
+
+        private static string NormalizeImportedQualifier(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+            var v = value.Trim().ToLowerInvariant();
+            return v switch
+            {
+                "âm tính" => "Negative",
+                "âm" => "Negative",
+                "am tinh" => "Negative",
+                "negative" => "Negative",
+                "dương tính" => "Positive",
+                "dương" => "Positive",
+                "duong tinh" => "Positive",
+                "positive" => "Positive",
+                _ => value.Trim()
+            };
         }
 
         public async Task<ResultXN> GetResultXNByKeyResultForHis(string keyResultForHis)
@@ -1060,69 +991,51 @@ namespace Management.BL
         /// Tách phần định lượng (số) và định tính (Positive|Negative|Âm|Dương) từ chuỗi giá trị.
         /// Ví dụ: "0.41 Negative" -> result="0.41", posneg="Negative"
         /// </summary>
-        private static void SplitValueAndQualifier(string input, out string? result, out double result_value, out string posneg)
+        private static void SplitValueAndQualifier(
+            string input, out string? result, out double resultValue, out string posneg)
         {
             result = null;
-            result_value = double.NaN;
-            posneg = "";
-
+            resultValue = double.NaN;
+            posneg = string.Empty;
             if (string.IsNullOrWhiteSpace(input)) return;
+            var raw = Regex.Replace(input.Trim(), @"\s+", " ");
 
-            string s = input.Trim();
-
-            // Qualifier âm/dương ở CUỐI chuỗi
-            var qTokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            // Một kết quả chỉ có định tính: không lưu 'Âm tính' vào Result.
+            var qualifierOnly = NormalizeImportedQualifier(raw);
+            if (qualifierOnly == "Positive" || qualifierOnly == "Negative")
             {
-                "positive", "negative", "âm", "dương", "am", "duong"
-            };
-            var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length >= 1 && qTokens.Contains(parts[^1]))
-            {
-                posneg = NormalizePosNeg(parts[^1]); // dùng hàm của bạn
-                s = string.Join(" ", parts.Take(parts.Length - 1)); // bỏ qualifier
-            }
-
-            // Chuẩn hoá toán tử (≥, ≤ -> >=, <=)
-            static string NormalizeOp(string op) => op switch
-            {
-                "≥" => ">=",
-                "≤" => "<=",
-                _ => op ?? string.Empty
-            };
-
-            // 1) Khớp toàn chuỗi: [op][number]
-            //    Hỗ trợ dấu thập phân , hoặc . và số mũ (e/E)
-            var full = Regex.Match(s, @"^\s*(?<op>>=|<=|>|<|≥|≤|=)?\s*(?<num>-?\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)\s*$");
-            if (full.Success)
-            {
-                var op = NormalizeOp(full.Groups["op"].Value);
-                var numRaw = full.Groups["num"].Value;
-                var numDot = numRaw.Replace(",", ".");
-                if (double.TryParse(numDot, NumberStyles.Float | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var val))
-                {
-                    result_value = val;
-                }
-                result = string.IsNullOrEmpty(op) ? numDot : (op + " " + numDot);
+                posneg = qualifierOnly;
                 return;
             }
 
-            // 2) Tìm [op][number] ở bất kỳ đâu trong chuỗi
-            var any = Regex.Match(s, @"(?<op>>=|<=|>|<|≥|≤|=)?\s*(?<num>-?\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)");
-            if (any.Success)
+            // Định lượng + định tính ở cuối, ví dụ '0.41 Negative'.
+            var mixed = Regex.Match(raw,
+                @"^(?<num>[<>≤≥=]?\s*[+-]?\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)\s+(?<qual>Positive|Negative|âm\s*tính|dương\s*tính|âm|dương)$",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            if (mixed.Success)
             {
-                var op = NormalizeOp(any.Groups["op"].Value);
-                var numRaw = any.Groups["num"].Value;
-                var numDot = numRaw.Replace(",", ".");
-                if (double.TryParse(numDot, NumberStyles.Float | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var val))
-                {
-                    result_value = val;
-                }
-                result = string.IsNullOrEmpty(op) ? numDot : (op + " " + numDot);
+                posneg = NormalizeImportedQualifier(mixed.Groups["qual"].Value);
+                raw = mixed.Groups["num"].Value.Trim();
+            }
+
+            // Chỉ bỏ cờ (H)/(L) cuối giá trị nếu cả ô là số.
+            // Giữ nguyên kết quả dạng khoảng '4-6', kết quả chữ, đơn vị phức tạp.
+            var numeric = Regex.Match(raw,
+                @"^(?<op>>=|<=|[><≤≥=])?\s*(?<num>[+-]?\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)\s*(?:\((?:H|L|CV)\))?$",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            if (numeric.Success)
+            {
+                var op = numeric.Groups["op"].Value.Replace("≥", ">=").Replace("≤", "<=");
+                var n = numeric.Groups["num"].Value.Replace(',', '.');
+                if (double.TryParse(n, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
+                    resultValue = parsed;
+                result = string.IsNullOrEmpty(op) ? n : op + " " + n;
                 return;
             }
 
-            // 3) Không tìm thấy số: lưu nguyên văn (sau khi bỏ qualifier), value = NaN
-            result = s;
+            // Fail-safe: lưu nguyên văn vào Result cho user kiểm tra; KHÔNG tự ý
+            // suy ra số để tính trạng thái (ví dụ '4-6' không biến thành '4').
+            result = raw;
         }
 
         private static string NormalizePosNeg(string token)

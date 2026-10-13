@@ -1572,7 +1572,7 @@ namespace Management.BL
                     {
                         foreach (var item in lstResult)
                         {
-                            if (item.TestCode.IsTestHead) continue;
+                            //if (item.TestCode.IsTestHead) continue;
 
                             //var result_BHYT = lstResult_BHYT.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
                             //if (result_BHYT == null)
