@@ -39,6 +39,31 @@ namespace Management.Models
         public int DurationMinutes { get; set; } = 60;
     }
 
+    // Batch: chỉ gửi identity của các dòng được chọn; lý do/thời hạn dùng chung.
+    public class ToolAdminBatchUnlockRequest
+    {
+        [Required, MinLength(1), MaxLength(50)]
+        public List<ToolAdminUnlockTarget> Items { get; set; } = new();
+
+        [Required, StringLength(1000, MinimumLength = 5)]
+        public string Reason { get; set; } = string.Empty;
+
+        [Range(5, 1440)]
+        public int DurationMinutes { get; set; } = 60;
+    }
+
+    public class ToolAdminUnlockTarget
+    {
+        [Required]
+        public string TargetType { get; set; } = string.Empty;
+
+        [Range(typeof(long), "1", "9223372036854775807")]
+        public long PatientId { get; set; }
+
+        public long? ResultCDHAId { get; set; }
+        public string ModuleCode { get; set; } = string.Empty;
+    }
+
     public class ToolAdminLockRequest
     {
         [Required]

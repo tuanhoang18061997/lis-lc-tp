@@ -613,6 +613,29 @@ namespace Management.BL
             return true;
         }
 
+        /// <summary>
+        /// Batch chỉ bỏ qua target đã có permission active (ADMIN/SAME_DAY),
+        /// không thay thế hoặc làm mới quyền đang cấp khi chọn tất cả.
+        /// </summary>
+        public async Task<bool> HasActiveUnlockForBatchAsync(
+            ToolAdminUnlockRequest request, DateTime now)
+        {
+            var targetType = NormalizeTargetType(request.TargetType);
+            var moduleCode = targetType == "XN" ? "XN" : NormalizeModule(request.ModuleCode);
+            if (request.PatientId <= 0 ||
+                (targetType != "XN" && (targetType != "CDHA" ||
+                  !CdhaModules.Contains(moduleCode) ||
+                  !request.ResultCDHAId.HasValue || request.ResultCDHAId <= 0)))
+                return false;
+
+            var resultId = targetType == "XN" ? (long?)null : request.ResultCDHAId;
+            return await _db.ResultEditUnlocks.AsNoTracking().AnyAsync(x =>
+                x.IsActive && x.RevokedAt == null && x.ExpireAt > now &&
+                x.PatientId == request.PatientId &&
+                x.ModuleCode == moduleCode &&
+                x.ResultCDHAId == resultId);
+        }
+
         public async Task<(bool Success, string Message, bool ShouldInvalid)> UnlockAsync(
             ToolAdminUnlockRequest request,
             long adminUserId,

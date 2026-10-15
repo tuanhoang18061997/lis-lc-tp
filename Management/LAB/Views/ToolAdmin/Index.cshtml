@@ -61,10 +61,20 @@
         <h2><i class="bi bi-list-check"></i> Danh sách kết quả</h2>
         <span id="tool-count">0 kết quả</span>
     </div>
+    <div class="tool-selection-toolbar">
+        <span id="tool-selected-count" aria-live="polite">Đã chọn 0 / 0 dòng đang hiển thị</span>
+        <button type="button" id="tool-bulk-unlock" class="btn btn-warning" disabled>
+            <i class="bi bi-key-fill"></i> Mở khóa các dòng đã chọn <span id="tool-bulk-count">(0)</span>
+        </button>
+    </div>
     <div class="table-responsive">
         <table class="table table-hover align-middle" id="tool-table">
             <thead>
                 <tr>
+                    <th class="select-cell">
+                        <input type="checkbox" id="tool-select-all" class="form-check-input tool-checkbox"
+                               aria-label="Chọn tất cả dòng đang hiển thị" title="Chọn tất cả dòng đang hiển thị" />
+                    </th>
                     <th>STT</th>
                     <th>Trạng thái</th>
                     <th>Bệnh nhân</th>
@@ -72,20 +82,19 @@
                     <th>Module</th>
                     <th>Thời gian trả KQ</th>
                     <th>Hết hạn mở</th>
-                    <th>Thao tác</th>
                 </tr>
                 <tr class="column-filters">
                     <th></th>
-                    <th><input data-column="1" placeholder="Lọc trạng thái" /></th>
+                    <th></th>
+                    <th><input data-column="2" placeholder="Lọc trạng thái" /></th>
                     <th>
                         <input type="text"
                                class="form-control"
-                               data-column="2"
+                               data-column="3"
                                placeholder="Lọc mã BN / mã BA / tên BN">
                     </th>
-                    <th><input data-column="3" placeholder="Lọc dịch vụ" /></th>
-                    <th><input data-column="4" placeholder="Lọc module" /></th>
-                    <th></th>
+                    <th><input data-column="4" placeholder="Lọc dịch vụ" /></th>
+                    <th><input data-column="5" placeholder="Lọc module" /></th>
                     <th></th>
                     <th></th>
                 </tr>

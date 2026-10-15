@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --tool-navy: #143f5c;
     --tool-blue: #0799c9;
     --tool-bg: #f3f7fa;
@@ -161,13 +161,36 @@ body {
 .stt-cell,
 .module-cell,
 .return-time-cell,
-.expire-time-cell,
-.action-cell {
+.expire-time-cell {
     white-space: nowrap;
 }
 
 .status-cell {
-    min-width: 145px;
+    /* Trạng thái và nút thao tác cùng ở đầu bảng, không cần cuộn ngang đến cuối. */
+    min-width: 220px;
+    width: 235px;
+}
+
+.status-main {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+}
+
+.status-main > .btn {
+    flex: 0 0 auto;
+    min-width: 82px;
+    padding: 4px 8px;
+    font-size: .77rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+/* Nút vẫn nằm dưới trạng thái nếu chiều rộng cột không đủ. */
+.status-main .status-badge {
+    max-width: 100%;
 }
 
 .status-badge,
@@ -611,4 +634,74 @@ body {
     .result-card .table-responsive {
         max-height: calc(100vh - 130px);
     }
+}
+
+/* =========================================================
+   TOOL ADMIN - CHỌN NHIỀU + MỞ KHÓA HÀNG LOẠT
+   ========================================================= */
+.tool-selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+    background: #f8fbfd;
+    border-bottom: 1px solid var(--tool-border);
+}
+
+#tool-selected-count {
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--tool-navy);
+}
+
+#tool-bulk-unlock {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+#tool-table .select-cell {
+    width: 48px;
+    min-width: 48px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#tool-table .tool-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+#tool-table .tool-row-selected > td {
+    background-color: #e8f4fc;
+}
+
+.swal-batch-summary {
+    padding: 12px;
+    text-align: left;
+    background: #f2f7fa;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+
+.swal-batch-results {
+    text-align: left;
+    font-size: .9rem;
+}
+
+.swal-batch-results ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    max-height: 220px;
+    overflow: auto;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+    .tool-selection-toolbar { padding: 10px 12px; }
+    #tool-bulk-unlock { width: 100%; }
 }
