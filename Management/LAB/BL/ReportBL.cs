@@ -1,4 +1,4 @@
-﻿using Management.Models;
+using Management.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Reflection;
@@ -10,110 +10,12 @@ using ClosedXML.Excel;
 
 namespace Management.BL
 {
-    public class ReportBL
+    public partial class ReportBL
     {
         private readonly LABContext _db;
         public ReportBL(LABContext db)
         {
             _db = db;
-        }
-
-        public byte[] ExportPatientServicesByDateToExcel(XNServiceByDateReport model)
-        {
-            using (var workbook = new XLWorkbook())
-            {
-                var ws = workbook.Worksheets.Add("BaoCaoXN");
-
-                int currentRow = 1;
-
-                // Title
-                ws.Cell(currentRow, 1).Value = $"BÁO CÁO XÉT NGHIỆM";
-                ws.Range(currentRow, 1, currentRow, 9).Merge().Style
-                    .Font.SetBold()
-                    .Font.SetFontSize(16)
-                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-
-                currentRow++;
-
-                ws.Cell(currentRow, 1).Value =
-                    $"Từ ngày {model.FromDate:dd/MM/yyyy} đến {model.ToDate:dd/MM/yyyy}";
-                ws.Range(currentRow, 1, currentRow, 9).Merge().Style
-                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-
-                currentRow += 2;
-
-                foreach (var group in model.DateGroups)
-                {
-                    // ===== HEADER NGÀY =====
-                    ws.Cell(currentRow, 1).Value =
-                        $"NGÀY THỰC HIỆN: {group.Date:dd/MM/yyyy}";
-
-                    ws.Range(currentRow, 1, currentRow, 9).Merge().Style
-                        .Font.SetBold()
-                        .Fill.SetBackgroundColor(XLColor.LightGray);
-
-                    currentRow++;
-
-                    // ===== HEADER TABLE =====
-                    ws.Cell(currentRow, 1).Value = "NGÀY THỰC HIỆN";
-                    ws.Cell(currentRow, 2).Value = "STT";
-                    ws.Cell(currentRow, 3).Value = "HỌ TÊN";
-                    ws.Cell(currentRow, 4).Value = "GIỚI TÍNH";
-                    ws.Cell(currentRow, 5).Value = "TUỔI";
-                    ws.Cell(currentRow, 6).Value = "ĐỐI TƯỢNG";
-                    ws.Cell(currentRow, 7).Value = "ĐỊA CHỈ";
-                    ws.Cell(currentRow, 8).Value = "YÊU CẦU";
-                    ws.Cell(currentRow, 9).Value = "NGƯỜI ĐỌC";
-
-                    ws.Range(currentRow, 1, currentRow, 9).Style
-                        .Font.SetBold()
-                        .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
-                        .Fill.SetBackgroundColor(XLColor.LightGray);
-
-                    currentRow++;
-
-                    // ===== DATA =====
-                    foreach (var row in group.Rows)
-                    {
-                        ws.Cell(currentRow, 1).Value = row.Date.ToString("yyyy-MM-dd");
-                        ws.Cell(currentRow, 2).Value = row.STT;
-                        ws.Cell(currentRow, 3).Value = row.PatientName;
-                        ws.Cell(currentRow, 4).Value = row.Gender;
-                        ws.Cell(currentRow, 5).Value = row.AgeValue;
-                        ws.Cell(currentRow, 6).Value = row.ObjectName;
-                        ws.Cell(currentRow, 7).Value = row.Address;
-                        ws.Cell(currentRow, 8).Value = row.ServiceName;
-                        ws.Cell(currentRow, 9).Value = row.ReaderName;
-
-                        currentRow++;
-                    }
-
-                    // ===== TOTAL =====
-                    ws.Cell(currentRow, 1).Value = $"TỔNG: {group.Total}";
-                    ws.Range(currentRow, 1, currentRow, 9).Merge().Style
-                        .Font.SetBold()
-                        .Fill.SetBackgroundColor(XLColor.LightGray);
-
-                    currentRow += 2;
-                }
-
-                // ===== FORMAT CHUNG =====
-                ws.Columns().AdjustToContents();
-
-                // Border
-                var usedRange = ws.RangeUsed();
-                if (usedRange != null)
-                {
-                    usedRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    usedRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-                }
-
-                using (var stream = new MemoryStream())
-                {
-                    workbook.SaveAs(stream);
-                    return stream.ToArray();
-                }
-            }
         }
 
         public async Task<List<TotalReportService>> GetReportByService(DateTime fromtime, DateTime totime, string location, string user, long? hospitalId)
@@ -2072,117 +1974,6 @@ namespace Management.BL
 
             return model;
         }
-
-        public async Task<XNServiceByDateReport> LC_GetPatientServicesByDateXN(DateTime fromtime, DateTime totime)
-        {
-            var start = fromtime.Date;
-            var end = totime.Date.AddDays(1);
-            var currentYear = DateTime.Now.Year;
-
-            var baseQuery =
-                from r in _db.ResultXNs
-                join p in _db.Patients on r.PatientId equals p.Id
-                join s in _db.Services on r.ServiceId equals s.Id
-                join u in _db.Users on p.UserReturnResultXN equals u.Id into userJoin
-                from u in userJoin.DefaultIfEmpty()
-                where r.Active == true
-                      && p.Active == true
-                      && r.ServiceId != null
-                      && p.InsertTime >= start
-                      && p.InsertTime < end
-                      && (p.ValidXN == true || p.ProcessXN == true)
-                select new
-                {
-                    Patient = p,
-                    ResultXN = r,
-                    Service = s,
-                    User = u
-                };
-
-            var distinctRows = await baseQuery
-                .GroupBy(x => new
-                {
-                    Date = x.Patient.InsertTime.HasValue ? x.Patient.InsertTime.Value.Date : start,
-                    PatientId = x.Patient.Id,
-                    ServiceId = x.ResultXN.ServiceId.Value
-                })
-                .Select(g => g
-                    .OrderByDescending(x => x.ResultXN.ValidTime ?? x.ResultXN.InsertTime)
-                    .ThenByDescending(x => x.ResultXN.Id)
-                    .FirstOrDefault())
-                .ToListAsync();
-
-            if (distinctRows == null || !distinctRows.Any())
-            {
-                return new XNServiceByDateReport
-                {
-                    FromDate = start,
-                    ToDate = totime,
-                    DateGroups = new List<XNServiceByDateGroup>()
-                };
-            }
-
-            int? CalculateAgeFromDate(DateTime? ageDate)
-            {
-                if (!ageDate.HasValue)
-                    return null;
-
-                return currentYear - ageDate.Value.Year;
-            }
-
-            string MapObjectName(string benhAn)
-            {
-                if (string.IsNullOrWhiteSpace(benhAn))
-                    return "";
-
-                switch (benhAn.Trim().ToLower())
-                {
-                    case "pakage":
-                        return "Khám sức khỏe";
-                    case "out":
-                        return "Dịch vụ";
-                    case "in":
-                        return "Nội trú";
-                    default:
-                        return benhAn;
-                }
-            }
-
-            var result = new XNServiceByDateReport
-            {
-                FromDate = start,
-                ToDate = totime,
-                DateGroups = distinctRows
-                    .Where(x => x != null && x.Patient.InsertTime.HasValue)
-                    .GroupBy(x => x.Patient.InsertTime.Value.Date)
-                    .OrderBy(g => g.Key)
-                    .Select(g => new XNServiceByDateGroup
-                    {
-                        Date = g.Key,
-                        Rows = g
-                            .OrderBy(x => x.Patient.Seq)
-                            .ThenBy(x => x.Patient.PatientName)
-                            .ThenBy(x => x.Service.Name)
-                            .Select((x, index) => new XNServiceByDateRow
-                            {
-                                STT = index + 1,
-                                Date = g.Key,
-                                PatientName = x.Patient.PatientName,
-                                Gender = x.Patient.Sex,
-                                AgeValue = CalculateAgeFromDate(x.Patient.Age),
-                                ObjectName = MapObjectName(x.Patient.BenhAn),
-                                Address = x.Patient.Address,
-                                ServiceName = x.Service.Name,
-                                ReaderName = x.User != null ? x.User.Name : ""
-                            })
-                            .ToList()
-                    })
-                    .ToList()
-            };
-
-            return result;
-        }
-
         public async Task<PatientServiceGroupedResultReport> LC_GetPatientResultGroupedByServiceXN(DateTime fromtime, DateTime totime)
         {
             var start = fromtime.Date;
@@ -2557,5 +2348,31 @@ namespace Management.BL
                 .ToList();
         }
 
+        public async Task<List<string>> LC_GetMaDotKhamOptionsAsync(string? keyword = null, CancellationToken cancellationToken = default)
+        {
+            const int maxItems = 100;
+            var term = keyword?.Trim();
+            var query = _db.Patients.AsNoTracking().Where(p => p.Active && p.MaDotKham != null && p.MaDotKham != "" &&
+                p.ResultXNs.Any(r => r.Active && r.Service != null && r.Service.Category != null &&
+                    r.Service.Category.Group != null && r.Service.Category.Group.Code == "XN"));
+
+            if (!string.IsNullOrEmpty(term)) query = query.Where(p => p.MaDotKham!.Contains(term));
+
+            var items = new List<string>(maxItems);
+            var uniqueCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var orderedQuery = query.OrderByDescending(p => p.InsertTime).ThenByDescending(p => p.Id).Select(p => p.MaDotKham);
+
+            // SQL chỉ sắp theo thời gian; không GROUP BY, MAX hay TRIM toàn bộ dữ liệu.
+            // Khi đã đủ 100 mã duy nhất, ngừng đọc dữ liệu từ SQL Server.
+            await foreach (var rawCode in orderedQuery.AsAsyncEnumerable().WithCancellation(cancellationToken))
+            {
+                var code = rawCode?.Trim();
+                if (string.IsNullOrWhiteSpace(code) || !uniqueCodes.Add(code)) continue;
+                items.Add(code);
+                if (items.Count >= maxItems) break;
+            }
+
+            return items;
+        }
     }
 }

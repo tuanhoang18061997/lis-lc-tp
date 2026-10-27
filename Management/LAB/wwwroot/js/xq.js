@@ -2174,6 +2174,26 @@ $(document).on('change', '.xq-chk-service', function () {
         }, 0);
     }
 });
+
+function Process_SaveDateToSession() {
+    var fromDate = document.getElementById('xq_process_timeSearchFrom').value;
+    var toDate = document.getElementById('xq_process_timeSearchTo').value;
+
+    if (fromDate && toDate) {
+        // Save to session via AJAX call when dates change
+        $.ajax({
+            url: '/XQ_Process/SaveSearchDates',
+            type: 'POST',
+            data: {
+                timeSearchFrom: fromDate,
+                timeSearchTo: toDate
+            },
+            success: function (result) {
+                // Optionally handle success
+            }
+        });
+    }
+}
 //***************************************************************************************** Return Result
 
 function ReturnResult_Refresh() {

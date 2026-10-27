@@ -158,162 +158,234 @@ namespace Management.BL
 
         public async Task Get_ResultXN_PushBHYT(DateTime from, DateTime to, string patientId)
         {
-            using (var context = new LABContext())
+            try
             {
-                var lstResult = new List<ResultXN>();
-                if (string.IsNullOrEmpty(patientId))
-                    lstResult = await context.ResultXNs.Where(p => p.Active == true && p.Patient.ValidXN == true && p.Patient.InsertTime > from && p.Patient.InsertTime < to).ToListAsync();
-                else
-                    lstResult = await context.ResultXNs.Where(p => p.Active == true && p.Patient.ValidXN == true && p.Patient.InsertTime > from && p.Patient.InsertTime < to && p.Patient.PatientId == patientId).ToListAsync();
-                var lstResult_BHYT = new List<Result_BHYT>();
+                using (var context = new LABContext())
+                {
+                    var lstResult = new List<ResultXN>();
+
+                    if (string.IsNullOrEmpty(patientId))
+                        lstResult = await context.ResultXNs.Where(p => p.Active == true &&
+                        (p.Patient.ValidXN == true || (p.Patient.NotFullResultXN == true && p.Patient.ProcessXN == true)) &&
+                        p.Patient.InsertTime > from && p.Patient.InsertTime < to).ToListAsync();
+                    else
+                        lstResult = await context.ResultXNs.Where(p => p.Active == true &&
+                        (p.Patient.ValidXN == true || (p.Patient.NotFullResultXN == true && p.Patient.ProcessXN == true)) &&
+                        p.Patient.InsertTime > from && p.Patient.InsertTime < to && p.Patient.PatientId == patientId).ToListAsync();
+
+                    var lstResult_BHYT = new List<Result_BHYT>();
+                    var lstStatusTicketItemId = new List<StatusTicketItemId>();
+
+
+                    if (lstResult != null)
+                    {
+                        foreach (var item in lstResult)
+                        {
+                            //if (item.TestCode.IsTestHead) continue;
+
+                            //var result_BHYT = lstResult_BHYT.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
+                            //if (result_BHYT == null)
+                            //{
+                            //    var nguoiThucHien = string.Empty;
+                            //    if (!string.IsNullOrEmpty(item?.Patient?.UserXN?.Name))
+                            //    {
+                            //        nguoiThucHien = item?.Patient?.UserXN?.Name.Split('.').Length > 1 ? item?.Patient?.UserXN?.Name.Split('.')[1].Trim() : item?.Patient?.UserXN?.Name.Trim();
+                            //    }
+                            //    var lstResult_XN = new List<Result_XN> { new Result_XN { param_code = item.TestCode.CodeBHYT, param_name = item.TestCode.NameBHYT, param_value = !string.IsNullOrEmpty(item.Result) ? item.Result : item.PosNeg, param_unit = item?.TestCode?.Unit } };
+                            //    var result_BHYT_New = new Result_BHYT { patient_id = item?.Patient?.PatientId, ticket_id = item?.Patient?.TicketId, service_id = item?.Service?.Code, ticket_item_id = item.TicketItemId, type = item.Patient.BenhAn, mechine_code = item.DeviceCodeBHYT, result = lstResult_XN, date = item.Patient.ReturnResultTimeXN ?? DateTime.Now, nguoi_thuc_hien = nguoiThucHien, bs_doc_kq = item?.Patient?.UserXN?.MaBHYT };
+                            //    lstResult_BHYT.Add(result_BHYT_New);
+                            //}
+                            //else
+                            //{
+                            //    var result_XN = new Result_XN { param_code = item.TestCode.CodeBHYT, param_name = item.TestCode.NameBHYT, param_value = !string.IsNullOrEmpty(item.Result) ? item.Result : item.PosNeg, param_unit = item?.TestCode?.Unit };
+                            //    result_BHYT.result.Add(result_XN);
+                            //}
+
+                            if (item.Patient.ValidXN == true)
+                            {
+                                var result_BHYT = lstResult_BHYT.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
+                                if (result_BHYT == null)
+                                {
+                                    var nguoiThucHien = string.Empty;
+                                    if (!string.IsNullOrEmpty(item?.Patient?.UserXN?.Name))
+                                    {
+                                        nguoiThucHien = item?.Patient?.UserXN?.Name.Split('.').Length > 1 ? item?.Patient?.UserXN?.Name.Split('.')[1].Trim() : item?.Patient?.UserXN?.Name.Trim();
+                                    }
+                                    var lstResult_XN = new List<Result_XN> { new Result_XN { param_code = item.TestCode.CodeBHYT, param_name = item.TestCode.NameBHYT, param_value = !string.IsNullOrEmpty(item.Result) ? item.Result : item.PosNeg, param_unit = item?.TestCode?.Unit } };
+                                    var result_BHYT_New = new Result_BHYT { patient_id = item?.Patient?.PatientId, ticket_id = item?.Patient?.TicketId, service_id = item?.Service?.Code, ticket_item_id = item.TicketItemId, type = item.Patient.BenhAn, mechine_code = item.DeviceCodeBHYT, result = lstResult_XN, date = item.Patient.ReturnResultTimeXN ?? DateTime.Now, nguoi_thuc_hien = nguoiThucHien, bs_doc_kq = item?.Patient?.UserXN?.MaBHYT };
+                                    lstResult_BHYT.Add(result_BHYT_New);
+                                }
+                                else
+                                {
+                                    var result_XN = new Result_XN { param_code = item.TestCode.CodeBHYT, param_name = item.TestCode.NameBHYT, param_value = !string.IsNullOrEmpty(item.Result) ? item.Result : item.PosNeg, param_unit = item?.TestCode?.Unit };
+                                    result_BHYT.result.Add(result_XN);
+                                }
+                            }
+
+                            // Set status cho Ticket_Item_Id
+                            var value = lstStatusTicketItemId.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
+                            if (value == null)
+                            {
+                                lstStatusTicketItemId.Add(new StatusTicketItemId { ticket_item_id = item.TicketItemId, type = item.TypeBenhAn, status = StatusForHIS.closed, sid = item.KeyResultForHis });
+                            }
+                        }
+
+                        if (lstResult_BHYT != null && lstResult_BHYT.Count > 0)
+                        {
+                            await Send_Result_BHYT(lstResult_BHYT);
+                            foreach (var item in lstResult)
+                            {
+                                item.PushBHYT = true;
+                            }
+                            await context.SaveChangesAsync();
+                        }
+
+                        if (lstStatusTicketItemId != null && lstStatusTicketItemId.Count > 0)
+                        {
+                            await UpdateStatusTicketItemId(lstStatusTicketItemId);
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        public async Task Get_ResultCDHA_PushBHYT(DateTime from, DateTime to, string patientId)
+        {
+            try
+            {
+                using (var context = new LABContext())
+                {
+                var lstResultImage = new List<ResultCDHA>();
                 var lstStatusTicketItemId = new List<StatusTicketItemId>();
 
+                if (string.IsNullOrEmpty(patientId))
+                    lstResultImage = await context.ResultCDHAs
+                    .Where(p => p.Active == true &&
+                                p.Patient.InsertTime > from &&
+                                p.Patient.InsertTime < to &&
+                                p.Service.Category.Code != "TDCN" &&
+                                !string.IsNullOrWhiteSpace(p.Result) &&
+                                (
+                                    p.IsValidated == true ||
+                                    (
+                                        p.IsValidated == null &&
+                                        (
+                                            (p.Patient.ValidSA == true && p.Service.Category.Code == "SA") ||
+                                            (p.Patient.ValidSAT == true && p.Service.Category.Code == "SAT") ||
+                                            (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
+                                            (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
+                                            (p.Patient.ValidNSCTC == true && p.Service.Category.Code == "NSCTC") ||
+                                            (p.Patient.ValidDDT == true && p.Service.Category.Code == "DDT")
+                                        )
+                                    )
+                                ))
+                    .ToListAsync();
+                else
+                    lstResultImage = await context.ResultCDHAs
+                    .Where(p => p.Active == true &&
+                                p.Patient.PatientId == patientId &&
+                                p.Patient.InsertTime > from &&
+                                p.Patient.InsertTime < to &&
+                                p.Service.Category.Code != "TDCN" &&
+                                !string.IsNullOrWhiteSpace(p.Result) &&
+                                (
+                                    p.IsValidated == true ||
+                                    (
+                                        p.IsValidated == null &&
+                                        (
+                                            (p.Patient.ValidSA == true && p.Service.Category.Code == "SA") ||
+                                            (p.Patient.ValidSAT == true && p.Service.Category.Code == "SAT") ||
+                                            (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
+                                            (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
+                                            (p.Patient.ValidNSCTC == true && p.Service.Category.Code == "NSCTC") ||
+                                            (p.Patient.ValidDDT == true && p.Service.Category.Code == "DDT")
+                                        )
+                                    )
+                                ))
+                    .ToListAsync();
+                    var lstResult_BHYT = new List<Result_BHYT>();
 
-                if (lstResult != null)
-                {
-                    foreach (var item in lstResult)
+                    if (lstResultImage != null)
                     {
-                        if (item.TestCode.IsTestHead) continue;
-                        var result_BHYT = lstResult_BHYT.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
-                        if (result_BHYT == null)
+                        foreach (var item in lstResultImage)
                         {
-                            var nguoiThucHien = string.Empty;
-                            if (!string.IsNullOrEmpty(item?.Patient?.UserXN?.Name))
+                            // Record service-level dùng LastValidatedAt riêng của chính dịch vụ.
+                            // Legacy hoặc fail-safe thiếu timestamp sẽ fallback Patient.ReturnResultTime* như trước.
+                            DateTime? legacyDate = item?.Service?.Category?.Code == "SA" ? item?.Patient?.ReturnResultTimeSA :
+                                                   (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.ReturnResultTimeSAT :
+                                                   (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.ReturnResultTimeXQ :
+                                                   (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.ReturnResultTimeDDT :
+                                                   (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.ReturnResultTimeNSCTC :
+                                                   (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.ReturnResultTimeTDCN : item?.Patient?.ReturnResultTimeNS)))));
+
+                            var date = item.IsValidated.HasValue && item.LastValidatedAt.HasValue ? item.LastValidatedAt : legacyDate;
+
+                            var nguoiThucHien = item?.Service?.Category?.Code == "SA" ? item?.Patient?.UserSA?.Name :
+                                              (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.Name :
+                                              (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.Name :
+                                              (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.UserDDT?.Name :
+                                              (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.UserNSCTC?.Name :
+                                              (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.UserTDCN?.Name : item?.Patient?.UserNS?.Name)))));
+
+                            var bsDocKQ = item?.Service?.Category?.Code == "SA" ? item?.Patient?.UserSA?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "DDT" ? item?.Patient?.UserDDT?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "NSCTC" ? item?.Patient?.UserNSCTC?.MaBHYT :
+                                         (item?.Service?.Category?.Code == "TDCN" ? item?.Patient?.UserTDCN?.MaBHYT : item?.Patient?.UserNS?.MaBHYT)))));
+
+                            if (!string.IsNullOrEmpty(nguoiThucHien))
                             {
-                                nguoiThucHien = item?.Patient?.UserXN?.Name.Split('.').Length > 1 ? item?.Patient?.UserXN?.Name.Split('.')[1].Trim() : item?.Patient?.UserXN?.Name.Trim();
+                                nguoiThucHien = nguoiThucHien.Split('.').Length > 1 ? nguoiThucHien.Split('.')[1].Trim() : nguoiThucHien.Trim();
                             }
-                            var lstResult_XN = new List<Result_XN> { new Result_XN { param_code = item.TestCode.CodeBHYT, param_name = item.TestCode.NameBHYT, param_value = !string.IsNullOrEmpty(item.Result) ? item.Result : item.PosNeg, param_unit = item?.TestCode?.Unit } };
-                            var result_BHYT_New = new Result_BHYT { patient_id = item?.Patient?.PatientId, ticket_id = item?.Patient?.TicketId, service_id = item?.Service?.Code, ticket_item_id = item.TicketItemId, type = item.Patient.BenhAn, mechine_code = item.DeviceCodeBHYT, result = lstResult_XN, date = item.Patient.ReturnResultTimeXN ?? DateTime.Now, nguoi_thuc_hien = nguoiThucHien, bs_doc_kq = item?.Patient?.UserXN?.MaBHYT };
-                            lstResult_BHYT.Add(result_BHYT_New);
+
+                            lstResult_BHYT.Add(new Result_BHYT { patient_id = item?.Patient?.PatientId, ticket_id = item?.Patient?.TicketId, service_id = item?.Service?.Code, ticket_item_id = item.TicketItemId, type = item.Patient.BenhAn, mechine_code = item.DeviceCodeBHYT, describe = item.Description, conclusion = item.Result, date = date ?? DateTime.Now, nguoi_thuc_hien = nguoiThucHien, bs_doc_kq = bsDocKQ });
+                            lstStatusTicketItemId.Add(new StatusTicketItemId { ticket_item_id = item.TicketItemId, type = item.TypeBenhAn, status = StatusForHIS.closed, sid = item.KeyResultForHis, result = item.Result });
                         }
-                        else
+                    }
+
+                    if (lstResult_BHYT != null && lstResult_BHYT.Count > 0)
+                    {
+                        await Send_Result_BHYT(lstResult_BHYT);
+                        foreach (var item in lstResultImage)
                         {
-                            var result_XN = new Result_XN { param_code = item.TestCode.CodeBHYT, param_name = item.TestCode.NameBHYT, param_value = !string.IsNullOrEmpty(item.Result) ? item.Result : item.PosNeg, param_unit = item?.TestCode?.Unit };
-                            result_BHYT.result.Add(result_XN);
+                            item.PushBHYT = true;
                         }
-                        // Set status cho Ticket_Item_Id
-                        var value = lstStatusTicketItemId.Where(p => p.ticket_item_id == item.TicketItemId).FirstOrDefault();
-                        if (value == null)
-                        {
-                            lstStatusTicketItemId.Add(new StatusTicketItemId { ticket_item_id = item.TicketItemId, type = item.TypeBenhAn, status = StatusForHIS.closed, sid = item.KeyResultForHis });
-                        }
+                        await context.SaveChangesAsync();
                     }
 
                     if (lstStatusTicketItemId != null && lstStatusTicketItemId.Count > 0)
                     {
                         await UpdateStatusTicketItemId(lstStatusTicketItemId);
                     }
-
-                    if (lstResult_BHYT != null && lstResult_BHYT.Count > 0)
-                    {
-                        await Send_Result_BHYT(lstResult_BHYT);
-                        foreach (var item in lstResult)
-                        {
-                            item.PushBHYT = true;
-                        }
-                        await context.SaveChangesAsync();
-                    }
                 }
             }
-        }
-
-        public async Task Get_ResultCDHA_PushBHYT(DateTime from, DateTime to, string patientId)
-        {
-            using (var context = new LABContext())
-            {
-                var lstResultImage = new List<ResultCDHA>();
-                var lstStatusTicketItemId = new List<StatusTicketItemId>();
-                if (string.IsNullOrEmpty(patientId))
-                    lstResultImage = await context.ResultCDHAs.Where(p => p.Active == true && p.Patient.InsertTime > from && p.Patient.InsertTime < to &&
-                                                         ((p.Patient.ValidSA == true && p.Service.Category.Code == "SA") ||
-                                                         (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
-                                                         (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
-                                                         (p.Patient.ValidSAT == true && p.Service.Category.Code == "SAT"))).ToListAsync();
-                else
-                    lstResultImage = await context.ResultCDHAs.Where(p => p.Active == true && p.Patient.PatientId == patientId && p.Patient.InsertTime > from && p.Patient.InsertTime < to &&
-                                                         ((p.Patient.ValidSA == true && p.Service.Category.Code == "SA") ||
-                                                         (p.Patient.ValidXQ == true && p.Service.Category.Code == "XQ") ||
-                                                         (p.Patient.ValidNS == true && p.Service.Category.Code == "NS") ||
-                                                         (p.Patient.ValidSAT == true && p.Service.Category.Code == "SAT"))).ToListAsync();
-                var lstResult_BHYT = new List<Result_BHYT>();
-                if (lstResultImage != null)
-                {
-                    foreach (var item in lstResultImage)
-                    {
-                        var date = item?.Service?.Category?.Code == "SA" ? item?.Patient?.ReturnResultTimeSA :
-                                      (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.ReturnResultTimeSAT :
-                                      (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.ReturnResultTimeXQ : item?.Patient?.ReturnResultTimeNS));
-
-                        var nguoiThucHien = item?.Service?.Category?.Code == "SA" ? item?.Patient?.UserSA?.Name :
-                                  (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.Name :
-                                  (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.Name : item?.Patient?.UserNS?.Name));
-
-                        var bsDocKQ = item?.Service?.Category?.Code == "SA" ? item?.Patient?.UserSA?.MaBHYT :
-                                    (item?.Service?.Category?.Code == "SAT" ? item?.Patient?.UserSAT?.MaBHYT :
-                                    (item?.Service?.Category?.Code == "XQ" ? item?.Patient?.UserReturnXQ?.MaBHYT : item?.Patient?.UserNS?.MaBHYT));
-
-                        if (!string.IsNullOrEmpty(nguoiThucHien))
-                        {
-                            nguoiThucHien = nguoiThucHien.Split('.').Length > 1 ? nguoiThucHien.Split('.')[1].Trim() : nguoiThucHien.Trim();
-                        }
-
-                        lstResult_BHYT.Add(new Result_BHYT { patient_id = item?.Patient?.PatientId, ticket_id = item?.Patient?.TicketId, service_id = item?.Service?.Code, ticket_item_id = item.TicketItemId, type = item.Patient.BenhAn, mechine_code = item.DeviceCodeBHYT, describe = item.Description, conclusion = item.Result, date = date ?? DateTime.Now, nguoi_thuc_hien = nguoiThucHien, bs_doc_kq = bsDocKQ });
-                        // check dịch vụ đó đã có kết luận chưa thì mới chuyển status
-                        if (item.Result != null)
-                        {
-                            lstStatusTicketItemId.Add(new StatusTicketItemId { ticket_item_id = item.TicketItemId, type = item.TypeBenhAn, status = StatusForHIS.closed, sid = item.KeyResultForHis, result = item.Result });
-                        }
-                    }
-                }
-                var lstResultImageTmp = new List<ResultCDHA>();
-
-                if (lstStatusTicketItemId != null && lstStatusTicketItemId.Count > 0)
-                {
-                    var ticketItemIds = lstStatusTicketItemId.Select(x => x.ticket_item_id).ToList();
-
-                    lstResultImageTmp = lstResultImage
-                                        .Where(x => ticketItemIds.Contains(x.TicketItemId))
-                                        .ToList();
-                }
-                if (lstStatusTicketItemId != null && lstStatusTicketItemId.Count > 0)
-                {
-                    await UpdateStatusTicketItemId(lstStatusTicketItemId);
-                    foreach (var item in lstResultImageTmp)
-                    {
-                        item.PushBHYT = true;
-                    }
-                    await context.SaveChangesAsync();
-                }
-
-                if (lstResult_BHYT != null && lstResult_BHYT.Count > 0)
-                {
-                    await Send_Result_BHYT(lstResult_BHYT);
-                    //foreach (var item in lstResultImage)
-                    //{
-                    //    item.PushBHYT = true;
-                    //}
-                    //await context.SaveChangesAsync();
-                }
-            }
+            catch { }
         }
 
         public async Task Send_Result_BHYT(List<Result_BHYT> lstValue)
         {
-            var settingAPISendResult = await _db.Settings.Where(p => p.Code == SettingBL.APISendResult).FirstOrDefaultAsync();
-            if (settingAPISendResult != null && !string.IsNullOrEmpty(settingAPISendResult.Value))
+            try
             {
-                HttpResponseMessage response = new HttpResponseMessage();
-                using (var client = new HttpClient())
+                var settingAPISendResult = await _db.Settings.Where(p => p.Code == SettingBL.APISendResult).FirstOrDefaultAsync();
+
+                if (settingAPISendResult != null && !string.IsNullOrEmpty(settingAPISendResult.Value))
                 {
-                    client.Timeout = TimeSpan.FromSeconds(10);
-                    client.BaseAddress = new Uri(settingAPISendResult.Value);
-                    var myContent = JsonConvert.SerializeObject(lstValue);
-                    var buffer = Encoding.UTF8.GetBytes(myContent);
-                    var byteContent = new ByteArrayContent(buffer);
-                    byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                    response = client.PostAsync("", byteContent).Result;
+                    HttpResponseMessage response = new HttpResponseMessage();
+                    using (var client = new HttpClient())
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(10);
+                        client.BaseAddress = new Uri(settingAPISendResult.Value);
+                        var myContent = JsonConvert.SerializeObject(lstValue);
+                        var buffer = Encoding.UTF8.GetBytes(myContent);
+                        var byteContent = new ByteArrayContent(buffer);
+                        byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                        response = client.PostAsync("", byteContent).Result;
+                    }
                 }
             }
+            catch { }
         }
 
         public async Task UpdateStatusTicketItemId(List<StatusTicketItemId> lstValue)

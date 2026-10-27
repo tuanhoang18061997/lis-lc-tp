@@ -1,98 +1,71 @@
-﻿@{
-    ViewData["Title"] = "Báo cáo thống kê";
+@{
+    ViewData["Title"] = "Trung tâm báo cáo";
     Layout = "_LayoutReport";
-    var lstUser = ViewData["lstUser"] as List<Management.Models.User>;
-    var lstHospital = ViewData["lstHospital"] as List<Management.Models.Hospital>;
 }
 
-<div class="report-container">
-    <div id="report-option-search" class="report-option-search">
-         @* <div class="input">
-            <select id="report-hospital" class="form-select height-28">
-                <option value="" disabled selected>-- Chọn bệnh viện --</option>
-                @if (lstHospital != null)
-                {
-                    foreach (var item in lstHospital)
-                    {
-                        <option value="@item.Id">@item.Name</option>
-                    }
-                }
-            </select>
-        </div>  *@
-        <div class="input1">
-            <input type="date" id="report-time-from" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+<link rel="stylesheet" href="~/css/report-xn-by-date.css" asp-append-version="true" />
+
+<div class="report-container report-shell" id="report-shell">
+    <aside class="report-sidebar" id="report-sidebar" aria-label="Danh mục báo cáo">
+        <div class="report-sidebar-header">
+            <h2><i class="bi bi-grid-1x2"></i> Danh sách báo cáo</h2>
+            <button type="button" id="report-sidebar-collapse" class="report-sidebar-collapse btn" aria-label="Thu gọn danh mục báo cáo" aria-controls="report-sidebar" aria-expanded="true" title="Thu gọn danh mục báo cáo"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
         </div>
-        <div class="input1">
-            <input type="date" id="report-time-to" class="form-control height-28" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+        <div class="report-sidebar-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" id="report-menu-search" class="form-control" placeholder="Tìm tên báo cáo..." aria-label="Tìm báo cáo" autocomplete="off" />
         </div>
-        <div class="input1">
-            <select id="report-type" class="form-select height-28 valid">
-                <option value="" disabled selected>-- Chọn loại báo cáo --</option>
-                <option value="1" selected>Theo dịch vụ</option>
-                <option value="2">Theo số ca</option>
-                <option value="3">Công thực hiện</option>
-                <option value="4">Khách hàng thực hiện XÉT NGHIỆM theo DỊCH VỤ</option>
-                <option value="5">Khách hàng thực hiện XÉT NGHIỆM theo NGÀY</option>
-                @*<option value="4">Test Covid</option> *@
-            </select>
+        <nav id="report-menu" class="report-menu" aria-label="Các báo cáo">
+            <div class="report-menu-group" data-report-group>
+                <div class="report-menu-label">BÁO CÁO TỔNG HỢP</div>
+                <button type="button" class="report-menu-item active" data-report-type="1" data-title="Thống kê theo dịch vụ" data-description="Tổng hợp số lượng thực hiện theo từng dịch vụ." aria-pressed="true"><i class="bi bi-bar-chart"></i><span>Theo dịch vụ</span></button>
+                <button type="button" class="report-menu-item" data-report-type="2" data-title="Thống kê theo số ca" data-description="Thống kê số ca theo khoảng thời gian và chuyên khoa." aria-pressed="false"><i class="bi bi-people"></i><span>Theo số ca</span></button>
+                <button type="button" class="report-menu-item" data-report-type="3" data-title="Công thực hiện" data-description="Thống kê công thực hiện và chi tiết dịch vụ." aria-pressed="false"><i class="bi bi-person-check"></i><span>Công thực hiện</span></button>
+            </div>
+            <div class="report-menu-group" data-report-group>
+                <div class="report-menu-label">BÁO CÁO XÉT NGHIỆM</div>
+                <button type="button" class="report-menu-item" data-report-type="4" data-title="XN theo dịch vụ" data-description="Xem kết quả xét nghiệm, nhóm theo từng dịch vụ." aria-pressed="false"><i class="bi bi-calendar3"></i><span>Khách hàng XN theo dịch vụ</span></button>
+                <button type="button" class="report-menu-item" data-report-type="5" data-title="XN theo ngày" data-description="Xem danh sách khách hàng thực hiện xét nghiệm theo ngày." aria-pressed="false"><i class="bi bi-calendar3"></i><span>Khách hàng XN theo ngày</span></button>
+                <button type="button" class="report-menu-item" data-report-type="XN-SERVICE-DETAIL" data-title="Thống kê dịch vụ XN" data-description="Báo cáo chi tiết 15 cột theo mẫu Excel thống kê dịch vụ xét nghiệm." aria-pressed="false"><i class="bi bi-file-earmark-spreadsheet"></i><span>Thống kê dịch vụ XN</span></button>
+            </div>
+            <div class="report-menu-empty" id="report-menu-empty" hidden>Không tìm thấy báo cáo phù hợp.</div>
+        </nav>
+    </aside>
+
+    <section class="report-workspace" aria-label="Nội dung báo cáo">
+        <div class="report-compact-nav">
+            <button type="button" id="report-menu-toggle" class="report-menu-toggle btn" aria-controls="report-sidebar" aria-expanded="true" aria-label="Thu gọn danh mục báo cáo" title="Thu gọn danh mục báo cáo"><i class="bi bi-layout-sidebar-inset"></i></button>
+            <nav class="report-breadcrumb" aria-label="Đường dẫn báo cáo">Báo cáo <span class="report-breadcrumb-divider">/</span> <span id="report-current-group">Tổng hợp</span> <span class="report-breadcrumb-divider">/</span> <strong id="report-current-title">Thống kê theo dịch vụ</strong></nav>
         </div>
-        <div class="input1">
-            <select id="report-location" class="form-select height-28 valid">
-                <option value="" disabled selected>-- Chọn khoa --</option>
-                <option value="XN">Xét nghiệm</option>
-                <option value="SA">Siêu âm</option>
-                <option value="NS">Nội soi</option>
-                <option value="DDT">Đo điện tim</option>
-                <option value="XQ">X-Quang</option>
-                <option value="TDCN">Thăm dò CN</option>
-            </select>
+
+        <div class="report-filter-panel">
+            <div class="report-filter-toolbar">
+                <div id="report-option-search" class="report-option-search">
+                    <input type="hidden" id="report-type" value="1" />
+                    <div class="report-filter-field report-filter-date"><label for="report-time-from">Từ ngày <span class="report-required">*</span></label><input type="date" id="report-time-from" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" /></div>
+                    <div class="report-filter-field report-filter-date"><label for="report-time-to">Đến ngày <span class="report-required">*</span></label><input type="date" id="report-time-to" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" /></div>
+                    <div class="report-filter-field" id="report-location-wrapper"><label for="report-location">Khoa <span class="report-required">*</span></label><select id="report-location" class="form-select valid"><option value="">-- Chọn khoa --</option><option value="XN" selected>Xét nghiệm</option><option value="SA">Siêu âm</option><option value="NS">Nội soi</option><option value="DDT">Đo điện tim</option><option value="XQ">X-Quang</option><option value="TDCN">Thăm dò CN</option></select></div>
+                    <div class="report-filter-field" id="report-category-wrapper" hidden><label for="report-category-code">Danh mục</label><select id="report-category-code" class="form-select" name="categoryCode" disabled><option value="">-- Tất cả danh mục --</option></select></div>
+                    <div class="report-filter-field report-filter-field-wide" id="report-madotkham-wrapper" hidden><label for="report-ma-dot-kham">Mã đợt khám <span class="report-required">*</span></label><select id="report-ma-dot-kham" class="form-control" aria-label="Chọn Mã Đợt Khám"><option value=""></option></select><div class="report-filter-hint" id="report-madotkham-hint">Chọn mã gần đây hoặc nhập để tìm trên toàn bộ dữ liệu.</div></div>
+                    <div class="report-filter-field report-filter-completed" id="report-xn-completed-wrapper" hidden><label for="report-xn-completed">Trạng thái</label><select id="report-xn-completed" class="form-select"><option value="true" selected>Đã hoàn thành</option><option value="false">Tất cả</option></select></div>
+                    <div class="report-filter-field report-filter-field-wide" id="report-service-wrapper"><label for="report-service-name">Tìm dịch vụ</label><input id="report-service-name" type="search" class="form-control" placeholder="Nhập tên dịch vụ..." disabled /></div>
+                </div>
+                <div class="report-button">
+                    <button type="button" id="report-search" class="btn btn-primary" title="Xem báo cáo" onclick="Report_Search_New()"><i class="bi bi-search"></i> Xem</button>
+                    <button type="button" id="report-excel" class="btn btn-outline-success" title="Xuất Excel" disabled><i class="bi bi-file-earmark-spreadsheet"></i> Excel</button>
+                    <button type="button" id="report-reset" class="btn btn-outline-secondary" title="Đặt lại bộ lọc"><i class="bi bi-arrow-counterclockwise"></i> Đặt lại</button>
+                </div>
+            </div>
         </div>
-        <div id="report-category-wrapper"
-             class="input1"
-             style="display: none; min-width: 175px;">
-            <select id="report-category-code"
-                    name="categoryCode"
-                    class="form-control"
-                    disabled>
-                <option value="">-- Tất cả danh mục --</option>
-            </select>
+
+        <div class="report-results-panel">
+            <div class="report-results-header"><div><i class="bi bi-table"></i> Kết quả báo cáo</div><span id="report-result-note">Chưa tải dữ liệu</span></div>
+            <div id="report-result" class="report-result" aria-live="polite"><div class="report-empty-state"><i class="bi bi-clipboard-data"></i><h3>Chưa có dữ liệu hiển thị</h3><p>Chọn thời gian và nhấn “Xem báo cáo” để tải dữ liệu.</p></div></div>
         </div>
- @*         <div class="input">
-            <select id="report-user" class="form-select height-28 valid">
-                <option value="" disabled selected>-- Chọn người báo cáo --</option>
-                @if (lstUser != null)
-                {
-                    foreach (var item in lstUser)
-                    {
-                        <option value="@item.Id">@item.Name</option>
-                    }
-                }
-            </select>
-        </div>  *@
-        <div class="input1">
-            <input id="report-service-name" type="text" class="form-control height-28" placeholder="-- Tên dịch vụ --" />
-        </div>
-    </div>
-    <div class="report-button">
-        <div class="button">
-            <button id="report-search" class="btn btn-success btn-blue" onclick="Report_Search_New()">
-                <i class="bi bi-search"></i> Xem trước
-            </button>
-        </div>
-        @* <div class="button">
-            <button id="report-pdf" class="btn btn-success btn-blue" onclick="Report_PDF()">
-                <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
-            </button>
-        </div> *@
-        <div class="button">
-            <button id="report-excel" class="btn btn-success btn-blue" onclick="Report_Excel('xlsx')">
-                <i class="bi bi-file-earmark-spreadsheet"></i> Xuất Excel
-            </button>          
-        </div>
-        @*<a asp-action="Full" asp-controller="Report_BaoCaoThongKe">Test Export</a>*@
-    </div>
-    <div id="report-result" class="report-result">
-        @await Html.PartialAsync("_ReportByService")
-    </div>
+    </section>
 </div>
 @await Html.PartialAsync("_Loading")
+
+@section Scripts {
+    <script src="~/js/report-xn-by-date.js" asp-append-version="true"></script>
+}

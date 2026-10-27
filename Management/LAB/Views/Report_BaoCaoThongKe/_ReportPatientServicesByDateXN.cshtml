@@ -157,6 +157,15 @@
         background: #fafafa;
     }
 
+    .date-report-table th.address-column,
+    .date-report-table td.address-column {
+        max-width: 220px; /* Bạn có thể tùy chỉnh kích thước này (ví dụ: 180px, 220px, 250px) */
+        min-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     @@media (max-width: 768px) {
         .date-block-header {
             align-items: flex-start;
@@ -308,7 +317,7 @@
                                             <th style="width:70px;">GIỚI</th>
                                             <th style="width:70px;">TUỔI</th>
                                             <th style="width:120px;">ĐỐI TƯỢNG</th>
-                                            <th>ĐỊA CHỈ</th>
+                                            <th class="address-column">ĐỊA CHỈ</th>
                                             <th>YÊU CẦU</th>
                                             <th style="width:180px;">NGƯỜI ĐỌC</th>
                                         </tr>
@@ -333,7 +342,7 @@
                                                     <td>@row.Gender</td>
                                                     <td style="text-align:center;">@(row.AgeValue.HasValue ? row.AgeValue.Value.ToString() : "")</td>
                                                     <td>@row.ObjectName</td>
-                                                    <td>@row.Address</td>
+                                                    <td class="address-column" title="@row.Address">@row.Address</td>
                                                     <td>@row.ServiceName</td>
                                                     <td>@row.ReaderName</td>
                                                 </tr>

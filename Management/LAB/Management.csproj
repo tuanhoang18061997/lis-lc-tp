@@ -172,4 +172,11 @@
     <Folder Include="wwwroot\js\pdf\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="ReportTemplates\XNServiceStatistics.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  
 </Project>

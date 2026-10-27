@@ -1,13 +1,14 @@
-﻿using Management.BL;
+using Management.BL;
 using Management.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace Management.Controllers
 {
-    public class Report_BaoCaoThongKeController : Controller
+    public partial class Report_BaoCaoThongKeController : Controller
     {
         
         public readonly ILogger<Report_BaoCaoThongKeController> _logger;
@@ -20,11 +21,12 @@ namespace Management.Controllers
         public readonly ResultXNBL _resultXNBL;
         public readonly HospitalBL _hospitalBL;
         public readonly ReportBL _reportBL;
+        private readonly IDistributedCache _reportCache;
         public readonly IWebHostEnvironment _environment;
         public readonly ToolBL _toolBL;
 
         public Report_BaoCaoThongKeController(ILogger<Report_BaoCaoThongKeController> logger, PatientCDHABL patientCDHABL, PatientXNBL patientXNBL, LocationBL locationBL, ToolBL toolBL,
-                                              UserBL userBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, ResultXNBL resultXNBL, ReportBL reportBL, HospitalBL hospitalBL, IWebHostEnvironment environment)
+                                              UserBL userBL, ServiceBL serviceBL, ResultCDHABL resultCDHABL, ResultXNBL resultXNBL, ReportBL reportBL, HospitalBL hospitalBL, IWebHostEnvironment environment, IDistributedCache reportCache)
         {
             _logger = logger;
             _patientCDHABL = patientCDHABL;
@@ -35,6 +37,7 @@ namespace Management.Controllers
             _userBL = userBL;
             _serviceBL = serviceBL;
             _reportBL = reportBL;
+            _reportCache = reportCache;
             _hospitalBL = hospitalBL;
             _environment = environment;
             _toolBL = toolBL;
@@ -321,21 +324,6 @@ namespace Management.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> ExportPatientServicesByDateXN(DateTime fromtime, DateTime totime)
-        {
-            var model = await _reportBL.LC_GetPatientServicesByDateXN(fromtime, totime);
-
-            var fileBytes = _reportBL.ExportPatientServicesByDateToExcel(model);
-
-            var fileName = $"BaoCaoXN_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-
-            return File(fileBytes,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                fileName);
-        }
-
-        [HttpGet]
         public async Task<IActionResult> GetXNReportCategories()
         {
             try
@@ -352,6 +340,29 @@ namespace Management.Controllers
                     message = ex.Message
                 });
             }
+        }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetMaDotKhamOptions(string? term = null)
+        {
+            var keyword = term?.Trim();
+            List<string> items;
+
+            if (string.IsNullOrEmpty(keyword))
+            {
+                const string cacheKey = "Report:MaDotKham:Latest100:v2";
+                var cached = await _reportCache.GetStringAsync(cacheKey, HttpContext.RequestAborted);
+                if (cached != null) items = System.Text.Json.JsonSerializer.Deserialize<List<string>>(cached) ?? new List<string>();
+                else
+                {
+                    items = await _reportBL.LC_GetMaDotKhamOptionsAsync(null, HttpContext.RequestAborted);
+                    var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(3));
+                    await _reportCache.SetStringAsync(cacheKey, System.Text.Json.JsonSerializer.Serialize(items), options, HttpContext.RequestAborted);
+                }
+            }
+            else items = await _reportBL.LC_GetMaDotKhamOptionsAsync(keyword, HttpContext.RequestAborted);
+
+            return Json(items.Select(x => new { id = x, text = x }));
         }
     }
 }
