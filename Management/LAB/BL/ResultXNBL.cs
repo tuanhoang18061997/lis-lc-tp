@@ -1,4 +1,4 @@
-﻿using Management.Models;
+using Management.Models;
 using Management.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -935,6 +935,206 @@ namespace Management.BL
 
             if (changed > 0) await _db.SaveChangesAsync();
             return changed;
+        }
+
+
+        /// <summary>
+        /// Import tạm thời riêng CBC ServiceId=12216: whitelist TestCodeId+Code và ServiceTest,
+        /// không liên quan gate _taman, không insert ResultXN, không update dịch vụ khác.
+        /// Bắt buộc khớp họ tên PDF với bệnh nhân nội bộ và đủ 22 dòng CBC.
+        /// </summary>
+        public async Task<int> UpdateCBC12216FromExternal(
+            long patientId,
+            IReadOnlyList<Management.Services.LabParsing.Cbc12216ParsedResult> items,
+            string pdfPatientName,
+            string pId,
+            string maBenhAn,
+            bool overwrite,
+            bool markValid,
+            long? userId,
+            bool dryRun = false)
+        {
+            var spec = Management.Services.LabParsing.Cbc12216ResultMapper.ExpectedCodes;
+            const long serviceId = Management.Services.LabParsing.Cbc12216ResultMapper.ServiceId;
+            if (patientId <= 0 || items == null || items.Count != spec.Count ||
+                items.Select(x => x.TestCodeId).Distinct().Count() != spec.Count)
+                throw new InvalidDataException("Không đủ 22 kết quả CBC hợp lệ.");
+
+            var patient = await _db.Patients.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == patientId);
+            if (patient == null)
+                throw new InvalidOperationException("Không tìm thấy bệnh nhân trong LIS.");
+            if (!string.IsNullOrWhiteSpace(pId) &&
+                !string.Equals(patient.PatientId?.Trim(), pId.Trim(), StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Mã bệnh nhân trên giao diện không khớp LIS.");
+            if (!string.IsNullOrWhiteSpace(maBenhAn) &&
+                !string.Equals(patient.MaBenhAn?.Trim(), maBenhAn.Trim(), StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Mã bệnh án trên giao diện không khớp LIS.");
+            if (string.IsNullOrWhiteSpace(pdfPatientName) ||
+                NormalizeCBCPatientName(pdfPatientName) != NormalizeCBCPatientName(patient.PatientName))
+                throw new InvalidOperationException("Họ tên bệnh nhân trên PDF không khớp LIS. Không cập nhật CBC.");
+
+            if (!await _resultEditUnlockBL.CanEditXNAsync(patientId, ToolBL.Get_DateNow()))
+                throw new InvalidOperationException("Bệnh nhân đang khóa chỉnh sửa xét nghiệm.");
+
+            var ids = spec.Keys.ToList();
+            var serviceTestIds = await _db.ServiceTests.AsNoTracking()
+                .Where(x => x.ServiceId == serviceId && x.TestCodeId.HasValue && ids.Contains(x.TestCodeId.Value))
+                .Select(x => x.TestCodeId.Value)
+                .ToListAsync();
+            if (serviceTestIds.Distinct().Count() != ids.Count)
+                throw new InvalidOperationException("ServiceTest của dịch vụ 12216 chưa map đủ 22 mã.");
+
+            var codes = await _db.TestCodes.AsNoTracking()
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            if (codes.Count != ids.Count || codes.Any(c =>
+                    !spec.TryGetValue(c.Id, out var expected) ||
+                    !string.Equals(c.Code?.Trim(), expected, StringComparison.OrdinalIgnoreCase) ||
+                    !c.Active))
+                throw new InvalidOperationException("Danh sách TestCode CBC không khớp cấu hình LIS.");
+
+            var results = await _db.ResultXNs
+                .Where(r => r.Active && r.PatientId == patientId && r.ServiceId == serviceId &&
+                    r.TestCodeId.HasValue && ids.Contains(r.TestCodeId.Value))
+                .ToListAsync();
+            if (results.Count != ids.Count ||
+                results.GroupBy(r => r.TestCodeId).Any(g => g.Count() != 1))
+                throw new InvalidOperationException("ResultXN dịch vụ 12216 không có đúng 22 dòng duy nhất.");
+            if (results.Any(r => r.SignStoreId > 0 && r.SignStatus == 1))
+                throw new InvalidOperationException("CBC đã được ký số. Phải đi qua quy trình Invalid trước khi sửa.");
+            var resultByCode = results.ToDictionary(r => r.TestCodeId.Value);
+            var codeById = codes.ToDictionary(c => c.Id);
+            bool isFemale = IsCBC12216Female(patient.Sex);
+
+            // Preflight kiểm tra ngưỡng LIS (kể cả dryRun) TRƯỚC khi lưu metadata PDF.
+            // Status CBC chỉ tính từ TestCode trên LIS, KHÔNG dùng entry.PdfStatus.
+            var lisStatuses = items.ToDictionary(
+                entry => entry.TestCodeId,
+                entry => CalculateCBC12216StatusFromLis(entry.Number, codeById[entry.TestCodeId],
+                    isFemale, out _, out _));
+            if (dryRun) return 0; // Không sửa dữ liệu.
+
+            var now = ToolBL.Get_DateNow();
+            int updated = 0;
+            foreach (var entry in items)
+            {
+                var row = resultByCode[entry.TestCodeId];
+                if (!overwrite && (!string.IsNullOrWhiteSpace(row.Result) ||
+                                   !string.IsNullOrWhiteSpace(row.PosNeg)))
+                    continue;
+
+                int? status = lisStatuses[entry.TestCodeId];
+                bool valid = markValid || row.ValidPrint;
+                if (row.Result == entry.Value && string.IsNullOrEmpty(row.PosNeg) &&
+                    row.Status == status && row.ValidPrint == valid)
+                    continue;
+
+                row.Result = entry.Value;
+                row.PosNeg = string.Empty;
+                row.Status = status;
+                row.ValidPrint = valid;
+                row.UserUpdateId = userId;
+                row.UpdateTime = now;
+                updated++;
+            }
+            if (updated > 0) await _db.SaveChangesAsync();
+            return updated;
+        }
+
+        /// <summary>
+        /// CBC ServiceId=12216: đánh giá kết quả bằng NGƯỠNG TESTCODE CỦA LIS.
+        /// Nữ: ưu tiên LowerLimitF/HigherLimitF nếu có, fallback LowerLimit/HigherLimit;
+        /// Nam/không xác định: LowerLimit/HigherLimit. Cờ (L)/(H) trên PDF bị bỏ qua.
+        /// 0 = trong ngưỡng; 1 = thấp; 2 = cao. Nếu LIS chưa cấu hình cả hai ngưỡng,
+        /// trả 0 theo quy ước status số hiện hành của LIS và preview báo chưa có ngưỡng.
+        /// </summary>
+        private static int CalculateCBC12216StatusFromLis(
+            decimal number, TestCode code, bool isFemale,
+            out double? lowerLimit, out double? higherLimit)
+        {
+            lowerLimit = isFemale ? code.LowerLimitF ?? code.LowerLimit : code.LowerLimit;
+            higherLimit = isFemale ? code.HigherLimitF ?? code.HigherLimit : code.HigherLimit;
+            if ((lowerLimit.HasValue && (double.IsNaN(lowerLimit.Value) || double.IsInfinity(lowerLimit.Value))) ||
+                (higherLimit.HasValue && (double.IsNaN(higherLimit.Value) || double.IsInfinity(higherLimit.Value))) ||
+                (lowerLimit.HasValue && higherLimit.HasValue && lowerLimit.Value > higherLimit.Value))
+                throw new InvalidOperationException(
+                    $"Ngưỡng LIS không hợp lệ cho TestCodeId={code.Id} ({code.Code}).");
+
+            var value = (double)number;
+            if (lowerLimit.HasValue && value < lowerLimit.Value) return 1;
+            if (higherLimit.HasValue && value > higherLimit.Value) return 2;
+            return 0;
+        }
+
+        private static bool IsCBC12216Female(string sex)
+        {
+            var normalized = (sex ?? string.Empty).Trim();
+            return string.Equals(normalized, "Nữ", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "Nu", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Chỉ đọc: cùng một hàm tính Status như lúc import để preview luôn khớp dữ liệu ghi.
+        /// Endpoint gọi sau khi đã xác minh danh tính, ServiceTest và ResultXN bằng dryRun.
+        /// </summary>
+        public async Task<List<Cbc12216LisStatusPreview>> PreviewCBC12216LisStatusesAsync(
+            long patientId, IReadOnlyList<Management.Services.LabParsing.Cbc12216ParsedResult> items)
+        {
+            if (items == null || items.Count == 0)
+                throw new InvalidDataException("Không có chỉ số CBC để xem trước.");
+
+            var sex = await _db.Patients.AsNoTracking()
+                .Where(p => p.Id == patientId)
+                .Select(p => p.Sex)
+                .FirstOrDefaultAsync();
+            var ids = items.Select(x => x.TestCodeId).Distinct().ToList();
+            var codes = await _db.TestCodes.AsNoTracking()
+                .Where(t => ids.Contains(t.Id))
+                .ToDictionaryAsync(t => t.Id);
+            if (codes.Count != ids.Count)
+                throw new InvalidOperationException("Không tìm thấy đủ TestCode để tính Status LIS.");
+
+            var female = IsCBC12216Female(sex);
+            var output = new List<Cbc12216LisStatusPreview>();
+            foreach (var entry in items)
+            {
+                var code = codes[entry.TestCodeId];
+                var status = CalculateCBC12216StatusFromLis(
+                    entry.Number, code, female, out var lower, out var higher);
+                output.Add(new Cbc12216LisStatusPreview
+                {
+                    TestCodeId = entry.TestCodeId,
+                    LowerLimit = lower,
+                    HigherLimit = higher,
+                    LisStatus = status,
+                    HasLimits = lower.HasValue || higher.HasValue
+                });
+            }
+            return output;
+        }
+
+        public sealed class Cbc12216LisStatusPreview
+        {
+            public long TestCodeId { get; set; }
+            public double? LowerLimit { get; set; }
+            public double? HigherLimit { get; set; }
+            public int LisStatus { get; set; }
+            public bool HasLimits { get; set; }
+        }
+
+        private static string NormalizeCBCPatientName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return "";
+            var decomp = value.Trim().Normalize(System.Text.NormalizationForm.FormD);
+            var b = new System.Text.StringBuilder();
+            foreach (var ch in decomp)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.NonSpacingMark) continue;
+                if (ch == 'đ' || ch == 'Đ') { b.Append('D'); continue; }
+                if (char.IsLetterOrDigit(ch)) b.Append(char.ToUpperInvariant(ch));
+            }
+            return b.ToString();
         }
 
         private static string NormalizeExternalCodeForImport(string code)

@@ -1,4 +1,4 @@
-﻿@using Management.Extensions
+@using Management.Extensions
 @{
     var lstresultXNs = ViewData["lstResultXNs"] as List<ResultXN>;
     var note = ViewData["note"] as String;
@@ -53,6 +53,38 @@
                                     <label class="custom-control-label" for="import_mark_valid">
                                         Đặt trạng thái <em>Valid</em> cho các chỉ số import
                                     </label>
+                                </div>
+                                <!-- CBC12216 TEMP: lựa chọn độc lập, không dùng hậu tố _taman -->
+                                <div class="custom-control custom-checkbox mt-3">
+                                    <input type="checkbox" class="custom-control-input" id="import_cbc12216"
+                                           onchange="Process_ToggleCBC12216Mode()" />
+                                    <label class="custom-control-label font-weight-bold" for="import_cbc12216">
+                                        Import riêng CBC (ServiceId 12216)
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted ml-1">
+                                    Ghi nhớ lựa chọn trên trình duyệt này. Khi chọn PDF sẽ tự kiểm tra 22 mã và Status theo ngưỡng LIS;
+                                    bấm Import để xác nhận cập nhật.
+                                </small>
+                                <div id="import_cbc12216_options" class="border rounded p-2 mt-2" style="display:none;">
+                                    <div class="small text-warning mb-2">
+                                        Chỉ nhập 22 chỉ số CBC, cần đủ 2 trang. PDF mẫu ghi máy đếm laser,
+                                        trong khi tên dịch vụ LIS ghi máy đếm tổng trở: xác nhận phù hợp chuyên môn trước khi nhập.
+                                        Họ tên PDF bắt buộc trùng LIS. Không tự Valid.
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="import_cbc12216_overwrite" />
+                                        <label class="form-check-label" for="import_cbc12216_overwrite">Ghi đè kết quả CBC đã có</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="import_cbc12216_mark_valid" />
+                                        <label class="form-check-label" for="import_cbc12216_mark_valid">Đánh dấu Valid khi import CBC</label>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary mt-2"
+                                            onclick="Process_PreviewCBC12216Mapping()">
+                                        Kiểm tra lại mapping + Status LIS (chỉ đọc)
+                                    </button>
+                                    <div id="import_cbc12216_preview" class="small mt-2" style="max-height:220px;overflow:auto;"></div>
                                 </div>
                                 <div class="custom-control custom-switch mt-2">
                                     <input type="checkbox" class="custom-control-input" id="import_is_visible_to_user">

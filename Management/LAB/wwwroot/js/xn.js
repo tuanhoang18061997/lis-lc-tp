@@ -1,4 +1,4 @@
-﻿// Tool tip cho control của form
+// Tool tip cho control của form
 //$(function () {
 //    $('[data-toggle="tooltip"]').tooltip()
 //})
@@ -1659,6 +1659,19 @@ function isProbablyBase64(s) {
 // Mở modal + đổ patientId hiện chọn
 var currentImportedExternalFileId = 0;
 var currentImportedExternalFileName = '';
+var CBC12216_MODE_STORAGE_KEY = 'LIS.XN_Process.ImportCBC12216.Enabled.v1';
+
+// Chỉ lưu lựa chọn chế độ, không lưu file PDF, danh tính bệnh nhân hoặc tùy chọn ghi đè.
+function Process_RestoreCBC12216Preference() {
+    var enabled = false;
+    try {
+        enabled = window.localStorage.getItem(CBC12216_MODE_STORAGE_KEY) === '1';
+    } catch (e) { /* Trình duyệt chặn localStorage: chế độ vẫn sử dụng được tạm thời. */ }
+    $('#import_cbc12216').prop('checked', enabled);
+    Process_ToggleCBC12216Mode(false);
+}
+
+
 function Process_ShowImportModal() {
     var pId = $('#xn_process_patientId').val();
     var pidTablePatient = $('#xn_process_id').val();
@@ -1675,6 +1688,11 @@ function Process_ShowImportModal() {
 
     // clear UI
     $('#import_pdf_file').val('');
+    cbc12216PreviewVerified = false;
+    $('#import_cbc12216_preview').empty();
+    // Chỉ ghi nhớ chế độ CBC; ghi đè/Valid luôn tắt lại khi mở hoặc làm mới modal.
+    $('#import_cbc12216_overwrite, #import_cbc12216_mark_valid').prop('checked', false);
+    Process_RestoreCBC12216Preference();
     $('#pdfPreview').html('<em class="text-muted">Chưa có tệp được chọn…</em>');
     //$('#import_overwrite').prop('checked', false);
     //$('#import_mark_valid').prop('checked', false);
@@ -1686,6 +1704,9 @@ function Process_ShowImportModal() {
 
 // Xem trước PDF ngay khi chọn file
 function Process_HandlePdfPreview(input) {
+    cbc12216PreviewVerified = false;
+    $('#import_cbc12216_preview').empty();
+    Process_UpdateCBC12216ImportButton();
     const container = document.getElementById('pdfPreview');
     if (!input || !input.files || input.files.length === 0) {
         container.innerHTML = '<em class="text-muted">Chưa có tệp được chọn…</em>';
@@ -1707,6 +1728,12 @@ function Process_HandlePdfPreview(input) {
     emb.style.width = '100%';
     emb.style.height = '70vh';
     container.appendChild(emb);
+
+    // Chế độ CBC đã ghi nhớ: chọn file là tự preview/check mapping, không phải bấm kiểm tra thủ công.
+    // Chỉ bấm Import mới thực hiện ghi database.
+    if ($('#import_cbc12216').is(':checked')) {
+        Process_PreviewCBC12216Mapping();
+    }
 }
 
 function Process_LoadImportedPdfList(pMaBenhAn, pId, pidTablePatient) {
@@ -1866,9 +1893,14 @@ function Process_ResetExternalImportMode() {
     $('#btn_import_external_pdf').show();
     $('#btn_save_imported_pdf_setting').hide();
 
-    $('#import_pdf_file').prop('disabled', false);
+    $('#import_pdf_file').prop('disabled', false).val('');
 
     $('#import_is_visible_to_user').prop('checked', true);
+    cbc12216PreviewVerified = false;
+    $('#import_cbc12216_preview').empty();
+    // Chỉ ghi nhớ chế độ CBC; ghi đè/Valid luôn tắt lại khi mở hoặc làm mới modal.
+    $('#import_cbc12216_overwrite, #import_cbc12216_mark_valid').prop('checked', false);
+    Process_RestoreCBC12216Preference();
 
     const container = document.getElementById('pdfPreview');
     if (container) {
@@ -1881,6 +1913,84 @@ $('#modal-import-external').on('hidden.bs.modal', function () {
 function escapeHtml(s) {
     if (!s) return '';
     return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+// Chỉ cho phép import CBC sau khi preview tự động hoặc thủ công đã xác minh file hiện tại.
+var cbc12216PreviewVerified = false;
+function Process_UpdateCBC12216ImportButton() {
+    $('#btn_import_external_pdf').prop('disabled',
+        $('#import_cbc12216').is(':checked') && !cbc12216PreviewVerified);
+}
+function Process_PreviewCBC12216Mapping() {
+    var input = document.getElementById('import_pdf_file');
+    if (!input || !input.files || input.files.length !== 1) {
+        SwalHelper.Toast.warning('Chọn một file PDF trước khi kiểm tra CBC.');
+        return;
+    }
+    var previewedFile = input.files[0];
+    var fd = new FormData();
+    fd.append('pMaBenhAn', $('#import_maBenhAn').val());
+    fd.append('pId', $('#import_patientId').val());
+    fd.append('pidTablePatient', $('#import_idTablePatient').val());
+    fd.append('file', input.files[0]);
+    cbc12216PreviewVerified = false;
+    Process_UpdateCBC12216ImportButton();
+    $('#import_cbc12216_preview').text('Đang tự kiểm tra 22 mã, bệnh nhân và ngưỡng LIS...');
+    $.ajax({
+        url: '/XN_Process/PreviewCBC12216Pdf', type: 'POST',
+        data: fd, processData: false, contentType: false,
+        success: function (res) {
+            if (!input.files || input.files[0] !== previewedFile || !$('#import_cbc12216').is(':checked'))
+                return; // File hoặc mode đã thay đổi trong lúc request đang chạy.
+            if (!res || !res.success || res.matchedCount !== 22 || !Array.isArray(res.rows)) {
+                $('#import_cbc12216_preview').text(res && res.message ? res.message : 'Preview CBC thất bại.');
+                return;
+            }
+            var html = '<div class="text-success font-weight-bold mb-1">Đã đối chiếu 22/22 mã. Status tính theo giới hạn TestCode của LIS, không dùng H/L từ PDF.</div>' +
+                '<table class="table table-sm table-bordered"><thead><tr><th>ID</th><th>Mã LIS</th><th>PDF</th><th>Kết quả</th><th>Lower LIS</th><th>Higher LIS</th><th>Status LIS</th></tr></thead><tbody>';
+            res.rows.forEach(function (r) {
+                var statusText = !r.hasLimits ? '0 - Chưa cấu hình ngưỡng' :
+                    (r.lisStatus === 1 ? '1 - Thấp' : r.lisStatus === 2 ? '2 - Cao' : '0 - Bình thường');
+                html += '<tr><td>' + escapeHtml(String(r.testCodeId)) + '</td><td>' +
+                    escapeHtml(String(r.code)) + '</td><td>' + escapeHtml(String(r.pdfName)) +
+                    '</td><td>' + escapeHtml(String(r.value)) + '</td><td>' +
+                    (r.lowerLimit == null ? '-' : escapeHtml(String(r.lowerLimit))) + '</td><td>' +
+                    (r.higherLimit == null ? '-' : escapeHtml(String(r.higherLimit))) + '</td><td>' +
+                    escapeHtml(statusText) + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            $('#import_cbc12216_preview').html(html);
+            cbc12216PreviewVerified = true;
+            Process_UpdateCBC12216ImportButton();
+        },
+        error: function () {
+            if (!input.files || input.files[0] !== previewedFile) return;
+            $('#import_cbc12216_preview').text('Lỗi mạng khi xem trước CBC. Có thể bấm kiểm tra lại.');
+        }
+    });
+}
+
+// Mode CBC độc lập với importer _taman; chỉ persist khi user chủ động đổi checkbox.
+function Process_ToggleCBC12216Mode(savePreference) {
+    cbc12216PreviewVerified = false;
+    $('#import_cbc12216_preview').empty();
+    var selected = $('#import_cbc12216').is(':checked');
+    $('#import_cbc12216_options').toggle(selected);
+    if (savePreference !== false) {
+        try {
+            window.localStorage.setItem(CBC12216_MODE_STORAGE_KEY, selected ? '1' : '0');
+        } catch (e) { /* localStorage bị tắt: không chặn import. */ }
+    }
+    if (!selected) {
+        $('#import_cbc12216_overwrite').prop('checked', false);
+        $('#import_cbc12216_mark_valid').prop('checked', false);
+    }
+    Process_UpdateCBC12216ImportButton();
+    // Nếu đã chọn PDF rồi mới bật CBC, preview tự chạy ngay.
+    var input = document.getElementById('import_pdf_file');
+    if (selected && input && input.files && input.files.length === 1) {
+        Process_PreviewCBC12216Mapping();
+    }
 }
 
 // Gửi kèm vendor vào FormData
@@ -1898,9 +2008,22 @@ function Process_SubmitExternalImport() {
         return;
     }
 
-    var overwrite = $('#import_overwrite').is(':checked');
-    var markValid = $('#import_mark_valid').is(':checked');
+    var importCBC12216 = $('#import_cbc12216').is(':checked');
+    var overwrite = importCBC12216
+        ? $('#import_cbc12216_overwrite').is(':checked')
+        : $('#import_overwrite').is(':checked');
+    var markValid = importCBC12216
+        ? $('#import_cbc12216_mark_valid').is(':checked')
+        : $('#import_mark_valid').is(':checked');
     var isVisibleToUser = $('#import_is_visible_to_user').is(':checked');
+    if (importCBC12216 && !cbc12216PreviewVerified) {
+        SwalHelper.Toast.warning('Hãy bấm Kiểm tra mapping 22 chỉ số trước khi import CBC.');
+        return;
+    }
+    if (importCBC12216 && !window.confirm(
+        'Import CBC ServiceId=12216: Đã xác nhận đúng bệnh nhân, đủ 2 trang và chấp nhận khác biệt phương pháp laser/tổng trở?')) {
+        return;
+    }
     //var vendor = $('#import_vendor').val() || '';
 
     var fd = new FormData();
@@ -1917,7 +2040,7 @@ function Process_SubmitExternalImport() {
     try { $('#showWaitting').modal('show'); } catch (e) { }
 
     $.ajax({
-        url: "/XN_Process/ImportExternalLabPdf",
+        url: importCBC12216 ? "/XN_Process/ImportCBC12216Pdf" : "/XN_Process/ImportExternalLabPdf",
         type: "POST",
         data: fd,
         processData: false,
@@ -1934,11 +2057,12 @@ function Process_SubmitExternalImport() {
             Process_LoadImportedPdfList(pMaBenhAn, pid);
             
             // Thông báo thành công với thông tin file
-            var message = "Lưu file PDF thành công!";
-            if (res.fileName) {
-                message += "\nTên file: " + res.fileName;
-            }
-            SwalHelper.Toast.success(message);
+            var message = importCBC12216
+                ? ('Đã map ' + (res.matchedCount || 0) + '/22 chỉ số CBC; đã cập nhật ' + (res.count || 0) + ' ResultXN.')
+                : 'Lưu file PDF thành công!';
+            if (res.fileName) message += "\nTên file: " + res.fileName;
+            if (importCBC12216 && res.count === 0) SwalHelper.Toast.warning(message);
+            else SwalHelper.Toast.success(message);
             
             try {
                 $('#modal-import-external').modal('hide');

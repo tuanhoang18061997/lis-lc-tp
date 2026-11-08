@@ -1,4 +1,4 @@
-﻿using Management.BL;
+using Management.BL;
 using Management.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +16,7 @@ using Management.Services.LabParsing;
 
 namespace Management.Controllers
 {
-    public class XN_ProcessController : Controller
+    public partial class XN_ProcessController : Controller
     {
         private readonly ExternalLabParserFactory _parserFactory;
 
