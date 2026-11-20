@@ -3,6 +3,7 @@ using Management.Models;
 using Management.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -248,7 +249,7 @@ namespace Management.Controllers
         [Authorize]
         public async Task<IActionResult> GetServiceForPatient(long patientId)
         {
-            ViewData["lstResultCDHAs"] = await _resultCDHABL.GetListResultCDHAByPatientId(patientId,_SA);
+            ViewData["lstResultCDHAs"] = await _resultCDHABL.GetListResultCDHAByPatientId(patientId, _SA);
             return PartialView("_SA_Process_ListService");
         }
 
@@ -260,16 +261,16 @@ namespace Management.Controllers
             if (_resultCDHA != null)
             {
                 var _lstItem = new List<object>();
-                if(_resultCDHA.ImageCDHAs != null && _resultCDHA.ImageCDHAs.Count > 0)
+                if (_resultCDHA.ImageCDHAs != null && _resultCDHA.ImageCDHAs.Count > 0)
                 {
-                    foreach(var item in _resultCDHA.ImageCDHAs)
+                    foreach (var item in _resultCDHA.ImageCDHAs)
                     {
                         _lstItem.Add(new { Id = item.Id, Name = item.ImagePath, Description = item.ResultCDHA.Description, Result = item.ResultCDHA.Result, Suggest = item.ResultCDHA.Suggest });
                     }
                 }
                 else
                 {
-                    _lstItem.Add(new {Description = _resultCDHA.Description, Result = _resultCDHA.Result, Suggest = _resultCDHA.Suggest });
+                    _lstItem.Add(new { Description = _resultCDHA.Description, Result = _resultCDHA.Result, Suggest = _resultCDHA.Suggest });
 
                 }
                 return Json(_lstItem);
@@ -849,6 +850,186 @@ namespace Management.Controllers
                 return Content(string.Empty);
             }
         }
+        // SA-VP-BATCH-20261114: Valid nhiều ResultCDHA của cùng bệnh nhân,
+        // rồi trả về MỘT PDF gộp. Không thay đổi API ValidPrint/ValidPrintMultiple cũ.
+        public sealed class SAValidPrintBatchRequest
+        {
+            public long PatientId { get; set; }
+            public List<long> ResultCDHAIds { get; set; } = new List<long>();
+            public DateTime ReturnResultTime { get; set; }
+            public long UserReturnResult { get; set; }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ValidPrintSelectedBatch([FromBody] SAValidPrintBatchRequest request)
+        {
+            var userLogin = GetUserLogin();
+            if (!userLogin.HasValue) return Unauthorized();
+
+            if (request == null || request.PatientId <= 0 ||
+                request.ResultCDHAIds == null || request.ResultCDHAIds.Count < 2 ||
+                request.ResultCDHAIds.Count > 100 ||
+                request.ResultCDHAIds.Any(x => x <= 0) ||
+                request.ResultCDHAIds.Distinct().Count() != request.ResultCDHAIds.Count ||
+                request.UserReturnResult <= 0 || request.ReturnResultTime == default(DateTime))
+            {
+                return BadRequest(new { message = "Danh sách dịch vụ hoặc thông tin trả kết quả không hợp lệ." });
+            }
+
+            try
+            {
+                // Preflight TOÀN BỘ ResultCDHAId, tránh lấy nhầm bệnh nhân/module.
+                // Explicit Include vì không được phụ thuộc Lazy Loading.
+                List<ResultCDHA> selected;
+                using (var db = new LABContext())
+                {
+                    selected = await db.ResultCDHAs
+                        .AsNoTracking()
+                        .Include(r => r.Patient)
+                        .Include(r => r.Service)
+                        .ThenInclude(service => service.Category)
+                        .Where(r => r.Active && r.PatientId == request.PatientId &&
+                            request.ResultCDHAIds.Contains(r.Id) && r.Service.Category.Code == _SA)
+                        .ToListAsync();
+                }
+
+                if (selected.Count != request.ResultCDHAIds.Count)
+                {
+                    // Read-only diagnostic: không bỏ bộ lọc PatientId/SA/Active.
+                    var acceptedIds = new HashSet<long>(selected.Select(x => x.Id));
+                    var rejectedIds = request.ResultCDHAIds.Where(x => !acceptedIds.Contains(x)).ToList();
+                    using (var diagnosisDb = new LABContext())
+                    {
+                        var details = await diagnosisDb.ResultCDHAs.AsNoTracking()
+                            .Where(r => rejectedIds.Contains(r.Id))
+                            .Select(r => new
+                            {
+                                r.Id,
+                                r.PatientId,
+                                r.Active,
+                                CategoryCode = r.Service != null && r.Service.Category != null
+                                    ? r.Service.Category.Code : null
+                            }).ToListAsync();
+                        // Chỉ ghi log server, không trả ID bệnh nhân khác về client.
+                        _logger.LogWarning(
+                            "SA batch rejected. RequestPatientId={PatientId}; RequestedIds={RequestedIds}; AcceptedIds={AcceptedIds}; RejectedIds={RejectedIds}; RejectedRecordDetails={Details}",
+                            request.PatientId,
+                            string.Join(",", request.ResultCDHAIds),
+                            string.Join(",", selected.Select(x => x.Id)),
+                            string.Join(",", rejectedIds),
+                            Newtonsoft.Json.JsonConvert.SerializeObject(details));
+                    }
+                    return BadRequest(new { message = "Danh sách dịch vụ không đồng nhất với bệnh nhân đang chọn. Hãy tải lại bệnh nhân và dịch vụ, sau đó kiểm tra lại trước khi Valid & In." });
+                }
+
+                // Tất cả KeyResultForHis phải hợp lệ trước khi thay đổi trạng thái Valid.
+                // Cấm trùng Key vì có thể khiến hai dịch vụ ghi đè cùng một PDF.
+                if (selected.Select(r => r.KeyResultForHis)
+                        .Distinct(StringComparer.OrdinalIgnoreCase).Count() != selected.Count)
+                    return BadRequest(new { message = "Nhiều dịch vụ dùng trùng mã file PDF. Không thể in an toàn." });
+
+                if (selected.Any(r => string.IsNullOrWhiteSpace(r.KeyResultForHis) ||
+                    Path.GetFileName(r.KeyResultForHis) != r.KeyResultForHis ||
+                    r.KeyResultForHis.Contains('\\') || r.KeyResultForHis.Contains('/')))
+                {
+                    return BadRequest(new { message = "Có dịch vụ thiếu mã file PDF hợp lệ. Không thực hiện Valid." });
+                }
+
+                // Dịch vụ đã Valid: không gọi ValidateCDHAAsync lần hai.
+                // Với dữ liệu legacy (IsValidated=null), dùng đúng chính sách fallback
+                // Patient.ValidSA + ReturnResultTimeSA + InsertTime của BL.
+                var pending = selected.Where(r =>
+                    !(r.IsValidated == true ||
+                    (r.IsValidated == null && r.Patient != null &&
+                     r.Patient.ValidSA && r.Patient.ReturnResultTimeSA.HasValue &&
+                     (!r.InsertTime.HasValue || r.InsertTime.Value <= r.Patient.ReturnResultTimeSA.Value))))
+                    .ToList();
+
+                if (pending.Count > 0)
+                {
+                    var inputs = pending.Select(r => new ResultCDHAModel
+                    {
+                        patientId = request.PatientId,
+                        resultCDHAId = r.Id,
+                        returnResultTime = request.ReturnResultTime,
+                        userReturnResult = request.UserReturnResult
+                    }).ToList();
+
+                    // BL kiểm tra CanEditCDHAAsync cho TOÀN BỘ trước khi Valid.
+                    var validOk = await _resultCDHABL.ValidateCDHAMultipleAsync(
+                        inputs, _SA, userLogin.Value, ToolBL.Get_DateNow());
+                    if (!validOk)
+                        return Conflict(new { message = "Một hoặc nhiều dịch vụ không thể Valid (đã khóa, chưa Invalid đúng quyền hoặc dữ liệu thay đổi). Không in được toàn bộ." });
+                }
+
+                var folder = Path.Combine(_environment.WebRootPath, "pdf", "sa");
+                Directory.CreateDirectory(folder);
+                var pendingIds = new HashSet<long>(pending.Select(r => r.Id));
+                var paths = new List<string>();
+                var hospital = await _hospitalBL.GetHospital();
+
+                // Render thứ tự đúng như người dùng chọn; chỉ tái tạo PDF cho dịch vụ
+                // vừa Valid hoặc dịch vụ đã Valid nhưng chưa có file PDF.
+                foreach (var resultId in request.ResultCDHAIds)
+                {
+                    var item = selected.Single(r => r.Id == resultId);
+                    var pdfPath = Path.Combine(folder, item.KeyResultForHis + ".pdf");
+                    if (pendingIds.Contains(resultId) || !System.IO.File.Exists(pdfPath) ||
+                        new FileInfo(pdfPath).Length == 0)
+                    {
+                        var result = await _resultCDHABL.GetResultCDHAByPatientId_ForValidPrint(resultId);
+                        if (result == null || result.PatientId != request.PatientId)
+                            throw new InvalidOperationException("Không thể tải lại ResultCDHA " + resultId);
+
+                        ViewData["ResultCDHA"] = result;
+                        ViewData["ReturnUser"] = await _userBL.GetUser(request.UserReturnResult);
+                        var service = _serviceBL.GetById(result.Service?.Id);
+                        ViewData["ServiceCDHA"] = service?.Result;
+
+                        var header = await this.RenderViewAsync("Header", hospital);
+                        var content = await this.RenderViewAsync("Content", hospital);
+                        var footer = await this.RenderViewAsync("Footer", hospital);
+                        var base64 = await _toolBL.ExportPdf_Result(folder, pdfPath, header, content, footer);
+                        if (string.IsNullOrEmpty(base64) || !System.IO.File.Exists(pdfPath))
+                            throw new InvalidOperationException("Không tạo được PDF cho ResultCDHA " + resultId);
+                    }
+                    paths.Add(pdfPath);
+                }
+
+                // Gộp PDF giữ nguyên kích thước/orientation và số trang của từng dịch vụ.
+                // Không ép A4 portrait vì bản SA có thể sử dụng thiết kế landscape.
+                using var output = new PdfSharpCore.Pdf.PdfDocument();
+                foreach (var path in paths)
+                {
+                    using var source = PdfSharpCore.Pdf.IO.PdfReader.Open(
+                        path, PdfSharpCore.Pdf.IO.PdfDocumentOpenMode.Import);
+                    if (source.PageCount == 0)
+                        throw new InvalidOperationException("PDF không có trang: " + Path.GetFileName(path));
+                    for (var page = 0; page < source.PageCount; page++)
+                        output.AddPage(source.Pages[page]);
+                }
+                if (output.PageCount == 0)
+                    throw new InvalidOperationException("Không có trang PDF hợp lệ để in.");
+
+                using var memory = new MemoryStream();
+                output.Save(memory, false);
+                Response.Headers["X-SA-Selected-Count"] = request.ResultCDHAIds.Count.ToString();
+                Response.Headers["X-SA-Page-Count"] = output.PageCount.ToString();
+                return File(memory.ToArray(), "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "ValidPrintSelectedBatch failed. PatientId={PatientId}; Count={Count}",
+                    request?.PatientId, request?.ResultCDHAIds?.Count ?? 0);
+                return StatusCode(500, new
+                {
+                    message = "Không tạo được PDF gộp. Vui lòng kiểm tra log server. Các dịch vụ Valid thành công trước đó được giữ nguyên trạng thái."
+                });
+            }
+        }
+
         public class ValidPrintAllInput
         {
             public int PatientId { get; set; }
@@ -967,12 +1148,13 @@ namespace Management.Controllers
             {
                 // Gọi BL để lưu (giả định chữ ký: UpdateSignStoreId_CKS(long id, string signStoreId))
                 var ok = await _resultCDHABL.UpdateSignStoreId_CKS(resultCDHAId, signStoreId, _userLogin.Value, _dateTime);
-                if(ok == true)
+                if (ok == true)
                 {
                     var _resultCDHA = await _resultCDHABL.GetResultCDHA(resultCDHAId);
                     var _keyResult = _resultCDHA.KeyResultForHis;
                     return Json(new { success = true, keyResult = _keyResult });
-                } else
+                }
+                else
                 {
                     return Json(new { success = false, message = "Lỗi lưu signStoreId." });
 

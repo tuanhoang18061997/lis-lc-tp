@@ -1,4 +1,4 @@
-﻿@using Management.BL
+@using Management.BL
 @using Newtonsoft.Json
 @inject IHttpContextAccessor HttpContextAccessor
 <!DOCTYPE html>
@@ -117,12 +117,22 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"
+            asp-append-version="true"></script>
+
+    <!-- SwalHelper -->
+    <script src="~/js/swal-helper.js"
+            asp-append-version="true"></script>
+
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- LIS -->
     <script src="~/js/helpers/barcode_scanner_input.js"></script>
     <script src="~/js/sa.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="~/js/swal-helper.js"></script>
-    @* <script src="~/lib/ckeditor/ckeditor.js"></script> *@
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

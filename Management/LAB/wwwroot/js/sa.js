@@ -5,6 +5,62 @@
 
 
 // *********************************************************************************** Select 2
+// SA-UI: Select2 là progressive enhancement; không phụ thuộc CDN để xử lý nghiệp vụ.
+function SA_InitSelect2(selector, options) {
+    var $select = $(selector);
+    if (!$select.length || !$.fn || typeof $.fn.select2 !== 'function') return;
+    if (!$select.hasClass('select2-hidden-accessible')) {
+        $select.select2(options || { placeholder: '-- Chọn --' });
+    }
+}
+function SA_FocusSelect2(selector) {
+    var $select = $(selector);
+    if (!$select.length) return;
+    if ($.fn && typeof $.fn.select2 === 'function' && $select.hasClass('select2-hidden-accessible')) {
+        $select.select2('open');
+    } else {
+        $select.trigger('focus');
+    }
+}
+function SA_SetSampleSelection(value, loadTemplate) {
+    var $select = $('#sa_process_sampleresult');
+    if (!$select.length) return;
+    $select.val(value === '' || value == null ? null : String(value));
+    // change.select2 cập nhật giao diện mà KHÔNG kích hoạt onchange tải mẫu.
+    $select.trigger(loadTemplate ? 'change' : 'change.select2');
+}
+var SA_ProcessServiceLoadState = {
+    generation: 0,
+    resultId: null,
+    resultXhr: null,
+    sampleXhr: null
+};
+function SA_InvalidateServiceLoads() {
+    var state = SA_ProcessServiceLoadState;
+    state.generation++;
+    state.resultId = null;
+    if (state.resultXhr && state.resultXhr.readyState !== 4) state.resultXhr.abort();
+    if (state.sampleXhr && state.sampleXhr.readyState !== 4) state.sampleXhr.abort();
+    state.resultXhr = null;
+    state.sampleXhr = null;
+}
+function SA_IsCurrentService(resultId, generation) {
+    var state = SA_ProcessServiceLoadState;
+    var $selected = $('#sa_list_service .sa-chk-service:checked');
+    return state.generation === generation &&
+        String(state.resultId) === String(resultId) &&
+        $selected.length === 1 && String($selected.val()) === String(resultId);
+}
+function SA_ClearServiceEditor() {
+    $('#imageCDHA').empty();
+    $('#sa_process_deletephoto').val('');
+    $('#sa_process_xem').val('');
+    var editor = window.CKEDITOR && CKEDITOR.instances['sa_process_description'];
+    if (editor) editor.setData('');
+    $('#sa_process_result, #sa_process_suggest').val('');
+    SA_SetSampleSelection(null, false);
+}
+
 $(function () {
     GetSample_SetSelect2_01(true);
 })
@@ -188,10 +244,7 @@ $(document).ready(function () {
 });
 function GetSample_SetSelect2_02() {
     $(document).ready(function () {
-        $('#sa_getsample_service').select2({
-            dropdownParent: $('#addServiceForm'),
-            placeholder: "-- Chọn dịch vụ --"
-        });
+        SA_InitSelect2('#sa_getsample_service', { dropdownParent: $('#addServiceForm'), placeholder: "-- Chọn dịch vụ --" });
     });
     $('#sa_getsample_service').val('');
 }
@@ -201,18 +254,14 @@ function GetSample_SetSelect2_01(isLoadPage) {
         $('#sa_getsample_location').val("");
     }
     $(document).ready(function () {
-        $('#sa_getsample_location').select2({
-            placeholder: "-- Chọn --"
-        });
-    });   
+        SA_InitSelect2('#sa_getsample_location', { placeholder: "-- Chọn --" });
+    });
 
     if (isLoadPage) {
         $('#sa_getsample_doctor').val("");
     }
     $(document).ready(function () {
-        $('#sa_getsample_doctor').select2({
-            placeholder: "-- Chọn --"
-        });
+        SA_InitSelect2('#sa_getsample_doctor', { placeholder: "-- Chọn --" });
     });
 
 
@@ -220,17 +269,13 @@ function GetSample_SetSelect2_01(isLoadPage) {
         $('#sa_process_sampleresult').val("");
     }
     $(document).ready(function () {
-        $('#sa_process_sampleresult').select2({
-            placeholder: "-- Chọn --"
-        });
+        SA_InitSelect2('#sa_process_sampleresult', { placeholder: "-- Chọn --" });
     });
 }
 
 function Process_SetSelect2_03() {
     $(document).ready(function () {
-        $('#sa_process_userReturnResultSA').select2({
-            placeholder: "-- Chọn --"
-        });
+        SA_InitSelect2('#sa_process_userReturnResultSA', { placeholder: "-- Chọn --" });
     });
 }
 
@@ -247,13 +292,13 @@ function GetSample_ValidateInput(id) {
         if (value === "" || !value) {
             if (flag) {
                 if (e.id === "sa_getsample_location") {
-                    $('#sa_getsample_location').select2('focus');
+                    SA_FocusSelect2('#sa_getsample_location');
                 }
                 else if (e.id === "sa_getsample_doctor") {
-                    $('#sa_getsample_doctor').select2('focus');
+                    SA_FocusSelect2('#sa_getsample_doctor');
                 }
                 else if (e.id === "sa_getsample_userReturnResultSA") {
-                    $('#sa_getsample_userReturnResultSA').select2('focus');
+                    SA_FocusSelect2('#sa_getsample_userReturnResultSA');
                 }
                 else {
                     $(e).focus();
@@ -545,7 +590,7 @@ function GetSample_ProcessResult() {
         SwalHelper.Toast.warning('Vui lòng chọn bệnh nhân!');
     }
     else if (doctorId == null) {
-        $('#sa_getsample_doctor').select2('focus');
+        SA_FocusSelect2('#sa_getsample_doctor');
         //alert("Vui lòng chọn bác sĩ chỉ định!");
         //return;
     }
@@ -707,7 +752,7 @@ function Process_ValidateInput(id) {
         if (value === "" || !value) {
             if (flag) {
                 if (e.id === "sa_process_userReturnResultSA") {
-                    $('#sa_process_userReturnResultSA').select2('focus');
+                    SA_FocusSelect2('#sa_process_userReturnResultSA');
                 }
                 else {
                     $(e).focus();
@@ -763,6 +808,15 @@ function Process_Search() {
 }
 
 function Process_ResetInput() {
+    // Không để callback cũ nạp lại thông tin sau Reset.
+    if (typeof SA_ProcessPatientLoadState !== 'undefined') {
+        SA_ProcessPatientLoadState.token++;
+        SA_ProcessPatientLoadState.patientId = null;
+        SA_ProcessPatientLoadState.serviceReady = false;
+        SA_AbortProcessPatientRequests();
+    }
+    $('#sa_process_valid_in').prop('disabled', true);
+    SA_InvalidateServiceLoads();
     $("#sa_process_pidorseq").val('');
     $('#sa_process_id').val('');
     $('#sa_process_patientId').val('');
@@ -791,63 +845,110 @@ function Process_ResetInput() {
     Process_SetSelect2_03(true);
 }
 
+// SA-VP-PATIENT-SYNC-20261116: Chặn response AJAX bệnh nhân/dịch vụ trả về sai thứ tự.
+var SA_ProcessPatientLoadState = {
+    token: 0, patientId: null, deviceXhr: null, patientXhr: null,
+    serviceXhr: null, serviceReady: false
+};
+function SA_IsExpectedProcessPatient(id, token) {
+    var state = SA_ProcessPatientLoadState;
+    return state.token === token && String(state.patientId) === String(id);
+}
+function SA_AbortProcessPatientRequests() {
+    var state = SA_ProcessPatientLoadState;
+    ['deviceXhr', 'patientXhr', 'serviceXhr'].forEach(function (key) {
+        var xhr = state[key];
+        if (xhr && xhr.readyState !== 4) xhr.abort();
+        state[key] = null;
+    });
+}
+
 function Process_GetPatientInfo(id) {
-    $.ajax({
-        url: "/SA_Process/Check_SelectDevice/",
-        type: 'GET',
-        dataType: 'text',
+    var state = SA_ProcessPatientLoadState;
+    state.token++;
+    var token = state.token;
+    state.patientId = String(id);
+    state.serviceReady = false;
+    SA_AbortProcessPatientRequests();
+    SA_InvalidateServiceLoads();
+    // Không cho người dùng CheckAll / Valid trên danh sách của bệnh nhân trước.
+    $('#process_sa-right-service-gridview').empty();
+    $('#process_patientInfo').empty();
+    $('#sa_process_valid_in').prop('disabled', true);
+    state.deviceXhr = $.ajax({
+        url: '/SA_Process/Check_SelectDevice/',
+        type: 'GET', dataType: 'text',
         success: function (result) {
-            if (result === "False") {
+            if (!SA_IsExpectedProcessPatient(id, token)) return;
+            if (result === 'False') {
                 $('#addDeviceForm').modal('show');
-            } else {
-                $.ajax({
-                    url: "/SA_Process/GetPatientInfo?id=" + id,
-                    type: "GET",
-                    dataType: "html",
-                    cache: false,
-                    success: function (result) {
-                        $(".list-group-item-action").removeClass("active");
-                        $(`.list-group-item-action[data-id='${id}']`).addClass("active");
-                        $("#process_patientInfo").html(result);
-                        Process_SetSelect2_03();
-                        GetSample_SetSelect2_01(true);
-                        // Auto-chọn bác sĩ = user đang login (nếu chưa có giá trị)
-                        var loginId = $("#sa_process_userLoginId").val();
-                        var $sel = $("#sa_process_userReturnResultSA");
-                        if (loginId && (!$sel.val() || $sel.val() === "")) {
-                            $sel.val(loginId).trigger("change");
-                        }
-
-                        // Gắn handler đổi bác sĩ
-                        $(document)
-                            .off("change", "#sa_process_userReturnResultSA")
-                            .on("change", "#sa_process_userReturnResultSA", Process_Load_SelectedDoctorInfo);
-                        // Lần đầu nếu có sẵn value thì cũng load info
-                        Process_Load_SelectedDoctorInfo();
-
-                        Process_GetListServiceForPatient(id);
-                    },
-                    error: function () {
-                        $("#process_patientInfo").empty();
-                        $('#tbody-gridview-service').empty();
+                return;
+            }
+            state.patientXhr = $.ajax({
+                url: '/SA_Process/GetPatientInfo?id=' + encodeURIComponent(id),
+                type: 'GET', dataType: 'html', cache: false,
+                success: function (html) {
+                    if (!SA_IsExpectedProcessPatient(id, token)) return;
+                    $('#process_patientInfo').html(html);
+                    // Bảo vệ tình huống API trả về bệnh nhân không đúng yêu cầu.
+                    if (String($('#sa_process_id').val()) !== String(id)) {
+                        console.error('[SA] Patient response mismatch', { expected: id, actual: $('#sa_process_id').val() });
+                        $('#process_patientInfo').empty();
+                        return;
                     }
-                });
+                    $('.list-group-item-action').removeClass('active');
+                    $('.list-group-item-action').filter(function () {
+                        return String($(this).data('id')) === String(id);
+                    }).addClass('active');
+                    Process_SetSelect2_03();
+                    GetSample_SetSelect2_01(true);
+                    var loginId = $('#sa_process_userLoginId').val();
+                    var $sel = $('#sa_process_userReturnResultSA');
+                    if (loginId && (!$sel.val() || $sel.val() === '')) {
+                        $sel.val(loginId).trigger('change');
+                    }
+                    $(document).off('change', '#sa_process_userReturnResultSA')
+                        .on('change', '#sa_process_userReturnResultSA', Process_Load_SelectedDoctorInfo);
+                    Process_Load_SelectedDoctorInfo();
+                    Process_GetListServiceForPatient(id, token);
+                },
+                error: function (xhr, textStatus) {
+                    if (textStatus === 'abort' || !SA_IsExpectedProcessPatient(id, token)) return;
+                    $('#process_patientInfo').empty();
+                    $('#process_sa-right-service-gridview').empty();
+                }
+            });
+        },
+        error: function (xhr, textStatus) {
+            if (textStatus !== 'abort' && SA_IsExpectedProcessPatient(id, token)) {
+                $('#process_sa-right-service-gridview').empty();
             }
         }
     });
 }
 
-function Process_GetListServiceForPatient(id) {
-    $.ajax({
-        url: "/sa_Process/GetServiceForPatient?patientId=" + id,
-        type: "GET",
-        dataType: "html",
-        cache: false,
-        success: function (result) {
-            $("#process_sa-right-service-gridview").html(result);
+function Process_GetListServiceForPatient(id, token) {
+    var state = SA_ProcessPatientLoadState;
+    token = token === undefined ? state.token : token;
+    if (!SA_IsExpectedProcessPatient(id, token)) return;
+    state.serviceReady = false;
+    $('#sa_process_valid_in').prop('disabled', true);
+    if (state.serviceXhr && state.serviceXhr.readyState !== 4) state.serviceXhr.abort();
+    state.serviceXhr = $.ajax({
+        url: '/SA_Process/GetServiceForPatient?patientId=' + encodeURIComponent(id),
+        type: 'GET', dataType: 'html', cache: false,
+        success: function (html) {
+            if (!SA_IsExpectedProcessPatient(id, token) || String($('#sa_process_id').val()) !== String(id)) return;
+            $('#process_sa-right-service-gridview').html(html);
+            state.serviceReady = true;
+            $('#sa_process_valid_in').prop('disabled', !!SA_ValidPrintRunning ||
+                $('#sa_list_service .sa-chk-service').length === 0);
         },
-        error: function () {
-            $('#tbody-gridview-service').empty();
+        error: function (xhr, textStatus) {
+            if (textStatus === 'abort' || !SA_IsExpectedProcessPatient(id, token)) return;
+            state.serviceReady = false;
+            $('#process_sa-right-service-gridview').empty();
+            $('#sa_process_valid_in').prop('disabled', true);
         }
     });
 }
@@ -861,16 +962,13 @@ function Process_SaveResult() {
         var validate = Process_ValidateInput('process_patientInfo');
         if (validate) {
 
-            // Lấy ServiceId
-            var resultCDHAId = "";
-            $(".row-service").each(function () {
-                $(this).find(".form-check-input").each(function () {
-                    var isChecked = $(this).is(':checked');
-                    if (isChecked) {
-                        resultCDHAId = $(this).val();
-                    }
-                })
-            })
+            // Mỗi lần lưu chỉ ghi vào đúng một ResultCDHA.
+            var $selectedResults = $('#sa_list_service .sa-chk-service:checked');
+            if ($selectedResults.length !== 1) {
+                SwalHelper.Toast.warning('Chỉ chọn một dịch vụ khi lưu kết quả!');
+                return false;
+            }
+            var resultCDHAId = $selectedResults.first().val();
 
             if (resultCDHAId === "") {
                 SwalHelper.Toast.warning('Vui lòng chọn dịch vụ!');
@@ -912,7 +1010,7 @@ function Process_SaveResult() {
                     }
                 });
                 return true;
-            }          
+            }
         }
         else {
             return false
@@ -1011,161 +1109,175 @@ function Process_SaveResult() {
 //    }
 //}
 
-// --- GỌI IN 1 DỊCH VỤ (hành vi cũ), tách riêng thành hàm dùng lại ---
-function _validPrintOne(resultCDHAId, opts, isMulti = false) {
-    // opts: { patientId, returnResultTime, userReturnResult, useSaved, description, result, suggest, selectedImageIds }
-    return new Promise(function (resolve) {
-        var payload = {
-            patientId: opts.patientId,
-            resultCDHAId: resultCDHAId,
-            returnResultTime: opts.returnResultTime,
-            userReturnResult: opts.userReturnResult,
-            // các field dưới đây chỉ hữu dụng khi in 1 dịch vụ đang mở editor:
-            description: opts.description || null,
-            result: opts.result || null,
-            suggest: opts.suggest || null,
-            selectedImageIds: Array.isArray(opts.selectedImageIds) ? opts.selectedImageIds : null
-        };
-        if (isMulti) {
-            $.ajax({
-                url: "/SA_Process/ValidPrintMultiple/",
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                dataType: "text",
-                data: JSON.stringify(payload),
-                success: function (resp) {
-                    if (resp) {
-                        // mở PDF
-                        var bytes = atob(resp);
-                        var arr = new Uint8Array(bytes.length);
-                        for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-                        var blob = new Blob([arr], { type: 'application/pdf;base64' });
-                        window.open(URL.createObjectURL(blob));
-                    }
-                    resolve();
-                },
-                error: function () {
-                    // không chặn chuỗi, tiếp tục cái tiếp theo
-                    resolve();
-                }
-            });
-        } else {
-            $.ajax({
-                url: "/SA_Process/ValidPrint/",
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                dataType: "text",
-                data: JSON.stringify(payload),
-                success: function (resp) {
-                    if (resp) {
-                        // mở PDF
-                        var bytes = atob(resp);
-                        var arr = new Uint8Array(bytes.length);
-                        for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-                        var blob = new Blob([arr], { type: 'application/pdf;base64' });
-                        window.open(URL.createObjectURL(blob));
-                    }
-                    resolve();
-                },
-                error: function () {
-                    // không chặn chuỗi, tiếp tục cái tiếp theo
-                    resolve();
-                }
-            });
-        }
-        
-    });
+// SA-VP-BATCH-20261114: mỗi thao tác chỉ mở tối đa MỘT cửa sổ PDF.
+// Dịch vụ đã Valid được in từ PDF hiện có; dịch vụ chưa Valid sẽ đi qua
+// ValidateCDHAMultipleAsync trên server, KHÔNG tự bỏ qua lỗi từng dịch vụ.
+var SA_ValidPrintRunning = false;
+
+function SA_ValidPrintOpenWindow() {
+    var popup = window.open('', '_blank');
+    if (popup) {
+        try {
+            popup.document.title = 'Đang chuẩn bị PDF Siêu âm';
+            popup.document.body.textContent = 'Đang chuẩn bị PDF. Vui lòng không đóng cửa sổ này.';
+        } catch (e) { /* cửa sổ vẫn có thể điều hướng blob URL */ }
+    }
+    return popup;
 }
-function Process_ValidPrint(mode) {
-    // mode: 'current' (mặc định), 'selected', 'all'
-    mode = mode || 'current';
 
-    var patientId = $('#sa_process_id').val();
-    if (!patientId) {
-        SwalHelper.Toast.warning("Vui lòng chọn bệnh nhân!");
-        return;
+function SA_ValidPrintShowPdf(blob, popup, fileName) {
+    if (!(blob instanceof Blob) || !blob.size) {
+        throw new Error('Server không trả về PDF hợp lệ.');
     }
-
-    // Validate input chung (bác sĩ, thời điểm trả kết quả,...)
-    var ok = Process_ValidateInput('process_patientInfo');
-    if (!ok) return;
-
-    var returnResultTime = $('#sa_process_returnResultTime').val();
-    var userReturnResult = $('#sa_process_userReturnResultSA').val();
-
-    // Thu thập danh sách resultIds theo mode
-    var resultIds = [];
-    if (mode === 'current') {
-        console.log("current");
-
-        // lấy id của dòng đang active (tùy markup; ví dụ theo checkbox đang checked đầu tiên)
-        var rid = $(".row-service .form-check-input:checked").first().val();
-        if (rid) resultIds.push(rid);
-    } else if (mode === 'selected') {
-        console.log("selecteddđ");
-        $(".row-service .form-check-input:checked").each(function () {
-            var v = $(this).val();
-            if (v) resultIds.push(v);
-        });
-    } else if (mode === 'all') {
-        console.log("allllll");
-        $(".row-service").each(function () {
-            var v = $(this).find(".form-check-input").first().val();
-            console.log(v);
-            if (v) resultIds.push(v);
-        });
+    var url = URL.createObjectURL(blob);
+    var opened = false;
+    if (popup && !popup.closed) {
+        try {
+            popup.location.href = url;
+            opened = true;
+        } catch (e) { console.warn('Không mở được cửa sổ PDF:', e); }
     }
-
-    // Nếu chỉ có 1 dịch vụ => hành vi cũ (dùng nội dung editor hiện tại nếu cần)
-    // Nếu nhiều dịch vụ => in lần lượt, dùng dữ liệu đã LƯU ở server (useSaved=true)
-    var isMulti = resultIds.length > 1;
-    var description = null;
-    var resultText = null;
-    var suggest = null;
-    var selectedImageIds = null;
-
-    console.log("resultIdss: ", resultIds);
-    if (!resultIds.length) {
-        SwalHelper.Toast.warning('Không tìm thấy dịch vụ nào để in!');
-        return;
+    if (!opened) {
+        // Trình duyệt chặn popup: tải một PDF gộp để người dùng chủ động in.
+        var anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        SwalHelper.Toast.warning('Trình duyệt đã chặn tab PDF. File được tải về thay thế.');
     }
-    else if (resultIds.length == 1) {
-        console.log("resultIds.length == 1")
-        //Process_CheckedBoxOnRow(resultIds[0]);
-    }
+    setTimeout(function () { URL.revokeObjectURL(url); }, 180000);
+}
 
-    description = isMulti ? null : (CKEDITOR.instances['sa_process_description'].getData() || null);
-    resultText = isMulti ? null : ($('#sa_process_result').val() || null);
-    suggest = isMulti ? null : ($('#sa_process_suggest').val() || null);
-    selectedImageIds = isMulti ? null : $(".sa-print-check:checked").map(function () { return $(this).val(); }).get(); // nếu có UI chọn ảnh riêng cho 1 dịch vụ
-
-    var opts = {
-        patientId: patientId,
-        returnResultTime: returnResultTime,
-        userReturnResult: userReturnResult,
-        description: description,
-        result: resultText,
-        suggest: suggest,
-        selectedImageIds: selectedImageIds
-    };
-
-    console.log(opts);
-    $('#showWaitting').modal('show');
-
-     // CHUỖI SEQUENTIAL: nếu nhiều dịch vụ => in lần lượt
-    var chain = Promise.resolve();
-    resultIds.forEach(function (rid) {
-        chain = chain.then(function () {
-            return _validPrintOne(rid, opts, isMulti);
-        });
-    });
-
-    chain.then(function () {
-        try { $('#showWaitting').modal('hide'); } catch (e) { }
+function SA_ValidPrintFinish(success) {
+    SA_ValidPrintRunning = false;
+    $('#sa_process_valid_in').prop('disabled',
+        !SA_ProcessPatientLoadState.serviceReady ||
+        $('#sa_list_service .sa-chk-service').length === 0);
+    try { $('#showWaitting').modal('hide'); } catch (e) { }
+    if (success) {
         Process_Refresh();
         Process_Get_Count();
-    });
+    }
 }
+
+function SA_ValidPrintError(err, popup) {
+    if (popup && !popup.closed) {
+        try { popup.close(); } catch (e) { }
+    }
+    console.error('[SA ValidPrint]', err);
+    SwalHelper.Alert.error('Valid & In chưa hoàn tất', (err && err.message) || 'Không tạo được PDF. Vui lòng kiểm tra Network/Console.');
+    SA_ValidPrintFinish(false);
+}
+
+function Process_ValidPrint(mode) {
+    mode = mode || 'current';
+    if (SA_ValidPrintRunning) {
+        SwalHelper.Toast.warning('Đang xử lý Valid & In. Vui lòng không bấm nhiều lần.');
+        return;
+    }
+
+    var patientId = Number($('#sa_process_id').val());
+    if (!Number.isSafeInteger(patientId) || patientId <= 0) {
+        SwalHelper.Toast.warning('Vui lòng chọn bệnh nhân!');
+        return;
+    }
+    if (!Process_ValidateInput('process_patientInfo')) return;
+    if (!SA_ProcessPatientLoadState.serviceReady ||
+        String(SA_ProcessPatientLoadState.patientId) !== String(patientId)) {
+        SwalHelper.Toast.warning('Danh sách dịch vụ chưa được tải đúng bệnh nhân. Hãy chọn lại bệnh nhân trước khi Valid & In.');
+        return;
+    }
+
+    var resultIds = [];
+    var $all = $('#sa_list_service .sa-chk-service');
+    if (mode === 'all') {
+        $all.each(function () { resultIds.push(Number(this.value)); });
+    } else if (mode === 'selected') {
+        $all.filter(':checked').each(function () { resultIds.push(Number(this.value)); });
+    } else {
+        var $current = $all.filter(':checked').first();
+        if ($current.length) resultIds.push(Number($current.val()));
+    }
+
+    if (!resultIds.length || resultIds.some(function (id) { return !Number.isSafeInteger(id) || id <= 0; }) ||
+        new Set(resultIds).size !== resultIds.length) {
+        SwalHelper.Toast.warning('Danh sách dịch vụ chọn không hợp lệ hoặc đang trống.');
+        return;
+    }
+
+    var data = {
+        patientId: patientId,
+        returnResultTime: $('#sa_process_returnResultTime').val(),
+        userReturnResult: Number($('#sa_process_userReturnResultSA').val())
+    };
+    if (!Number.isSafeInteger(data.userReturnResult) || data.userReturnResult <= 0 || !data.returnResultTime) {
+        SwalHelper.Toast.warning('Vui lòng chọn người và thời gian trả kết quả.');
+        return;
+    }
+
+    // Được mở đồng bộ trong click để không bị popup blocker chặn như window.open trong AJAX.
+    var popup = SA_ValidPrintOpenWindow();
+    SA_ValidPrintRunning = true;
+    $('#sa_process_valid_in').prop('disabled', true);
+    $('#showWaitting').modal('show');
+    var filename = 'SA_' + patientId + '_' + Date.now() + '.pdf';
+
+    if (resultIds.length === 1) {
+        // Giữ hành vi cũ: khi chỉ chọn một dịch vụ, lấy nội dung editor chưa Save.
+        data.resultCDHAId = resultIds[0];
+        data.description = CKEDITOR.instances['sa_process_description'].getData() || null;
+        data.result = $('#sa_process_result').val() || null;
+        data.suggest = $('#sa_process_suggest').val() || null;
+        data.selectedImageIds = $('.sa-print-check:checked').map(function () { return Number(this.value); }).get();
+        fetch('/SA_Process/ValidPrint/', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: JSON.stringify(data)
+        }).then(async function (response) {
+            if (!response.ok) throw new Error('API ValidPrint trả mã HTTP ' + response.status);
+            var base64 = (await response.text()).trim();
+            if (!base64) throw new Error('Dịch vụ này không thể Valid lại hoặc tạo PDF. Hãy kiểm tra IsValidated / quyền Invalid của dịch vụ.');
+            var decoded = atob(base64);
+            var bytes = new Uint8Array(decoded.length);
+            for (var i = 0; i < decoded.length; i++) bytes[i] = decoded.charCodeAt(i);
+            SA_ValidPrintShowPdf(new Blob([bytes], { type: 'application/pdf' }), popup, filename);
+            SA_ValidPrintFinish(true);
+        }).catch(function (err) { SA_ValidPrintError(err, popup); });
+        return;
+    }
+
+    // Multi-service: một request, server xác minh đầy đủ và trả về một PDF gộp.
+    data.resultCDHAIds = resultIds;
+    console.info('[SA ValidPrint] Selected ResultCDHAIds', resultIds);
+    fetch('/SA_Process/ValidPrintSelectedBatch/', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: JSON.stringify(data)
+    }).then(async function (response) {
+        if (!response.ok) {
+            var message = 'API ValidPrintSelectedBatch trả mã HTTP ' + response.status;
+            try {
+                var error = await response.json();
+                message = error.message || message;
+            } catch (e) { /* giữ HTTP status làm thông báo */ }
+            throw new Error(message);
+        }
+        var actual = Number(response.headers.get('X-SA-Selected-Count'));
+        if (actual !== resultIds.length) {
+            throw new Error('Server trả số dịch vụ không khớp: ' + actual + '/' + resultIds.length);
+        }
+        var blob = await response.blob();
+        if (!blob.size || !((response.headers.get('Content-Type') || '').includes('application/pdf'))) {
+            throw new Error('Server không trả về dữ liệu PDF.');
+        }
+        SA_ValidPrintShowPdf(blob, popup, filename);
+        SwalHelper.Toast.success('Đã xử lý ' + actual + '/' + resultIds.length + ' dịch vụ trong một PDF.');
+        SA_ValidPrintFinish(true);
+    }).catch(function (err) { SA_ValidPrintError(err, popup); });
+}
+
 function Process_GetSample() {
     var id = $('#sa_process_id').val();
     if (id === "") {
@@ -1246,33 +1358,27 @@ function Process_Get_Count() {
 //}
 
 function Process_CheckedBoxOnRow(id) {
+    var $all = $('#sa_list_service .sa-chk-service');
+    var $target = $all.filter(function () { return String(this.value) === String(id); }).first();
+    if (!$target.length) return;
+
+    $all.prop('checked', false);
+    $target.prop('checked', true);
+    $('#sa_chk_all').prop('checked', $all.length === 1).prop('indeterminate', false);
+    $('#sa_list_service .row-service').removeClass('active multi-selected');
+    $target.closest('.row-service').addClass('active');
+
     $('#sa_process_saveresult').show();
-    $('#sa_process_result').attr('disabled', false);
-    $('#sa_list_service .row-service').removeClass('multi-selected');
-    $(".row-service .form-check-input").each(function () {
-        var $chk = $(this);
-        var resultCdhaId = String($chk.val());
-        var isTarget = (resultCdhaId === String(id));
-        $chk.prop("checked", isTarget);
+    $('#sa_process_result').prop('disabled', false);
+    var editor = window.CKEDITOR && CKEDITOR.instances['sa_process_description'];
+    if (editor) editor.setReadOnly(false); // Phục hồi sau khi dùng multi-select
 
-        if (isTarget) {
-            // đánh dấu dòng đang thao tác
-            $('.row-service').removeClass('active');
-            $chk.closest('.row-service').addClass('active');
-            // 1) lấy ServiceId thực của dịch vụ từ data-serviceid
-            var serviceId = $chk.data("serviceid");
-            var bs_thuc_hien = $chk.data("bs-thuc-hien");
-            if (bs_thuc_hien != null && bs_thuc_hien != '') {
-                $('#sa_process_userReturnResultSA').val(bs_thuc_hien).trigger("change");
-            } else {
-                var loginId = $("#sa_process_userLoginId").val();
-                $('#sa_process_userReturnResultSA').val(loginId).trigger("change");
+    var doctorId = $target.data('bs-thuc-hien');
+    var loginId = $('#sa_process_userLoginId').val();
+    $('#sa_process_userReturnResultSA').val(doctorId || loginId || '').trigger('change');
 
-            }
-            // 2) gọi load và để hàm tự ưu tiên “đã lưu”, nếu không có sẽ fallback theo service+gender
-            Process_Load_ResultAndImage_ForService(id, serviceId);
-        }
-    });
+    // id = ResultCDHA.Id, data-serviceid = Service.Id; không hoán đổi hai giá trị.
+    Process_Load_ResultAndImage_ForService(id, $target.data('serviceid'));
 }
 
 // Chuẩn hoá giới tính từ select id = sa_process_sex
@@ -1298,10 +1404,7 @@ function _autoPickSampleForService(serviceId) {
         return String(optService) === String(serviceId) && accept.has(optGender);
     });
     if (!$options.length) {
-        $("#sa_process_sampleresult").val("");
-        $('#sa_process_sampleresult').select2({
-            placeholder: "-- Chọn --"
-        });
+        SA_SetSampleSelection(null, false);
         return;
     }
 
@@ -1314,7 +1417,7 @@ function _autoPickSampleForService(serviceId) {
     });
 
     var val = ($best.length ? $best.first().val() : $options.first().val()) || "";
-    $sel.val(val).trigger("change"); // để Select2 cập nhật UI
+    SA_SetSampleSelection(val, true); // chỉ tải mẫu khi thực sự tự chọn
 }
 
 function _setSampleSelectValue(sampleId, sampleName) { //Hàm set giá trị cho Mô tả (đảm bảo option tồn tại)
@@ -1389,89 +1492,60 @@ function _setSampleSelectValue(sampleId, sampleName) { //Hàm set giá trị cho
  * @param {number|string} serviceId  ServiceId (đọc từ checkbox)
  */
 function Process_Load_ResultAndImage_ForService(id, serviceId) {
-    $("#imageCDHA").empty();
-    CKEDITOR.instances["sa_process_description"].setData("");
-    $("#sa_process_result").val("");
-    $("#sa_process_suggest").val("");
-    $("#sa_process_sampleresult").val("");
-    $('#sa_process_sampleresult').select2({
-        placeholder: "-- Chọn --"
-    });
-    $.ajax({
-        url: "/SA_Process/GetImageForService?id=" + id,
+    SA_InvalidateServiceLoads();
+    var state = SA_ProcessServiceLoadState;
+    state.resultId = String(id);
+    var generation = state.generation;
+    SA_ClearServiceEditor();
+
+    state.resultXhr = $.ajax({
+        url: '/SA_Process/GetImageForService',
+        data: { id: id },
         type: 'GET',
         dataType: 'json',
         success: function (response) {
+            if (!SA_IsCurrentService(id, generation)) return;
+            if (!Array.isArray(response)) response = [];
+
             var html = '';
-            var firstPayload = null;
-
-            $.each(response, function (key, value) {
-                if (!firstPayload && value) firstPayload = value;
-                if (value.id) {
-                    //$("#imageCDHA").append('<img class="image-item" id="' + value.id + '" src="' + value.name + '" onclick="Process_GetImageCDHAId(' + value.id + ')"/>');
-                    html += `
-                        <div class="img-cell">
-                            <img class="image-item"
-                                 id="img_${value.id}"
-                                 src="${value.name}"
-                                 data-id="${value.id}"
-                                 onclick="Process_GetImageCDHAId(${value.id}, this)" />
-                            <label class="sa-print-ctrl">
-                              <input type="checkbox"
-                                     class="sa-print-check"
-                                     value="${value.id}"
-                                     checked />
-                              Chọn in
-                            </label>
-                        </div>`;
-                }
-                //CKEDITOR.instances["sa_process_description"].setData(value.description);
-                //$("#sa_process_result").val(value.result);
-                //$("#sa_process_suggest").val(value.suggest);
+            var firstPayload = response.length ? response[0] : null;
+            $.each(response, function (_, value) {
+                if (!value || !value.id) return;
+                html += `
+                    <div class="img-cell">
+                        <img class="image-item" id="img_${value.id}"
+                             src="${value.name}" data-id="${value.id}"
+                             onclick="Process_GetImageCDHAId(${value.id}, this)" />
+                        <label class="sa-print-ctrl">
+                            <input type="checkbox" class="sa-print-check"
+                                   value="${value.id}" checked /> Chọn in
+                        </label>
+                    </div>`;
             });
-            $("#imageCDHA").html(html);
-
-            // Chỉ đánh dấu UI "đã chọn để IN" (không đụng tới ảnh đang chọn)
-            $(".sa-print-check").off("change").on("change", function () {
-                $(this).closest(".img-cell").toggleClass("print-selected", this.checked);
+            $('#imageCDHA').html(html);
+            $('.sa-print-check').each(function () {
+                $(this).closest('.img-cell').toggleClass('print-selected', this.checked);
             });
 
-            // Khởi tạo trạng thái print-selected theo checkbox (mặc định đã checked)
-            $(".sa-print-check").each(function () {
-                $(this).closest(".img-cell").toggleClass("print-selected", this.checked);
-            });
+            var desc = String(firstPayload?.description ?? '');
+            var res = String(firstPayload?.result ?? '');
+            var suggest = String(firstPayload?.suggest ?? '');
+            var editor = window.CKEDITOR && CKEDITOR.instances['sa_process_description'];
+            if (editor) editor.setData(desc);
+            $('#sa_process_result').val(res);
+            $('#sa_process_suggest').val(suggest);
 
-            // set mô tả/kết quả/tư vấn (lấy từ phần tử đầu tiên nếu có)
-            var desc = "", res = "", suggest = "";
-            if (firstPayload) {
-                desc = firstPayload.description ?? "";
-                res = firstPayload.result ?? "";
-                suggest = firstPayload.suggest ?? "";
-            }
-            if (CKEDITOR.instances["sa_process_description"]) {
-                CKEDITOR.instances["sa_process_description"].setData(desc);
-            }
-            $("#sa_process_result").val(res);
-            $("#sa_process_suggest").val(suggest);
-
-            // ✅ CHỈ khi cả desc và result đều null/rỗng thì mới tự chọn sample
-            var needAutoPick =
-                (!desc || desc.trim() === "") &&
-                (!res || res.trim() === "");
-
-            if (needAutoPick && serviceId != null) {
+            if (!desc.trim() && !res.trim() && serviceId != null) {
                 _autoPickSampleForService(serviceId);
-            } else {
-                $("#sa_process_sampleresult").val("");
-                $('#sa_process_sampleresult').select2({
-                    placeholder: "-- Chọn --"
-                });
             }
-            // nếu không needAutoPick: giữ nguyên select hiện tại, không can thiệp
-
-            return { needAutoPick: !!needAutoPick };
+        },
+        error: function (xhr, status) {
+            if (status === 'abort' || !SA_IsCurrentService(id, generation)) return;
+            console.error('SA: Không thể tải kết quả dịch vụ', id, xhr);
+            SwalHelper.Toast.warning('Không tải được kết quả dịch vụ đã chọn.');
         }
     });
+    return state.resultXhr;
 }
 function Process_GetImageCDHAId(imageCDHAId, el) {
     $("#sa_process_deletephoto").val(imageCDHAId); // giữ logic cũ
@@ -1564,16 +1638,12 @@ function SnapShot() {
         //canvas.height = 228;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         var image_data_url = document.getElementById("canvas").toDataURL("image/png");
-        var resultCDHAId = null;
-
-        $(".row-service").each(function () { // Lấy value trên từng Row
-            $(this).find(".form-check-input").each(function () {
-                var isChecked = $(this).prop('checked');
-                if (isChecked) {
-                    resultCDHAId = $(this).val();
-                }
-            })
-        })
+        var $selected = $('#sa_list_service .sa-chk-service:checked');
+        if ($selected.length !== 1) {
+            SwalHelper.Toast.warning('Chọn đúng một dịch vụ trước khi chụp ảnh!');
+            return false;
+        }
+        var resultCDHAId = $selected.val();
 
         if (resultCDHAId !== null) {
             var data = {
@@ -1599,7 +1669,7 @@ function SnapShot() {
         else {
             SwalHelper.Toast.warning("Vui lòng chọn dịch vụ !");
         }
-    }   
+    }
 }
 
 // ========================== FOOT SWITCH CAPTURE IMAGE ==========================
@@ -1637,7 +1707,7 @@ function SnapShot() {
             return false;
         }
 
-        return true;``
+        return true; ``
     }
 
     function handleFootSwitchCapture(e) {
@@ -1761,15 +1831,13 @@ function UploadHinh(fileInput) {
         return;
     }
 
-    var resultCDHAId = null;
-    $(".row-service").each(function () { // Lấy value trên từng Row
-        $(this).find(".form-check-input").each(function () {
-            var isChecked = $(this).prop('checked');
-            if (isChecked) {
-                resultCDHAId = $(this).val();
-            }
-        })
-    })
+    var $selected = $('#sa_list_service .sa-chk-service:checked');
+    if ($selected.length !== 1) {
+        SwalHelper.Toast.warning('Chọn đúng một dịch vụ trước khi tải hình!');
+        fileInput.value = '';
+        return;
+    }
+    var resultCDHAId = $selected.val();
 
     if (resultCDHAId !== null) {
 
@@ -1891,16 +1959,33 @@ function Process_Load_Image_ForService(id) {
 }
 
 function GetSampleForService(id) {
-    $.ajax({
-        url: "/SA_Process/GetSampleForService?id=" + id,
+    if (!id) return;
+    var state = SA_ProcessServiceLoadState;
+    if (!state.resultId) return; // Không có dịch vụ đơn đang thao tác
+    if (state.sampleXhr && state.sampleXhr.readyState !== 4) state.sampleXhr.abort();
+    var generation = state.generation;
+    var resultId = state.resultId;
+    var sampleId = String(id);
+    state.sampleXhr = $.ajax({
+        url: '/SA_Process/GetSampleForService',
+        data: { id: id },
         type: 'GET',
         dataType: 'json',
         success: function (response) {
-            CKEDITOR.instances["sa_process_description"].setData(response.description);
-            $("#sa_process_result").val(response.result);
-            $("#sa_process_suggest").val(response.suggest);
+            if (!response || !SA_IsCurrentService(resultId, generation) ||
+                String($('#sa_process_sampleresult').val()) !== sampleId) return;
+            var editor = window.CKEDITOR && CKEDITOR.instances['sa_process_description'];
+            if (editor) editor.setData(response.description ?? '');
+            $('#sa_process_result').val(response.result ?? '');
+            $('#sa_process_suggest').val(response.suggest ?? '');
+        },
+        error: function (xhr, status) {
+            if (status !== 'abort' && SA_IsCurrentService(resultId, generation)) {
+                console.error('SA: Không thể tải mẫu mô tả', sampleId, xhr);
+            }
         }
     });
+    return state.sampleXhr;
 }
 
 // Tải thông tin bác sĩ khi đổi select
@@ -2003,7 +2088,7 @@ function Process_SignPdf() {
     var doctorName = $('#sa_process_userReturnResultSA option:selected').text() || $('#sa_process_userReturnResultSA').val() || "";
     var performedAt = $('#sa_process_returnResultTime').val() || ""; // thời điểm trả kết quả
     var serviceCode = ""; // nếu cần, bạn lấy từ label dịch vụ đang chọn
-    var formType = "SieuAm"; 
+    var formType = "SieuAm";
 
     // 1) Gọi API xuất PDF base64 (tận dụng endpoint ValidPrint đang có)
     //    Nếu bạn có endpoint riêng chỉ "Export" (không đổi trạng thái), thay URL ở đây là tốt nhất.
@@ -2310,7 +2395,7 @@ function Process_SignPdf_Multi(mode) {
             });
         });
     }
-    
+
     console.log(pdfJobs);
     // 3. PHASE 2: Gửi 1 lần lên /api/ExternalSign/sign-pdf
     chain = chain.then(function () {
@@ -2541,114 +2626,41 @@ function isProbablyBase64(s) {
 }
 // ===============================================================================
 
-// Tick/untick tất cả dịch vụ
-$(document).on('change', '#sa_chk_all', function () {
-    var checked = this.checked === true;
+// SA: Đồng bộ chọn 0 / 1 / nhiều dịch vụ theo cùng một quy tắc.
+function SA_UpdateServiceSelection() {
+    var $all = $('#sa_list_service .sa-chk-service');
+    var $checked = $all.filter(':checked');
+    var count = $checked.length;
+    var $editor = window.CKEDITOR && CKEDITOR.instances['sa_process_description'];
 
-    var $items = $('#sa_list_service').find('.sa-chk-service');
-    $items.prop('checked', checked);
+    $('#sa_chk_all')
+        .prop('checked', $all.length > 0 && count === $all.length)
+        .prop('indeterminate', count > 0 && count < $all.length);
 
-    // Đếm lại số đang được tick sau khi set
-    var marked = $items.filter(':checked').length;
-    console.log("marked: ", marked);
-    // Quy tắc multi-selected:
-    // - >=2 checked: tất cả các dòng đang checked thêm class
-    // - <2 checked : xóa hết class
-    if (marked >= 2) {
-        // thêm cho tất cả dòng đang checked
-        $items.each(function () {
-            var $row = $(this).closest('.row-service');
-            $row.removeClass('active');
-            if (this.checked) $row.addClass('multi-selected');
-            else $row.removeClass('multi-selected');
-        });
-    } else if (marked == 1) {
-
-        // Lấy checkbox duy nhất đang được tick
-        var $only = $items.filter(':checked').first();
-
-        // Lấy dòng chứa checkbox đó
-        var $rowOnly = $only.closest('.row-service');
-
-        // Xóa trạng thái multi-selected vì chỉ còn 1 dòng
-        //$row.addClass('active');
-        console.log($only);
-        // Gọi lại hàm xử lý 1 dòng
-        Process_CheckedBoxOnRow($only.val());
-
-    } else {
-        // xóa hết
-        var $row = $(this).closest('.row-service');
-        $row.removeClass('active');
-        $('#sa_list_service .row-service').removeClass('multi-selected');
+    $('#sa_list_service .row-service').removeClass('active multi-selected');
+    if (count === 1) {
+        Process_CheckedBoxOnRow($checked.val());
+        return;
     }
-
-    // Ẩn/hiện nút Lưu dựa trên trạng thái check all (giữ nguyên logic cũ)
-    if (checked) {
+    SA_InvalidateServiceLoads();
+    SA_ClearServiceEditor();
+    if (count > 1) {
+        $checked.closest('.row-service').addClass('multi-selected');
         $('#sa_process_saveresult').hide();
+        $('#sa_process_result').prop('disabled', true);
+        if ($editor) $editor.setReadOnly(true);
     } else {
-        $('#sa_process_saveresult').show();
+        $('#sa_process_saveresult').hide();
+        $('#sa_process_result').prop('disabled', false);
+        if ($editor) $editor.setReadOnly(false);
     }
-});
-
-// Khai báo guard toàn cục (một lần)
-if (window.__sa_row_selecting === undefined) {
-    window.__sa_row_selecting = false;
 }
-
-// Tick/untick từng dịch vụ riêng lẻ
+$(document).on('change', '#sa_chk_all', function () {
+    $('#sa_list_service .sa-chk-service').prop('checked', this.checked);
+    SA_UpdateServiceSelection();
+});
 $(document).on('change', '.sa-chk-service', function () {
-    var $all = $('#sa_list_service').find('.sa-chk-service');
-    var total = $all.length;
-    var marked = $all.filter(':checked').length;
-
-    // Đồng bộ header "chọn tất cả"
-    var allChecked = total > 0 && marked === total;
-    $('#sa_chk_all').prop('checked', allChecked);
-
-    // Quy tắc multi-selected:
-    // - Nếu chỉ còn 0 hoặc 1 cái được tick → remove hết .multi-selected
-    // - Nếu từ 2 cái trở lên → tất cả các dòng được tick đều có .multi-selected
-    if (marked >= 2) {
-        $('#sa_process_saveresult').hide(); // ẩn nút Lưu
-        $('#imageCDHA').empty();
-        CKEDITOR.instances.sa_process_description.setReadOnly(true); // disabled nhập mô tả kết quả
-        CKEDITOR.instances.sa_process_description.setData('');
-        $('#sa_process_result').attr('disabled', true); // disabled nhập kết luận
-        $('#sa_process_result').val(''); // disabled nhập kết luận
-        
-        $all.each(function () {
-            var $row = $(this).closest('.row-service');
-            $row.removeClass('active');
-            if (this.checked) $row.addClass('multi-selected');
-            else $row.removeClass('multi-selected');
-        });
-    } else {
-        //var $row = $(this).closest('.row-service');
-        //$row.removeClass('active');
-        $('#sa_process_saveresult').show();
-        CKEDITOR.instances.sa_process_description.setReadOnly(false);
-        $('#sa_process_result').attr('disabled', false);
-        $('#sa_list_service .row-service').removeClass('multi-selected');
-    }
-
-    // === Điểm thêm mới theo yêu cầu ===
-    // Nếu sau thao tác chỉ còn 1 checkbox được chọn:
-    // -> Lấy resultCDHAId còn lại và gọi Process_CheckedBoxOnRow(resultCDHAId)
-    if (marked === 1 && !window.__sa_row_selecting) {
-        var $only = $all.filter(':checked').first();
-        var resultId = $only.val();
-
-        // Tránh loop sự kiện change khi Process_CheckedBoxOnRow thay đổi checkbox
-        window.__sa_row_selecting = true;
-        setTimeout(function () {
-            try {
-                Process_CheckedBoxOnRow(resultId);
-            } finally {
-                window.__sa_row_selecting = false;
-            }
-        }, 0);
-    }
+    SA_UpdateServiceSelection();
 });
 
 // --- Auto-search khi quét barcode vào ô #sa_getsample_pidorseq ---

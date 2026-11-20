@@ -1,4 +1,4 @@
-﻿@{
+@{
     var lstSampleResult = ViewData["lstSampleResult"] as List<Sample>;
     var _lstUserFunction = ViewData["lstUserFunction"] as List<UserFunction>;
 }
@@ -38,6 +38,7 @@
     </div>
     <div class="sample">
         <select id="sa_process_sampleresult" name="sa_process_sampleresult" class="form-select height-28" onchange="GetSampleForService(this.value)">
+            <option value=""></option>
             @if (lstSampleResult != null)
             {
                 foreach (var item in lstSampleResult)
